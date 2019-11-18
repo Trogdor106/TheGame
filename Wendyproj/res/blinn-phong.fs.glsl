@@ -22,6 +22,7 @@ uniform float a_LightAttenuation;
 uniform sampler2D s_Albedo;
 
 void main() {
+	
     // Re-normalize our input, so that it is always length 1
     vec3 norm = normalize(inNormal);
     // Determine the direction from the position to the light
@@ -65,6 +66,13 @@ void main() {
 	vec3 result = (ambientOut + attenuation * (diffuseOut + specOut)) * albedo.xyz * inColor.xyz;
 
 	// TODO: gamma correction
-	// Write the output    
+	// Write the output   
 	outColor = vec4(result, inColor.a * albedo.a); // * a_ColorMultiplier;
+
+	//0, 0, 1
+	//if ((inNormal.x * 0 + inNormal.y * 1 + inNormal.z * 1) <= 0.1 && (inNormal.x * 0 + inNormal.y * 1 + inNormal.z * 1) >= -0.1) {
+	//		outColor.r = 1.0f;
+	//		outColor[1] = 1.0f;
+	//		//inColor = 0.0f;
+	//}
 }
