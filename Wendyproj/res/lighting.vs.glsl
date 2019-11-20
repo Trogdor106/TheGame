@@ -16,13 +16,10 @@ uniform mat4 a_ModelView;
 uniform mat3 a_NormalMatrix;
 
 void main() {
-
 	outColor = inColor;
 	outNormal = a_NormalMatrix * inNormal;
 	outColor = inColor;
 	outWorldPos =  (a_Model * vec4(inPosition, 1)).xyz;
 	gl_Position = a_ModelViewProjection * vec4(inPosition, 1);
 	outUV = inUV;
-	
-
 }

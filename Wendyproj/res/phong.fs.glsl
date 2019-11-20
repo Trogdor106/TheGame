@@ -46,8 +46,6 @@ void main() {
     // Our result is our lighting multiplied by our object's color
     vec3 result = (ambientOut + diffuseOut + specOut) * inColor.xyz;
 
-
-
     // Write the output
 	outColor = vec4(result, inColor.a);// * a_ColorMultiplier;
 }

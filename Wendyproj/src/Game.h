@@ -14,6 +14,7 @@
 #include "Camera.h"
 #include "OBJLoader.h"
 #include "Material.h"
+#include "HitBoxes.h"
 
 
 class Game {
@@ -41,6 +42,8 @@ protected:
 	void Draw(float deltaTime);
 	void DrawGui(float deltaTime);
 
+	// Interaction
+	bool interactionIsPossible(glm::vec3, glm::vec3);
 private:
 	// Stores the main window that the game is running in
 	GLFWwindow* myWindow;
@@ -62,6 +65,8 @@ private:
 	// Shader for viewing normal maps
 	Shader::Sptr myNormalShader;
 
+
+
 	// Our models transformation matrix
 	glm::mat4   myModelTransform;
 
@@ -73,6 +78,8 @@ private:
 
 	glm::vec3 cameraPos = glm::vec3(1, 1, 5);
 	Material::Sptr testMat2; //Wut?
+
+	HitBoxes hitBoxManager;
 
 	//Lantern stuff prob want to seperate into another file later
 	float lanternFuel = 1.0f;
@@ -88,4 +95,5 @@ private:
 	int windowSizeHeight = 0;
 	int windowPosX = 0;
 	int windowPosY = 0;
+
 };

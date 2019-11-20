@@ -159,6 +159,8 @@ void Game::Shutdown() {
 	glfwTerminate();
 }
 
+
+
 glm::vec4 testColor = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
 void Game::LoadContent() {
 	myCamera = std::make_shared<Camera>();
@@ -204,7 +206,7 @@ void Game::LoadContent() {
 		{{ -10.0f,  10.0f, 0.5f }, { 1.0f, 0.0f, 1.0f, 1.0f }, {0.0f, 0.0f, 1.0f}, {0, 0}},
 		{{  10.0f,  10.0f, 0.5f }, { 0.0f, 1.0f, 0.0f, 1.0f }, {0.0f, 0.0f, 1.0f}, {1, 0}},
 	};
-
+	
 	// Create our 6 indices
 	uint32_t indices2[6] = {
 		0, 1, 2,
@@ -216,7 +218,18 @@ void Game::LoadContent() {
 	std::vector <Vertex> objVertices = loadOBJ("Floor1_Beeg (2).obj");
 	std::vector <Vertex> lanternVertices = loadOBJ("Lantern2.obj");
 	
+	hitBoxManager.saveHitBoxes(lanternVertices);
+
+	//for (int i = 0; i < objVertices.size(); i++) {
+	//	if (dot(objVertices[i].Position, cameraViewTarget) <= 0.000001 && dot(objVertices[i].Position, cameraViewTarget) >= -0.000001) {
+	//		objVertices[i].Color[0] = 0.0f;
+	//		objVertices[i].Color[1] = 1.0f;
+	//		objVertices[i].Color[2] = 0.0f;
+	//	}
+	//
+
 	// Create a new mesh from the data
+	
 	myMesh = std::make_shared<Mesh>(vertices, 4, indices, 6);
 	myMesh2 = std::make_shared<Mesh>(vertices2, 4, indices2, 6);
 	myMesh3 = std::make_shared<Mesh>(vertices3, 4, indices, 6);
@@ -243,7 +256,7 @@ void Game::LoadContent() {
 	testMat2->Set("a_LightPos", { 0, 1, 10 });
 	testMat2->Set("a_LightColor", { 1.0f, 0.0f, 0 });
 	testMat2->Set("a_AmbientColor", { 1.0f, 1.0f, 1.0f });
-	testMat2->Set("a_AmbientPower", 0.1f);
+	testMat2->Set("a_AmbientPower", 0.7f);
 	testMat2->Set("a_LightSpecPower", 0.5f);
 	
 	//Brightness
@@ -442,7 +455,7 @@ void Game::Update(float deltaTime) {
 		glfwGetWindowSize(myWindow, &windowSizeWidth, &windowSizeHeight);
 		glfwSetCursorPos(myWindow, windowPosX + windowSizeWidth / 4, windowPosY + windowSizeHeight / 4);
 		//rotation.x = (mousePosX - mousePrevPosX) * deltaTime;
-
+		
 		
 		rotation.y = (mousePosX - mousePrevPosX) * deltaTime;
 		rotation.x = (mousePosY - mousePrevPosY) * deltaTime;
@@ -485,22 +498,9 @@ void Game::Update(float deltaTime) {
 	if (glfwGetKey(myWindow, GLFW_KEY_RIGHT) == GLFW_PRESS)
 		rotation.y += rotSpeed * deltaTime;
 
-	Camera::Sptr newCamera;
-	newCamera->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
-	//newCamera->Rotate(glm::vec3(0, rotation.y, 0));
-	//newCamera->Rotate(glm::vec3(rotation.x, 0, 0));
-	
-//	glm::mat4 newView = myCamera->GetView();
-
-	//myCamera->SetView();
-
-//	glm::vec3 globalPos;
-//	globalPos = (myCamera->GetPosition());
-
-
 	// Rotate and move our camera based on input
 	
-	myCamera->Rotate(glm::vec3(rotation.x, rotation.y, 0));
+	myCamera->Rotate(rotation);
 	
 	myCamera->Move(movement);
 
@@ -515,6 +515,10 @@ void Game::Update(float deltaTime) {
 	}
 	cameraPos = myCamera->GetPosition();
 	testMat2->Set("a_LightPos", { cameraPos/*+ glm::vec3(-6, -2, 0)*/});
+	if (hitBoxManager.testHitBoxes(cameraPos, 0)) {
+		myCamera->SetPosition(cameraPos);
+	}
+
 	//myLanternTransform = glm::translate(myLanternTransform, glm::vec3(cameraPos + glm::vec3(-6, -2, 0)));
 
 	if (glfwGetKey(myWindow, GLFW_KEY_U) == GLFW_PRESS) {
@@ -546,6 +550,7 @@ void Game::Update(float deltaTime) {
 		testMat2->Set("a_LightColor", { 0.0f, 0.0f, 0.0f });
 	}
 	
+
 }
 
 void Game::Draw(float deltaTime) {
@@ -685,4 +690,12 @@ void Game::DrawGui(float deltaTime) {
 		}
 	}
 	ImGui::End();
+}
+
+bool Game::interactionIsPossible(glm::vec3 playerPos, glm::vec3 objectPos)
+{
+	if (playerPos.x - objectPos.x < 3 && playerPos.x - objectPos.x > 3) {
+		return true;
+	}
+	return false;
 }
