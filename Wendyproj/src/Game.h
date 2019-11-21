@@ -70,7 +70,6 @@ private:
 	// Our models transformation matrix
 	glm::mat4   myModelTransform;
 
-	glm::mat4 myLanternTransform = glm::mat4(1.0f);
 
 
 	glm::vec3 cameraViewAngle = glm::vec3(0, 0, 1);
@@ -85,6 +84,13 @@ private:
 	float lanternFuel = 1.0f;
 	float lightShyninessModifyer = 1.0f;
 	float lightAttenuationModifyer = 1.0f;
+	glm::mat4 myLanternTransform = glm::mat4(1.0f);
+	glm::vec3 lanternAngle = {0.0f, 0.0f, 0.0f};
+	float angleForX = 0;
+	float angleForY = 0;
+	float angleForZ = 0;
+
+
 	//That's it for now I guess XD
 
 	double mousePosX = 0;

@@ -71,26 +71,27 @@ bool HitBoxes::testHitBoxes(glm::vec3 &cameraPos, int ObjectID)
 	if (cameraPos.z > permHitBoxHolder[ObjectID].MinZ && cameraPos.z < permHitBoxHolder[ObjectID].MaxZ) {
 		float diffX = 0;
 		float diffY = 0;
-		if (cameraPos.x > permHitBoxHolder[ObjectID].MinX && cameraPos.x < permHitBoxHolder[ObjectID].MaxX) {
-
-			diffX = cameraPos.x - permHitBoxHolder[ObjectID].MinX < cameraPos.x - permHitBoxHolder[ObjectID].MaxX ?
-				cameraPos.x - permHitBoxHolder[ObjectID].MinX : cameraPos.x - permHitBoxHolder[ObjectID].MaxX;
-		}
-	
-		if (cameraPos.y > permHitBoxHolder[ObjectID].MinY&& cameraPos.y < permHitBoxHolder[ObjectID].MaxY) {
-			diffY = cameraPos.y - permHitBoxHolder[ObjectID].MinY < cameraPos.y - permHitBoxHolder[ObjectID].MaxY ?
-				cameraPos.y - permHitBoxHolder[ObjectID].MinY : cameraPos.y - permHitBoxHolder[ObjectID].MaxY;
-		}
-		if (diffX != 0 || diffY != 0) {
-			if (diffX < diffY) {
-				cameraPos.x = cameraPos.x - permHitBoxHolder[ObjectID].MinX < cameraPos.x - permHitBoxHolder[ObjectID].MaxX ?
-					permHitBoxHolder[ObjectID].MinX : permHitBoxHolder[ObjectID].MaxX;
-			}
-			else {
-				cameraPos.y = cameraPos.y - permHitBoxHolder[ObjectID].MinY < cameraPos.y - permHitBoxHolder[ObjectID].MaxY ?
-					permHitBoxHolder[ObjectID].MinY : permHitBoxHolder[ObjectID].MaxY;
-			}
-		}
+		//if (cameraPos.x > permHitBoxHolder[ObjectID].MinX && cameraPos.x < permHitBoxHolder[ObjectID].MaxX) {
+		//
+		//	diffX = cameraPos.x - permHitBoxHolder[ObjectID].MinX < cameraPos.x - permHitBoxHolder[ObjectID].MaxX ?
+		//		cameraPos.x - permHitBoxHolder[ObjectID].MinX : cameraPos.x - permHitBoxHolder[ObjectID].MaxX;
+		//}
+		//
+		//if (cameraPos.y > permHitBoxHolder[ObjectID].MinY&& cameraPos.y < permHitBoxHolder[ObjectID].MaxY) {
+		//	diffY = cameraPos.y - permHitBoxHolder[ObjectID].MinY < cameraPos.y - permHitBoxHolder[ObjectID].MaxY ?
+		//		cameraPos.y - permHitBoxHolder[ObjectID].MinY : cameraPos.y - permHitBoxHolder[ObjectID].MaxY;
+		//}
+		//if (diffX != 0 || diffY != 0) {
+		//	if (diffX < diffY) {
+		//		cameraPos.x = cameraPos.x - permHitBoxHolder[ObjectID].MinX < cameraPos.x - permHitBoxHolder[ObjectID].MaxX ?
+		//			permHitBoxHolder[ObjectID].MinX : permHitBoxHolder[ObjectID].MaxX;
+		//	}
+		//	else {
+		//		cameraPos.y = cameraPos.y - permHitBoxHolder[ObjectID].MinY < cameraPos.y - permHitBoxHolder[ObjectID].MaxY ?
+		//			permHitBoxHolder[ObjectID].MinY : permHitBoxHolder[ObjectID].MaxY;
+		//	}
+		//}
+		cameraPos.z = 20;
 		return true;
 	}
 }
