@@ -435,15 +435,15 @@ void Game::Update(float deltaTime) {
 	float rotSpeed = 1.0f;
 	//myCamera->LookAt(cameraViewTarget, cameraViewAngle);
 
-	if (glfwGetKey(myWindow, GLFW_KEY_W) == GLFW_PRESS)
+	if (glfwGetKey(myWindow, GLFW_KEY_S) == GLFW_PRESS)
 		movement.z = -1;
-	else if (glfwGetKey(myWindow, GLFW_KEY_S) == GLFW_PRESS)
+	else if (glfwGetKey(myWindow, GLFW_KEY_W) == GLFW_PRESS)
 		movement.z = 1;
 	else
 		movement.z = 0;
-	if (glfwGetKey(myWindow, GLFW_KEY_A) == GLFW_PRESS)
+	if (glfwGetKey(myWindow, GLFW_KEY_D) == GLFW_PRESS)
 		movement.x = -1;
-	else if (glfwGetKey(myWindow, GLFW_KEY_D) == GLFW_PRESS)
+	else if (glfwGetKey(myWindow, GLFW_KEY_A) == GLFW_PRESS)
 		movement.x = 1;
 	else
 		movement.x = 0;
@@ -457,42 +457,28 @@ void Game::Update(float deltaTime) {
 		exit(1);
 	}
 
-	if (glfwGetKey(myWindow, GLFW_KEY_Q) == GLFW_PRESS) {
-		//rotation.z -= rotSpeed * deltaTime;
-		angleForZ -= 0.01;
-		if (angleForZ < -3) {
-			angleForZ = -3;
-		}
-	}
-	if (glfwGetKey(myWindow, GLFW_KEY_E) == GLFW_PRESS) {
-		//rotation.z += rotSpeed * deltaTime;
-		angleForZ += 0.01;
-		if (angleForZ > 3) {
-			angleForZ = 3;
-		}
-	}
-	if (glfwGetKey(myWindow, GLFW_KEY_UP) == GLFW_PRESS) {
+	if (glfwGetKey(myWindow, GLFW_KEY_DOWN) == GLFW_PRESS) {
 		//rotation.x -= rotSpeed * deltaTime;
 		//angleForX -= 0.01;
 		angleForZ -= 0.01;
-		if (angleForZ < -3) {
-			angleForZ = -3;
+		if (angleForZ < -1.4) {
+			angleForZ = -1.4;
 		}
 	}
-	if (glfwGetKey(myWindow, GLFW_KEY_DOWN) == GLFW_PRESS) {
+	if (glfwGetKey(myWindow, GLFW_KEY_UP) == GLFW_PRESS) {
 		//rotation.x += rotSpeed * deltaTime;
 		//angleForX += 0.01;
 		angleForZ += 0.01;
-		if (angleForZ > 3) {
-			angleForZ = 3;
+		if (angleForZ > 1.4) {
+			angleForZ = 1.4;
 		}
 	}
-	if (glfwGetKey(myWindow, GLFW_KEY_LEFT) == GLFW_PRESS) {
+	if (glfwGetKey(myWindow, GLFW_KEY_RIGHT) == GLFW_PRESS) {
 		//rotation.y -= rotSpeed * deltaTime;
 		angleForY += 0.01;
 		angleForX -= 0.01;
 	}
-	if (glfwGetKey(myWindow, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+	if (glfwGetKey(myWindow, GLFW_KEY_LEFT) == GLFW_PRESS) {
 		//rotation.y += rotSpeed * deltaTime;
 		angleForY -= 0.01;
 		angleForX += 0.01;
@@ -502,7 +488,7 @@ void Game::Update(float deltaTime) {
 	
 	//myCamera->Rotate(rotation);
 	
-	myCamera->LookAt({ myCamera->GetPosition().x + cos(angleForX), myCamera->GetPosition().y + sin(angleForY), myCamera->GetPosition().z + tan(angleForZ)}, cameraViewAngle);
+	myCamera->LookAt({ myCamera->GetPosition().x + cos(-angleForX), myCamera->GetPosition().y + sin(-angleForY), myCamera->GetPosition().z + tan(angleForZ)}, cameraViewAngle);
 
 	myCamera->SetPosition({ myCamera->GetPosition().x + movement.z * cos(angleForX) + movement.x * cos(angleForX + 1.57078145), myCamera->GetPosition().y + movement.z * sin(angleForX) + movement.x * sin(angleForX + 1.57078145), myCamera->GetPosition().z });
 
