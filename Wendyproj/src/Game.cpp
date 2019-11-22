@@ -257,7 +257,7 @@ void Game::LoadContent() {
 	testMat2->Set("a_LightPos", { 0, 1, 10 });
 	testMat2->Set("a_LightColor", { 1.0f, 0.0f, 0 });
 	testMat2->Set("a_AmbientColor", { 1.0f, 1.0f, 1.0f });
-	testMat2->Set("a_AmbientPower", 0.1f);
+	testMat2->Set("a_AmbientPower", 0.9f);
 	testMat2->Set("a_LightSpecPower", 0.5f);
 	
 	//Brightness
@@ -432,19 +432,20 @@ void Game::Update(float deltaTime) {
 	}
 
 	float speed = 30.0f;
+	float speed2 = 15.0f;
 	float rotSpeed = 1.0f;
 	//myCamera->LookAt(cameraViewTarget, cameraViewAngle);
 
 	if (glfwGetKey(myWindow, GLFW_KEY_S) == GLFW_PRESS)
-		movement.z = -1;
+		movement.z = -speed2 * deltaTime;
 	else if (glfwGetKey(myWindow, GLFW_KEY_W) == GLFW_PRESS)
-		movement.z = 1;
+		movement.z = speed2 * deltaTime;
 	else
-		movement.z = 0;
+		movement.z = 0 * deltaTime;
 	if (glfwGetKey(myWindow, GLFW_KEY_D) == GLFW_PRESS)
-		movement.x = -1;
+		movement.x = -speed2 * deltaTime;
 	else if (glfwGetKey(myWindow, GLFW_KEY_A) == GLFW_PRESS)
-		movement.x = 1;
+		movement.x = speed2 * deltaTime;
 	else
 		movement.x = 0;
 

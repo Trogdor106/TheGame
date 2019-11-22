@@ -65,7 +65,7 @@ private:
 	// Shader for viewing normal maps
 	Shader::Sptr myNormalShader;
 
-
+	//ObjLoader hello;
 
 	// Our models transformation matrix
 	glm::mat4   myModelTransform;
