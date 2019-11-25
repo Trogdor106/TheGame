@@ -16,6 +16,7 @@
 #include "SceneManager.h"
 #include "MeshRenderer.h"
 #include "Texture2D.h"
+#include "OBJLoader2.h"
 
 
 /*
@@ -160,7 +161,6 @@ void Game::Shutdown() {
 	glfwTerminate();
 }
 
-//D2d1.lib
 
 glm::vec4 testColor = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
 void Game::LoadContent() {
@@ -168,6 +168,11 @@ void Game::LoadContent() {
 	myCamera->SetPosition(cameraPos);
 	myCamera->LookAt(cameraViewTarget, cameraViewAngle);
 	myCamera->Projection = glm::perspective(glm::radians(60.0f), 1.0f, 0.01f, 1000.0f);
+
+	OrthoCameraForInteraction = std::make_shared<Camera>();
+	OrthoCameraForInteraction->SetPosition(cameraPos);
+	OrthoCameraForInteraction->LookAt(cameraViewTarget, cameraViewAngle);
+	OrthoCameraForInteraction->Projection = glm::ortho(-4, 4, -4, 4, 1, 1000);
 
 	// Create our 4 vertices
 	Vertex vertices[4] = {
@@ -196,8 +201,8 @@ void Game::LoadContent() {
 
 
 	Texture2D::Sptr albedo = Texture2D::LoadFromFile("untitled.png");
-	Texture2D::Sptr albedo2 = Texture2D::LoadFromFile("touhou-4.png");
-
+	Texture2D::Sptr albedo2 = Texture2D::LoadFromFile("Dresser4.png");
+	
 
 	Vertex vertices2[4] = {
 		//       Position                   Color
@@ -215,9 +220,11 @@ void Game::LoadContent() {
 	};
 	
 	
-	//Maybe works?????
+	//Halp
 	std::vector <Vertex> objVertices = loadOBJ("Floor1_Beeg (2).obj");
 	std::vector <Vertex> lanternVertices = loadOBJ("Lantern2.obj");
+	//MeshData lanternVertices = ObjLoader::LoadObj("Dresser.obj");
+	
 	
 	hitBoxManager.saveHitBoxes(lanternVertices);
 
@@ -227,7 +234,6 @@ void Game::LoadContent() {
 	//		objVertices[i].Color[1] = 1.0f;
 	//		objVertices[i].Color[2] = 0.0f;
 	//	}
-	//
 
 	// Create a new mesh from the data
 	
@@ -236,6 +242,7 @@ void Game::LoadContent() {
 	myMesh3 = std::make_shared<Mesh>(vertices3, 4, indices, 6);
 	myMesh4 = std::make_shared<Mesh>(objVertices.data(), objVertices.size(), nullptr, 0);
 	myMesh5 = std::make_shared<Mesh>(lanternVertices.data(), lanternVertices.size(), nullptr, 0);
+	//Mesh::Sptr myMesh5 = ObjLoader::LoadObjToMesh("Dresser.obj");
 
 
 	Shader::Sptr phong = std::make_shared<Shader>();
@@ -501,6 +508,9 @@ void Game::Update(float deltaTime) {
 
 	// Rotate our transformation matrix a little bit each frame
 	myModelTransform = glm::rotate(myModelTransform, deltaTime, glm::vec3(0, 0, 1));
+	myLanternTransform = glm::translate(myLanternTransform, glm::vec3(1 * deltaTime, 0, 0));
+
+
 	auto view = CurrentRegistry().view<UpdateBehaviour>();
 	for (const auto& e : view) {
 		auto& func = CurrentRegistry().get<UpdateBehaviour>(e);
@@ -508,9 +518,11 @@ void Game::Update(float deltaTime) {
 			func.Function(e, deltaTime);
 		}
 	}
+
+
 	cameraPos = myCamera->GetPosition();
 	
-
+	hitBoxManager.updateHitBoxes(glm::vec3(myLanternTransform[3][0], myLanternTransform[3][1], myLanternTransform[3][2]), 0);
 	//Will add once the camera follows the correct format
 	
 	//testMat2->Set("a_LightPos", { cameraPos + glm::vec3(-6, -2, 0) + glm::vec3(cos(lanternAngle.x), sin(lanternAngle.y), tan(lanternAngle.z)) });
@@ -625,6 +637,11 @@ void Game::Draw(float deltaTime) {
 		renderer.Mesh->Draw();
 	}
 	hello = 0;
+
+
+	myShader->Bind();
+	myShader->SetUniform("a_ModelViewProjection", OrthoCameraForInteraction->GetViewProjection());
+	myMesh->Draw();
 }
 
 void Game::DrawGui(float deltaTime) {

@@ -53,6 +53,7 @@ private:
 	char        myWindowTitle[32];
 
 	Camera::Sptr myCamera;
+	Camera::Sptr OrthoCameraForInteraction;
 	// A shared pointer to our mesh
 	Mesh::Sptr   myMesh;
 	Mesh::Sptr   myMesh2;
