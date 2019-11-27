@@ -32,10 +32,24 @@
 */
 
 
-struct MorphMesh:MorphObject {
-	MorphObject::Sptr Morph;
+void lerp(glm::vec3& goal, glm::vec3& startPoint, glm::vec3& currentPos, float duration) {
+	static float totalTime = duration;
+	static float amountOfTimes = totalTime / (0.095);
+	static float percentagePerIntervals = (0.095) / totalTime;
+	static float currentInterval = 0;
+	if (currentInterval <= amountOfTimes && currentInterval >= 0) {
+		float t = startPoint.x != goal.x ? (((percentagePerIntervals * currentInterval) * (goal.x - startPoint.x) + startPoint.x) - startPoint.x) / (goal.x - startPoint.x) : 1;
+		currentPos.x = (1 - t) * startPoint.x + t * goal.x;
+		float t2 = startPoint.y != goal.y ? (((percentagePerIntervals * currentInterval) * (goal.y - startPoint.y) + startPoint.y) - startPoint.y) / (goal.y - startPoint.y) : 1;
+		currentPos.y = (1 - t2) * startPoint.y + t2 * goal.y;
+		float t3 = startPoint.z != goal.z ? (((percentagePerIntervals * currentInterval) * (goal.z - startPoint.z) + startPoint.z) - startPoint.z) / (goal.z - startPoint.z) : 1;
+		currentPos.z = (1 - t3) * startPoint.z + t3 * goal.z;
 
-};
+		currentInterval += 0.095;
+
+		//All the 0.095s are because delta time was giving us varying results based on the computers, so this constant works better with smaller numbers
+	}
+}
 
 struct UpdateBehaviour {
 	std::function<void(entt::entity e, float dt)> Function;
@@ -175,10 +189,10 @@ void Game::LoadContent() {
 	myCamera->LookAt(cameraViewTarget, cameraViewAngle);
 	myCamera->Projection = glm::perspective(glm::radians(60.0f), 1.0f, 0.01f, 1000.0f);
 
-	OrthoCameraForInteraction = std::make_shared<Camera>();
-	OrthoCameraForInteraction->SetPosition(cameraPos);
-	OrthoCameraForInteraction->LookAt(cameraViewTarget, cameraViewAngle);
-	OrthoCameraForInteraction->Projection = glm::ortho(-4, 4, -4, 4, 1, 1000);
+	interactCamera = std::make_shared<Camera>();
+	interactCamera->SetPosition(cameraPos);
+	interactCamera->LookAt(cameraViewTarget, cameraViewAngle);
+	interactCamera->Projection = glm::ortho(-4, 4, -4, 4, 1, 1000);
 
 	// Create our 4 vertices
 	Vertex vertices[4] = {
@@ -227,10 +241,12 @@ void Game::LoadContent() {
 	
 	
 	//Halp
-	std::vector <Vertex> objVertices = loadOBJ("Chair.obj");
+	//std::vector <Vertex> objVertices = loadOBJ("Chair.obj");
+	//deCasteJauManager.saveDeCasteJauObject("Chair.obj", "Chair2.obj", "Chair3.obj", "Chair4.obj");
+	deCasteJauManager.saveDeCasteJauObject("Door.obj", "DoorHuge.obj", "DoorAss.obj", "DoorImplode.obj");
+	chairVertices = deCasteJauManager.getCurrentCasteJau(0);
 
-
-	morphObjectManager.saveMorphObject("Door.obj", "DoorImplode.obj");
+	morphObjectManager.saveMorphObject("Door.obj", "Door.obj");
 	//lanternVertices = loadOBJ("Door.obj");
 	lanternVertices = morphObjectManager.getCurrentModel(0);
 
@@ -246,7 +262,7 @@ void Game::LoadContent() {
 	myMesh = std::make_shared<Mesh>(vertices, 4, indices, 6);
 	myMesh2 = std::make_shared<Mesh>(vertices2, 4, indices2, 6);
 	myMesh3 = std::make_shared<Mesh>(vertices3, 4, indices, 6);
-	myMesh4 = std::make_shared<Mesh>(objVertices.data(), objVertices.size(), nullptr, 0);
+	myMesh4 = std::make_shared<Mesh>(chairVertices.data(), chairVertices.size(), nullptr, 0);
 	myMesh5 = std::make_shared<Mesh>(lanternVertices.data(), lanternVertices.size(), nullptr, 0);
 	//Mesh::Sptr myMesh5 = ObjLoader::LoadObjToMesh("Dresser.obj");
 
@@ -268,10 +284,10 @@ void Game::LoadContent() {
 	testMat2 = std::make_shared<Material>(phong);
 	testMat2->Set("s_Albedo", albedo2);
 	testMat2->Set("a_LightPos", { 0, 1, 10 });
-	testMat2->Set("a_LightColor", { 1.0f, 0.0f, 0 });
+	testMat2->Set("a_LightColor", { 0.0f, 1.0f, 0.0f });
 	testMat2->Set("a_AmbientColor", { 1.0f, 1.0f, 1.0f });
-	testMat2->Set("a_AmbientPower", 0.9f);
-	testMat2->Set("a_LightSpecPower", 0.5f);
+	testMat2->Set("a_AmbientPower", 0.4f);
+	testMat2->Set("a_LightSpecPower", 1.0f);
 	
 	//Brightness
 	testMat2->Set("a_LightShininess", 1);
@@ -314,12 +330,12 @@ void Game::LoadContent() {
 		
 		//morphObjectManager.updateMorphObject(0.000000003, 0, myLanternTransform);
 		
-		if (backupDeltatime != -431602080.) {
-			morphObjectManager.updateMorphObject(backupDeltatime, 0, myLanternTransform);
-			lanternVertices = morphObjectManager.getCurrentModel(0);
-			myMesh5 = std::make_shared<Mesh>(lanternVertices.data(), lanternVertices.size(), nullptr, 0);
-			int hello = 0;
-		}
+		//if (backupDeltatime != -431602080.) {
+		//	morphObjectManager.updateMorphObject();
+		//	lanternVertices = morphObjectManager.getCurrentModel(0);
+		//	myMesh5 = std::make_shared<Mesh>(lanternVertices.data(), lanternVertices.size(), nullptr, 0);
+		//	int hello = 0;
+		//}
 
 		entt::entity e5 = ecs2.create();
 		ecs2.assign<TempTransform>(e5).Scale = glm::vec3(1.0f);
@@ -344,6 +360,7 @@ void Game::LoadContent() {
 
 	}
 	myLanternTransform = glm::translate(myLanternTransform, glm::vec3(0, 0, 1));
+	myLanternTransform2 = glm::translate(myLanternTransform2, glm::vec3(25, 0, 1));
 
 }
 
@@ -517,6 +534,36 @@ void Game::Update(float deltaTime) {
 		angleForX += 0.01;
 	}
 
+	bool inRange = false;
+	glm::vec3 distance = {  abs(abs(myLanternTransform[3][0]) - abs(myCamera->GetPosition().x)),
+							abs(abs(myLanternTransform[3][1]) - abs(myCamera->GetPosition().y)),
+							abs(abs(myLanternTransform[3][2]) - abs(myCamera->GetPosition().z)) };
+
+	if (distance.x < 5 && distance.y < 5 && distance.z < 5)
+		inRange = true;
+
+	static float currentTime = 0;
+	currentTime = currentTime + deltaTime;
+	static bool wasLPressed = false;
+	static bool isLPressed = false;
+	if (glfwGetKey(myWindow, GLFW_KEY_L) == GLFW_PRESS && wasLPressed == false && inRange == true)
+	{
+		wasLPressed = true;
+	}
+
+	static glm::vec3 start = myLanternTransform[3];
+	glm::vec3 currentPos = myLanternTransform[3];
+	static glm::vec3 end = glm::vec3(myLanternTransform[3][0], myLanternTransform[3][1], myLanternTransform[3][2] + 20);
+	static float startTime = 0;
+
+	if (wasLPressed)
+		lerp(end, start, currentPos, (10));
+
+	myLanternTransform[3][0] = currentPos.x;
+	myLanternTransform[3][1] = currentPos.y;
+	myLanternTransform[3][2] = currentPos.z;
+
+
 	// Rotate and move our camera based on input
 	
 	//myCamera->Rotate(rotation);
@@ -524,6 +571,14 @@ void Game::Update(float deltaTime) {
 	myCamera->LookAt({ myCamera->GetPosition().x + cos(-angleForX), myCamera->GetPosition().y + sin(-angleForY), myCamera->GetPosition().z + tan(angleForZ)}, cameraViewAngle);
 
 	myCamera->SetPosition({ myCamera->GetPosition().x + movement.z * cos(angleForX) + movement.x * cos(angleForX + 1.57078145), myCamera->GetPosition().y + movement.z * sin(angleForX) + movement.x * sin(angleForX + 1.57078145), myCamera->GetPosition().z });
+
+	float extraDist = 10;
+	float offSet = 0.5;
+
+	testMat2->Set("a_LightPos", { (myCamera->GetPosition().x + cos(-angleForX) + extraDist * cos (angleForX - offSet)), //+ offSet * cos(angleForX), 
+								  (myCamera->GetPosition().y + sin(-angleForY) + extraDist * sin(-angleForY - offSet)), //+ offSet * sin(-angleForY),
+								  myCamera->GetPosition().z + (angleForZ > -1 ? (angleForZ < 1 ? tan(angleForZ) : 1) : -1) });
+
 
 	//myCamera->Move(movement);
 
@@ -586,10 +641,10 @@ void Game::Update(float deltaTime) {
 	lanternFuel -= 1; //Just makes the lantern fuel drain
 
 	if (lanternFuel > 1000) {
-		testMat2->Set("a_LightColor", { 1.0f, 0.0f, 0.0f });
+		testMat2->Set("a_LightColor", { 1.0f, 1.0f, 1.0f });
 
 		//Brightness Smaller the more shinny the surface is and the better it will show light
-		testMat2->Set("a_LightShininess", 56.0f);
+		testMat2->Set("a_LightShininess", 85.0f);
 
 		//Radius of glow Bigger the wider range and brighter it becomes
 		testMat2->Set("a_LightAttenuation", 0.00125f);
@@ -612,10 +667,17 @@ void Game::Update(float deltaTime) {
 	//myMesh5 = std::make_shared<Mesh>(lanternVertices.data(), lanternVertices.size(), nullptr, 0);
 	myMesh5 = nullptr;
 
-	morphObjectManager.updateMorphObject(deltaTime, 0, myLanternTransform);
+	morphObjectManager.updateMorphObject();
 	lanternVertices = morphObjectManager.getCurrentModel(0);
 
 	myMesh5 = std::make_shared<Mesh>(lanternVertices.data(), lanternVertices.size(), nullptr, 0);
+
+	myMesh4 = nullptr;
+
+	deCasteJauManager.calculatedeCasteJau();
+	chairVertices = deCasteJauManager.getCurrentCasteJau(0);
+
+	myMesh4 = std::make_shared<Mesh>(chairVertices.data(), chairVertices.size(), nullptr, 0);
 
 }
 
@@ -627,7 +689,7 @@ void Game::Draw(float deltaTime) {
 	//myScene.Render(deltaTime);
 
 	myShader->Bind();
-	myShader->SetUniform("a_ModelViewProjection", OrthoCameraForInteraction->GetViewProjection());
+	myShader->SetUniform("a_ModelViewProjection", interactCamera->GetViewProjection());
 	myMesh->Draw();
 	
 
@@ -654,27 +716,6 @@ void Game::Draw(float deltaTime) {
 			return lhs.Material < rhs.Material;
 		});
 
-	auto& ecs2 = CurrentRegistry();
-	auto view2 = ecs2.view<MorphMesh>();
-	//view2.each([&](entt::entity entity, MorphMesh& morph) {
-	//	//morph.updateMorphObject(deltaTime, 0, myLanternTransform);
-	//
-	//
-	//	morphObjectManager.updateMorphObject(deltaTime, 0, myLanternTransform);
-	//	lanternVertices = morphObjectManager.getCurrentModel(0);
-	//	myMesh5 = std::make_shared<Mesh>(lanternVertices.data(), lanternVertices.size(), nullptr, 0);
-	//
-	//	MeshRenderer& m2 = ecs.assign<MeshRenderer>(entity);
-	//	m2.Material = testMat2;
-	//	m2.Mesh = myMesh5;
-	//
-	//
-	//
-	//	});
-	////ecs.assign<
-
-
-
 	// These will keep track of the current shader and material that we have bound    
 	Material::Sptr mat = nullptr;
 	Shader::Sptr   boundShader = nullptr;
@@ -694,6 +735,9 @@ void Game::Draw(float deltaTime) {
 			continue;
 		if (hello == 0) {
 			renderer.Mesh = myMesh5;
+		}
+		else if (hello == 1) {
+			renderer.Mesh = myMesh4;
 		}
 		// If our shader has changed, we need to bind it and update our frame-level uniforms    
 		if (renderer.Material->GetShader() != boundShader) {
@@ -716,6 +760,9 @@ void Game::Draw(float deltaTime) {
 		if (hello == 0) { //The lantern
 																													//Ask TA
 			mat->GetShader()->SetUniform("a_ModelViewProjection", myCamera->GetViewProjection() /*transform.GetWorldTransform())*/ * myLanternTransform);
+		}
+		else if (hello == 1) {
+			mat->GetShader()->SetUniform("a_ModelViewProjection", myCamera->GetViewProjection() /*transform.GetWorldTransform())*/ * myLanternTransform2);
 		}
 		else {
 			mat->GetShader()->SetUniform("a_ModelViewProjection", myCamera->GetViewProjection() * transform.GetWorldTransform());

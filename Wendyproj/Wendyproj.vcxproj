@@ -105,6 +105,7 @@
   <ItemGroup>
     <ClInclude Include="src\Camera.h" />
     <ClInclude Include="src\Game.h" />
+    <ClInclude Include="src\GeneralMath.h" />
     <ClInclude Include="src\HitBoxes.h" />
     <ClInclude Include="src\Material.h" />
     <ClInclude Include="src\Mesh.h" />
@@ -119,6 +120,7 @@
   <ItemGroup>
     <ClCompile Include="src\Camera.cpp" />
     <ClCompile Include="src\Game.cpp" />
+    <ClCompile Include="src\GeneralMath.cpp" />
     <ClCompile Include="src\HitBoxes.cpp" />
     <ClCompile Include="src\Material.cpp" />
     <ClCompile Include="src\Mesh.cpp" />

@@ -6,17 +6,20 @@
 void MorphObject::saveMorphObject(const char* filenameOriginal, const char* filenameTarget) {
 	morphObject temp = { loadOBJ(filenameOriginal), loadOBJ(filenameOriginal) , loadOBJ(filenameTarget) };
 	morphObjectList.push_back(temp);
+	currentInterval.push_back(0);
+	amountOfTimess.push_back(0);
 }
 
-void MorphObject::updateMorphObject(float deltatime, int objectID, glm::mat4 objTransform) {
+void MorphObject::updateMorphObject() {
+	static float filler = 0;
 	for (int j = 0; j < morphObjectList.size(); j++) {
 		for (int i = 0; i < morphObjectList[j].originalModel.size(); i++) {
 
 			glm::vec3 tempVertices = { 0, 0, 0 };
 			glm::vec3 tempNeorm = { 0, 0, 0 };
 
-			MorphObject::lerp(morphObjectList[j].targetModel[i].Position, morphObjectList[j].originalModel[i].Position, tempVertices, deltatime, 10);
-			MorphObject::lerp(morphObjectList[j].targetModel[i].Normal, morphObjectList[j].originalModel[i].Normal, tempNeorm, deltatime, 10);
+			MorphObject::lerp( morphObjectList[j].originalModel[i].Position, morphObjectList[j].targetModel[i].Position, tempVertices, filler, 10, j, filler);
+			MorphObject::lerp( morphObjectList[j].originalModel[i].Normal, morphObjectList[j].targetModel[i].Normal, tempNeorm, filler, 10, j, filler);
 			morphObjectList[j].currentModel[i].Position = tempVertices;
 			morphObjectList[j].currentModel[i].Normal = glm::normalize(tempNeorm);
 			
@@ -29,8 +32,8 @@ void MorphObject::updateMorphObject(float deltatime, int objectID, glm::mat4 obj
 			//	mesh->normals[i] = glm::normalize(n);
 			//
 		}
+	currentInterval[j] += 0.095;
 	}
-	currentInterval += 0.095;
 }
 
 // Uses start point, end point, the percentage to move each frame (speed, essentially), the matrix you're modifying, and the xyz index
@@ -53,7 +56,7 @@ void MorphObject::updateMorphObject(float deltatime, int objectID, glm::mat4 obj
 //}
 
 std::vector<Vertex> MorphObject::getCurrentModel(int objectID) {
-	if (currentInterval <= amountOfTimess) {
+	if (currentInterval[objectID] <= amountOfTimess[objectID] || amountOfTimess[objectID] == 0) {
 		return morphObjectList[objectID].currentModel;
 	}
 	else {
@@ -61,21 +64,42 @@ std::vector<Vertex> MorphObject::getCurrentModel(int objectID) {
 	}
 }
 
-void  MorphObject::lerp(glm::vec3& goal, glm::vec3& startPoint, glm::vec3& currentPos, float deltatime, float total_time) {
+void  MorphObject::lerp(glm::vec3& startPoint, glm::vec3& goal, glm::vec3& currentPos, float& deltatime, float total_time, int objectID, float current_Interval) {
 	//glm::vec3 diffVec = { goal.x - startPoint.x, goal.y - startPoint.y, goal.z - startPoint.z }
-	static float totalTime = total_time;
-	static int amountOfTimes = totalTime / 0.095;
-	amountOfTimess = amountOfTimes;
-	static float percentagePerIntervals = 0.095 / totalTime;
+	float totalTime = total_time;
+	int amountOfTimes = totalTime / 0.095;
+	float percentagePerIntervals = 0.095 / totalTime;
+	if (amountOfTimess.empty() != true) {
+		if (amountOfTimess[objectID] == 0) {
+			amountOfTimess[objectID] = amountOfTimes;
+		}
+		if (deltatime == 0) {
+			deltatime = amountOfTimes;
+		}
 
-	if (currentInterval <= amountOfTimes && currentInterval >= 0) {
-		float t = startPoint.x != goal.x ? (((percentagePerIntervals * currentInterval) * (goal.x - startPoint.x) + startPoint.x) - startPoint.x) / (goal.x - startPoint.x) : 1;
-		currentPos.x = (1 - t) * startPoint.x + t * goal.x;
-		float t2 = startPoint.y != goal.y ? (((percentagePerIntervals * currentInterval) * (goal.y - startPoint.y) + startPoint.y) - startPoint.y) / (goal.y - startPoint.y) : 1;
-		currentPos.y = (1 - t2) * startPoint.y + t2 * goal.y;
-		float t3 = startPoint.z != goal.z ? (((percentagePerIntervals * currentInterval) * (goal.z - startPoint.z) + startPoint.z) - startPoint.z) / (goal.z - startPoint.z) : 1;
-		currentPos.z = (1 - t3) * startPoint.z + t3 * goal.z;
+		if (currentInterval[objectID] <= amountOfTimess[objectID] && currentInterval[objectID] >= 0) {
+			float t = startPoint.x != goal.x ? (((percentagePerIntervals * currentInterval[objectID]) * (goal.x - startPoint.x) + startPoint.x) - startPoint.x) / (goal.x - startPoint.x) : 1;
+			currentPos.x = (1 - t) * startPoint.x + t * goal.x;
+			float t2 = startPoint.y != goal.y ? (((percentagePerIntervals * currentInterval[objectID]) * (goal.y - startPoint.y) + startPoint.y) - startPoint.y) / (goal.y - startPoint.y) : 1;
+			currentPos.y = (1 - t2) * startPoint.y + t2 * goal.y;
+			float t3 = startPoint.z != goal.z ? (((percentagePerIntervals * currentInterval[objectID]) * (goal.z - startPoint.z) + startPoint.z) - startPoint.z) / (goal.z - startPoint.z) : 1;
+			currentPos.z = (1 - t3) * startPoint.z + t3 * goal.z;
 
+		}
+	}
+	else {
+		if (deltatime == 0) {
+			deltatime = amountOfTimes;
+		}
+		if (current_Interval <= deltatime && current_Interval >= 0) {
+			float t = startPoint.x != goal.x ? (((percentagePerIntervals * current_Interval) * (goal.x - startPoint.x) + startPoint.x) - startPoint.x) / (goal.x - startPoint.x) : 1;
+			currentPos.x = (1 - t) * startPoint.x + t * goal.x;
+			float t2 = startPoint.y != goal.y ? (((percentagePerIntervals * current_Interval) * (goal.y - startPoint.y) + startPoint.y) - startPoint.y) / (goal.y - startPoint.y) : 1;
+			currentPos.y = (1 - t2) * startPoint.y + t2 * goal.y;
+			float t3 = startPoint.z != goal.z ? (((percentagePerIntervals * current_Interval) * (goal.z - startPoint.z) + startPoint.z) - startPoint.z) / (goal.z - startPoint.z) : 1;
+			currentPos.z = (1 - t3) * startPoint.z + t3 * goal.z;
+
+		}
 	}
 
 	//if (currentInterval == amountOfTimes) {
@@ -86,3 +110,5 @@ void  MorphObject::lerp(glm::vec3& goal, glm::vec3& startPoint, glm::vec3& curre
 	//}
 	
 }
+
+//Fowards kinematic here if we have time

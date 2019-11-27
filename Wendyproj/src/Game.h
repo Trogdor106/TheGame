@@ -15,7 +15,7 @@
 #include "OBJLoader.h"
 #include "Material.h"
 #include "HitBoxes.h"
-#include "MorphObject.h"
+#include "GeneralMath.h"
 
 
 class Game {
@@ -54,8 +54,9 @@ private:
 	char        myWindowTitle[32];
 
 	Camera::Sptr myCamera;
-	Camera::Sptr OrthoCameraForInteraction;
-
+	Camera::Sptr interactCamera;
+	
+	
 	// A shared pointer to our mesh
 	Mesh::Sptr   myMesh;
 	Mesh::Sptr   myMesh2;
@@ -79,6 +80,7 @@ private:
 	glm::vec3 cameraViewTarget = glm::vec3(0);
 
 	glm::vec3 cameraPos = glm::vec3(1, 1, 5);
+	glm::vec3 interactPos = glm::vec3(1, 1, 5);
 	Material::Sptr testMat2; //Wut?
 
 	HitBoxes hitBoxManager;
@@ -90,6 +92,7 @@ private:
 	float lightShyninessModifyer = 1.0f;
 	float lightAttenuationModifyer = 1.0f;
 	glm::mat4 myLanternTransform = glm::mat4(1.0f);
+	glm::mat4 myLanternTransform2 = glm::mat4(1.0f);
 	glm::vec3 lanternAngle = {0.0f, 0.0f, 0.0f};
 	float angleForX = 0;
 	float angleForY = 0;
@@ -109,7 +112,9 @@ private:
 
 	//Objects
 	std::vector <Vertex> lanternVertices;
+	std::vector <Vertex> chairVertices;
 
-	//Morph objects
+	//Other
 	MorphObject morphObjectManager;
+	deCasteJau deCasteJauManager;
 };

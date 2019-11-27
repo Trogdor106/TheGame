@@ -5,9 +5,9 @@
 class MorphObject {
 public:
 	void saveMorphObject(const char* filenameOriginal, const char* filenameTarget);
-	void updateMorphObject(float deltatime, int objectID, glm::mat4 objTransform);
+	void updateMorphObject();
 	//float justLerp(float p1, float p2, float want, glm::mat4 objTransform, int index);
-	void lerp(glm::vec3& goal, glm::vec3& startPoint, glm::vec3& currentPos, float deltatime, float total_time);
+	void lerp(glm::vec3& startPoint, glm::vec3& goal, glm::vec3& currentPos, float& deltatime, float total_time, int objectID, float current_Interval);
 	std::vector <Vertex> getCurrentModel(int objectID);
 	typedef std::shared_ptr<MorphObject> Sptr;
 
@@ -21,6 +21,6 @@ private:
 	
 	std::vector <morphObject> morphObjectList;
 
-	float currentInterval = 0;
-	float amountOfTimess = 0;
+	std::vector <float> currentInterval;
+	std::vector <float> amountOfTimess;
 };
