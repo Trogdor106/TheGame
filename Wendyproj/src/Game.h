@@ -53,6 +53,7 @@ private:
 	char        myWindowTitle[32];
 
 	Camera::Sptr myCamera;
+	Camera::Sptr interactCamera;
 	// A shared pointer to our mesh
 	Mesh::Sptr   myMesh;
 	Mesh::Sptr   myMesh2;
@@ -65,18 +66,16 @@ private:
 	// Shader for viewing normal maps
 	Shader::Sptr myNormalShader;
 
-
+	//ObjLoader hello;
 
 	// Our models transformation matrix
 	glm::mat4   myModelTransform;
-
-	glm::mat4 myLanternTransform = glm::mat4(1.0f);
-
 
 	glm::vec3 cameraViewAngle = glm::vec3(0, 0, 1);
 	glm::vec3 cameraViewTarget = glm::vec3(0);
 
 	glm::vec3 cameraPos = glm::vec3(1, 1, 5);
+	glm::vec3 interactPos = glm::vec3(1, 1, 5);
 	Material::Sptr testMat2; //Wut?
 
 	HitBoxes hitBoxManager;
@@ -85,6 +84,13 @@ private:
 	float lanternFuel = 1.0f;
 	float lightShyninessModifyer = 1.0f;
 	float lightAttenuationModifyer = 1.0f;
+	glm::mat4 myLanternTransform = glm::mat4(1.0f);
+	glm::vec3 lanternAngle = {0.0f, 0.0f, 0.0f};
+	float angleForX = 0;
+	float angleForY = 0;
+	float angleForZ = 0;
+
+
 	//That's it for now I guess XD
 
 	double mousePosX = 0;

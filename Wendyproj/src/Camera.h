@@ -19,8 +19,6 @@ public:
 
 	// Gets the camera's view matrix
 	const glm::mat4& GetView() const { return myView; }
-	//Sets the camera's view
-	void SetView(glm::mat4 newView) const {myView = newView; }
 	// Gets the camera's view projection
 	inline glm::mat4 GetViewProjection() const { return Projection * myView; }
 

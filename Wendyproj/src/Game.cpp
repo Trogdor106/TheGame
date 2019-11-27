@@ -16,6 +16,8 @@
 #include "SceneManager.h"
 #include "MeshRenderer.h"
 #include "Texture2D.h"
+#include "OBJLoader2.h"
+
 
 /*
 	Handles debug messages from OpenGL
@@ -65,6 +67,7 @@ void GlfwWindowResizedCallback(GLFWwindow* window, int width, int height) {
 
 void Game::Resize(int newWidth, int newHeight) {
 	myCamera->Projection = glm::perspective(glm::radians(60.0f), newWidth / (float)newHeight, 0.01f, 1000.0f);
+	interactCamera->Projection = glm::perspective(glm::radians(60.0f), newWidth / (float)newHeight, 0.01f, 1000.0f);
 }
 
 Game::Game() :
@@ -159,7 +162,24 @@ void Game::Shutdown() {
 	glfwTerminate();
 }
 
+void lerp(glm::vec3& goal, glm::vec3& startPoint, glm::vec3& currentPos, float duration) {
+	static float totalTime = duration;
+	static float amountOfTimes = totalTime / (0.095);
+	static float percentagePerIntervals =	 (0.095) / totalTime;
+	static float currentInterval = 0;
+	if (currentInterval <= amountOfTimes && currentInterval >= 0) {
+		float t = startPoint.x != goal.x ? (((percentagePerIntervals * currentInterval) * (goal.x - startPoint.x) + startPoint.x) - startPoint.x) / (goal.x - startPoint.x) : 1;
+		currentPos.x = (1 - t) * startPoint.x + t * goal.x;
+		float t2 = startPoint.y != goal.y ? (((percentagePerIntervals * currentInterval) * (goal.y - startPoint.y) + startPoint.y) - startPoint.y) / (goal.y - startPoint.y) : 1;
+		currentPos.y = (1 - t2) * startPoint.y + t2 * goal.y;
+		float t3 = startPoint.z != goal.z ? (((percentagePerIntervals * currentInterval) * (goal.z - startPoint.z) + startPoint.z) - startPoint.z) / (goal.z - startPoint.z) : 1;
+		currentPos.z = (1 - t3) * startPoint.z + t3 * goal.z;
+		
+		currentInterval += 0.095;
 
+		//All the 0.095s are because delta time was giving us varying results based on the computers, so this constant works better with smaller numbers
+	}
+}
 
 glm::vec4 testColor = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
 void Game::LoadContent() {
@@ -167,6 +187,11 @@ void Game::LoadContent() {
 	myCamera->SetPosition(cameraPos);
 	myCamera->LookAt(cameraViewTarget, cameraViewAngle);
 	myCamera->Projection = glm::perspective(glm::radians(60.0f), 1.0f, 0.01f, 1000.0f);
+
+	interactCamera = std::make_shared<Camera>();
+	interactCamera->SetPosition(cameraPos);
+	interactCamera->LookAt(cameraViewTarget, interactCamera->GetPosition() + glm::vec3(10, 0, 100));
+	interactCamera->Projection = glm::ortho(-4, 4, -4, 4, 1, 25);
 
 	// Create our 4 vertices
 	Vertex vertices[4] = {
@@ -195,8 +220,8 @@ void Game::LoadContent() {
 
 
 	Texture2D::Sptr albedo = Texture2D::LoadFromFile("untitled.png");
-	Texture2D::Sptr albedo2 = Texture2D::LoadFromFile("touhou-4.png");
-
+	Texture2D::Sptr albedo2 = Texture2D::LoadFromFile("Dresser4.png");
+	
 
 	Vertex vertices2[4] = {
 		//       Position                   Color
@@ -212,11 +237,13 @@ void Game::LoadContent() {
 		0, 1, 2,
 		2, 1, 3
 	};
-	
-	
-	//Maybe works?????
+	 
+	//Halp
 	std::vector <Vertex> objVertices = loadOBJ("Floor1_Beeg (2).obj");
-	std::vector <Vertex> lanternVertices = loadOBJ("Lantern2.obj");
+	std::vector <Vertex> lanternVertices = loadOBJ("Dresser33.obj");
+	//MeshData lanternVertices = ObjLoader::LoadObj("Dresser.obj");
+	
+	//myLanternTransform = glm::translate(myModelTransform, glm::vec3(0, 0, -10));
 	
 	hitBoxManager.saveHitBoxes(lanternVertices);
 
@@ -226,7 +253,6 @@ void Game::LoadContent() {
 	//		objVertices[i].Color[1] = 1.0f;
 	//		objVertices[i].Color[2] = 0.0f;
 	//	}
-	//
 
 	// Create a new mesh from the data
 	
@@ -235,6 +261,7 @@ void Game::LoadContent() {
 	myMesh3 = std::make_shared<Mesh>(vertices3, 4, indices, 6);
 	myMesh4 = std::make_shared<Mesh>(objVertices.data(), objVertices.size(), nullptr, 0);
 	myMesh5 = std::make_shared<Mesh>(lanternVertices.data(), lanternVertices.size(), nullptr, 0);
+	//Mesh::Sptr myMesh5 = ObjLoader::LoadObjToMesh("Dresser.obj");
 
 
 	Shader::Sptr phong = std::make_shared<Shader>();
@@ -256,7 +283,7 @@ void Game::LoadContent() {
 	testMat2->Set("a_LightPos", { 0, 1, 10 });
 	testMat2->Set("a_LightColor", { 1.0f, 0.0f, 0 });
 	testMat2->Set("a_AmbientColor", { 1.0f, 1.0f, 1.0f });
-	testMat2->Set("a_AmbientPower", 0.7f);
+	testMat2->Set("a_AmbientPower", 0.9f);
 	testMat2->Set("a_LightSpecPower", 0.5f);
 	
 	//Brightness
@@ -274,43 +301,8 @@ void Game::LoadContent() {
 	//myNormalShader = std::make_shared<Shader>();
 	//myNormalShader->Load("passthrough.vs", "normalView.fs");
 
-	SceneManager::RegisterScene("Test");
 	SceneManager::RegisterScene("Test2");
-	SceneManager::SetCurrentScene("Test");
-
-	{
-		auto& ecs = GetRegistry("Test");
-		entt::entity e1 = ecs.create();
-		ecs.assign<TempTransform>(e1).Scale = glm::vec3(1.0f);
-		MeshRenderer& m1 = ecs.assign<MeshRenderer>(e1);
-		m1.Material = testMat;
-		m1.Mesh = myMesh;
-	
-		entt::entity e3 = ecs.create();
-		ecs.assign<TempTransform>(e3).Scale = glm::vec3(1.0f);
-		MeshRenderer& m3 = ecs.assign<MeshRenderer>(e3);
-		m3.Material = testMat2;
-		m3.Mesh = myMesh5;
-	
-		auto rotate = [](entt::entity e, float dt) {
-			CurrentRegistry().get<TempTransform>(e).EulerRotation += glm::vec3(0, 0, 90 * dt);
-		};
-		auto rotate2 = [](entt::entity e, float dt) {
-			CurrentRegistry().get<TempTransform>(e).EulerRotation += glm::vec3(0, 30 * dt, 90 * dt);
-		};
-		auto& up = ecs.get_or_assign<UpdateBehaviour>(e1);
-		up.Function = rotate;
-		auto& up2 = ecs.get_or_assign<UpdateBehaviour>(e3);
-		up2.Function = rotate2;
-	
-		//entt::entity e5 = ecs.create();
-		//ecs.assign<TempTransform>(e5).Scale = glm::vec3(1.0f);
-		//MeshRenderer& m4 = ecs.assign<MeshRenderer>(e5);
-		//m4.Material = testMat2;
-		//m4.Mesh = myMesh5;
-		//auto& up3 = ecs.get_or_assign<UpdateBehaviour>(e5);
-	
-	}
+	SceneManager::SetCurrentScene("Test2");
 
 	{
 
@@ -349,8 +341,7 @@ void Game::LoadContent() {
 		auto& up2 = ecs2.get_or_assign<UpdateBehaviour>(e5);
 		up2.Function = rotate3;
 	}
-	myLanternTransform = glm::translate(myLanternTransform, glm::vec3(0, 0, 1));
-
+	myLanternTransform = glm::translate(myLanternTransform, glm::vec3(10, 0, 1));
 }
 
 
@@ -448,34 +439,36 @@ void Game::Update(float deltaTime) {
 	else {
 		isM = false;
 	}
-	if (isMouse){
+	if (isMouse) {
 		glfwSetInputMode(myWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		glfwGetCursorPos(myWindow, &mousePosX, &mousePosY);
 		glfwGetWindowPos(myWindow, &windowPosX, &windowPosY);
 		glfwGetWindowSize(myWindow, &windowSizeWidth, &windowSizeHeight);
 		glfwSetCursorPos(myWindow, windowPosX + windowSizeWidth / 4, windowPosY + windowSizeHeight / 4);
 		//rotation.x = (mousePosX - mousePrevPosX) * deltaTime;
-		
-		
+
+
 		rotation.y = (mousePosX - mousePrevPosX) * deltaTime;
 		rotation.x = (mousePosY - mousePrevPosY) * deltaTime;
-		
-		//Proper way to do it, but not enough time for tomorrow so will be left to the me of a later day
-		//cameraViewAngle.x += (mousePosY - mousePrevPosY) * deltaTime;
-		//myCamera->LookAt(cameraViewTarget, cameraViewAngle);
 	}
-	
+
 	float speed = 30.0f;
+	float speed2 = 15.0f;
 	float rotSpeed = 1.0f;
 
-	if (glfwGetKey(myWindow, GLFW_KEY_W) == GLFW_PRESS)
-		movement.z -= speed * deltaTime;
 	if (glfwGetKey(myWindow, GLFW_KEY_S) == GLFW_PRESS)
-		movement.z += speed * deltaTime;
-	if (glfwGetKey(myWindow, GLFW_KEY_A) == GLFW_PRESS)
-		movement.x -= speed * deltaTime;
+		movement.z = -speed2 * deltaTime;
+	else if (glfwGetKey(myWindow, GLFW_KEY_W) == GLFW_PRESS)
+		movement.z = speed2 * deltaTime;
+	else
+		movement.z = 0 * deltaTime;
 	if (glfwGetKey(myWindow, GLFW_KEY_D) == GLFW_PRESS)
-		movement.x += speed * deltaTime;
+		movement.x = -speed2 * deltaTime;
+	else if (glfwGetKey(myWindow, GLFW_KEY_A) == GLFW_PRESS)
+		movement.x = speed2 * deltaTime;
+	else
+		movement.x = 0;
+
 	if (glfwGetKey(myWindow, GLFW_KEY_SPACE) == GLFW_PRESS)
 		movement.y += speed * deltaTime;
 	if (glfwGetKey(myWindow, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
@@ -485,27 +478,70 @@ void Game::Update(float deltaTime) {
 		exit(1);
 	}
 
-	if (glfwGetKey(myWindow, GLFW_KEY_Q) == GLFW_PRESS)
-		rotation.z -= rotSpeed * deltaTime;
-	if (glfwGetKey(myWindow, GLFW_KEY_E) == GLFW_PRESS)
-		rotation.z += rotSpeed * deltaTime;
-	if (glfwGetKey(myWindow, GLFW_KEY_UP) == GLFW_PRESS)
-		rotation.x -= rotSpeed * deltaTime;
-	if (glfwGetKey(myWindow, GLFW_KEY_DOWN) == GLFW_PRESS)
-		rotation.x += rotSpeed * deltaTime;
-	if (glfwGetKey(myWindow, GLFW_KEY_LEFT) == GLFW_PRESS)
-		rotation.y -= rotSpeed * deltaTime;
-	if (glfwGetKey(myWindow, GLFW_KEY_RIGHT) == GLFW_PRESS)
-		rotation.y += rotSpeed * deltaTime;
+	if (glfwGetKey(myWindow, GLFW_KEY_DOWN) == GLFW_PRESS) {
+		angleForZ -= 0.01;
+		if (angleForZ < -1.4) {
+			angleForZ = -1.4;
+		}
+	}
+	if (glfwGetKey(myWindow, GLFW_KEY_UP) == GLFW_PRESS) {
+		angleForZ += 0.01;
+		if (angleForZ > 1.4) {
+			angleForZ = 1.4;
+		}
+	}
+	if (glfwGetKey(myWindow, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+		angleForY += 0.01;
+		angleForX -= 0.01;
+	}
+	if (glfwGetKey(myWindow, GLFW_KEY_LEFT) == GLFW_PRESS) {
+		angleForY -= 0.01;
+		angleForX += 0.01;
+	}
+	bool inRange = false;
+	glm::vec3 distance = {  myLanternTransform[3][0] - myCamera->GetPosition().x,
+							myLanternTransform[3][1] - myCamera->GetPosition().y,
+							myLanternTransform[3][2] - myCamera->GetPosition().z };
 
-	// Rotate and move our camera based on input
+	if (distance.x < 5 && distance.y < 5 && distance.z < 5)
+		inRange = true;
+
+	static float currentTime = 0;
+	currentTime = currentTime + deltaTime;
+	static bool wasLPressed = false;
+	static bool isLPressed = false;
+	if (glfwGetKey(myWindow, GLFW_KEY_L) == GLFW_PRESS && wasLPressed == false && inRange == true)
+	{
+		wasLPressed = true;
+	}
+
+	static glm::vec3 start = myLanternTransform[3];
+	glm::vec3 currentPos = myLanternTransform[3];
+	static glm::vec3 end = glm::vec3(myLanternTransform[3][0], myLanternTransform[3][1], myLanternTransform[3][2] + 120);
+	static float startTime = 0;
+
+	if (wasLPressed)
+		lerp(end, start, currentPos, (10));
 	
-	myCamera->Rotate(rotation);
+	myLanternTransform[3][0] = currentPos.x;
+	myLanternTransform[3][1] = currentPos.y;
+	myLanternTransform[3][2] = currentPos.z;
 	
-	myCamera->Move(movement);
+	float boxX, boxY, boxZ;
+	//boxX = currentPos.x + cos(-angleForX);
+	//boxY = currentPos.y + sin(-angleForY);
+	//boxZ = currentPos.z + tan(-angleForZ);
+
+	myCamera->LookAt({ myCamera->GetPosition().x + cos(-angleForX), myCamera->GetPosition().y + sin(-angleForY), myCamera->GetPosition().z + tan(angleForZ)}, cameraViewAngle);
+	//myLanternTransform = glm::translate(myLanternTransform, boxX, boxY, boxZ);
+	myCamera->SetPosition({ myCamera->GetPosition().x + movement.z * cos(angleForX) + movement.x * cos(angleForX + 1.57078145), myCamera->GetPosition().y + movement.z * sin(angleForX) + movement.x * sin(angleForX + 1.57078145), myCamera->GetPosition().z });
+
+	//glm::mat4 temp = myCamera->GetView();
 
 	// Rotate our transformation matrix a little bit each frame
 	myModelTransform = glm::rotate(myModelTransform, deltaTime, glm::vec3(0, 0, 1));
+
+	
 	auto view = CurrentRegistry().view<UpdateBehaviour>();
 	for (const auto& e : view) {
 		auto& func = CurrentRegistry().get<UpdateBehaviour>(e);
@@ -513,11 +549,22 @@ void Game::Update(float deltaTime) {
 			func.Function(e, deltaTime);
 		}
 	}
+
 	cameraPos = myCamera->GetPosition();
-	testMat2->Set("a_LightPos", { cameraPos/*+ glm::vec3(-6, -2, 0)*/});
+	
+	hitBoxManager.updateHitBoxes(glm::vec3(myLanternTransform[3][0], myLanternTransform[3][1], myLanternTransform[3][2]), 0);
+	//Will add once the camera follows the correct format
+	
+	//testMat2->Set("a_LightPos", { cameraPos + glm::vec3(-6, -2, 0) + glm::vec3(cos(lanternAngle.x), sin(lanternAngle.y), tan(lanternAngle.z)) });
+	
+
+	
+	//HitBoxing, will be a for loop going through objects once we have things in place
 	if (hitBoxManager.testHitBoxes(cameraPos, 0)) {
 		myCamera->SetPosition(cameraPos);
 	}
+
+
 
 	//myLanternTransform = glm::translate(myLanternTransform, glm::vec3(cameraPos + glm::vec3(-6, -2, 0)));
 
@@ -549,8 +596,6 @@ void Game::Update(float deltaTime) {
 	else {
 		testMat2->Set("a_LightColor", { 0.0f, 0.0f, 0.0f });
 	}
-	
-
 }
 
 void Game::Draw(float deltaTime) {
@@ -620,6 +665,11 @@ void Game::Draw(float deltaTime) {
 		renderer.Mesh->Draw();
 	}
 	hello = 0;
+
+
+	myShader->Bind();
+	myShader->SetUniform("a_ModelViewProjection", interactCamera->GetViewProjection());
+	myMesh->Draw();
 }
 
 void Game::DrawGui(float deltaTime) {
@@ -655,6 +705,9 @@ void Game::DrawGui(float deltaTime) {
 		glm::vec3 camNormal = myCamera->GetForward();
 		ImGui::DragFloat3("Normal", &camNormal[0]);
 	
+		glm::vec3 interactNormal = interactCamera->GetForward();
+		ImGui::DragFloat3("Normal", &interactNormal[0]);
+		////////////////////////////////////////////////////////////////////////////////////////////Doing stuff maybe here
 		// Get the camera's position so we can edit it
 		glm::vec3 position = myCamera->GetPosition();
 		// Draw an editor control for the position, and update camera position

@@ -1,40 +1,11 @@
 #include "HitBoxes.h"
 
 HitBoxes::HitBoxes() :objectID(0), permHitBoxHolder(0)
-{
-}
+{}
 
-void HitBoxes::saveHitBoxes(std::vector<Vertex> objectData)
-{
+void HitBoxes::saveHitBoxes(std::vector<Vertex> objectData) {
 	maxAndMin hitBoxHolder;
-	/*
-	hitBoxHolder[objectID].MaxX = 0;
-	hitBoxHolder[objectID].MinX = 0;
-	hitBoxHolder[objectID].MaxY = 0;
-	hitBoxHolder[objectID].MinY = 0;
-	hitBoxHolder[objectID].MaxZ = 0;
-	hitBoxHolder[objectID].MinZ = 0;
-	for (int i = 0; i < objectData.size(); i++) {
-		if (objectData[objectID].Position[intForX] < hitBoxHolder[objectID].MinX) {
-			hitBoxHolder[objectID].MinX = objectData[objectID].Position[intForX];
-		}
-		else if (objectData[objectID].Position[intForX] > hitBoxHolder[objectID].MaxX) {
-			hitBoxHolder[objectID].MaxX = objectData[objectID].Position[intForX];
-		}
-		if (objectData[objectID].Position[intForY] < hitBoxHolder[objectID].MinY) {
-			hitBoxHolder[objectID].MinY = objectData[objectID].Position[intForY];
-		}
-		else if (objectData[objectID].Position[intForY] > hitBoxHolder[objectID].MaxY) {
-			hitBoxHolder[objectID].MaxY = objectData[objectID].Position[intForY];
-		}
-		if (objectData[objectID].Position[intForZ] < hitBoxHolder[objectID].MinZ) {
-			hitBoxHolder[objectID].MinZ = objectData[objectID].Position[intForZ];
-		}
-		else if (objectData[objectID].Position[intForZ] > hitBoxHolder[objectID].MaxZ) {
-			hitBoxHolder[objectID].MaxZ = objectData[objectID].Position[intForZ];
-		}
-	}
-	*/
+	
 	hitBoxHolder.MaxX = 0;
 	hitBoxHolder.MinX = 0;
 	hitBoxHolder.MaxY = 0;
@@ -50,7 +21,7 @@ void HitBoxes::saveHitBoxes(std::vector<Vertex> objectData)
 			hitBoxHolder.MaxX = objectData[i].Position[intForX];
 		}
 		if (objectData[i].Position[intForY] < hitBoxHolder.MinY) {
-			hitBoxHolder.MinY = objectData[objectID].Position[intForY];
+			hitBoxHolder.MinY = objectData[i].Position[intForY];
 		}
 		else if (objectData[i].Position[intForY] > hitBoxHolder.MaxY) {
 			hitBoxHolder.MaxY = objectData[i].Position[intForY];
@@ -63,34 +34,46 @@ void HitBoxes::saveHitBoxes(std::vector<Vertex> objectData)
 		}
 	}
 	permHitBoxHolder.push_back(hitBoxHolder);
+	modHitBoxHolder.push_back(hitBoxHolder);
 	objectID++;
 }
 
-bool HitBoxes::testHitBoxes(glm::vec3 &cameraPos, int ObjectID)
-{
-	if (cameraPos.z > permHitBoxHolder[ObjectID].MinZ && cameraPos.z < permHitBoxHolder[ObjectID].MaxZ) {
+bool HitBoxes::testHitBoxes(glm::vec3 &cameraPos, int ObjectID) {
+	if (cameraPos.z > modHitBoxHolder[ObjectID].MinZ && cameraPos.z < modHitBoxHolder[ObjectID].MaxZ) {
 		float diffX = 0;
 		float diffY = 0;
-		if (cameraPos.x > permHitBoxHolder[ObjectID].MinX && cameraPos.x < permHitBoxHolder[ObjectID].MaxX) {
 
-			diffX = cameraPos.x - permHitBoxHolder[ObjectID].MinX < cameraPos.x - permHitBoxHolder[ObjectID].MaxX ?
-				cameraPos.x - permHitBoxHolder[ObjectID].MinX : cameraPos.x - permHitBoxHolder[ObjectID].MaxX;
+		if (cameraPos.x > modHitBoxHolder[ObjectID].MinX && cameraPos.x < modHitBoxHolder[ObjectID].MaxX) {
+		
+			diffX = abs(cameraPos.x - modHitBoxHolder[ObjectID].MinX) < abs(cameraPos.x - modHitBoxHolder[ObjectID].MaxX) ?
+				abs(cameraPos.x - modHitBoxHolder[ObjectID].MinX) : abs(cameraPos.x - modHitBoxHolder[ObjectID].MaxX);
 		}
-	
-		if (cameraPos.y > permHitBoxHolder[ObjectID].MinY&& cameraPos.y < permHitBoxHolder[ObjectID].MaxY) {
-			diffY = cameraPos.y - permHitBoxHolder[ObjectID].MinY < cameraPos.y - permHitBoxHolder[ObjectID].MaxY ?
-				cameraPos.y - permHitBoxHolder[ObjectID].MinY : cameraPos.y - permHitBoxHolder[ObjectID].MaxY;
+		
+		if (cameraPos.y > modHitBoxHolder[ObjectID].MinY&& cameraPos.y < modHitBoxHolder[ObjectID].MaxY) {
+			diffY = abs(cameraPos.y - modHitBoxHolder[ObjectID].MinY) < abs(cameraPos.y - modHitBoxHolder[ObjectID].MaxY) ?
+				abs(cameraPos.y - modHitBoxHolder[ObjectID].MinY) : abs(cameraPos.y - modHitBoxHolder[ObjectID].MaxY);
 		}
-		if (diffX != 0 || diffY != 0) {
+		//if (diffX != 0 || diffY != 0) {
+		if (diffX != 0 && diffY != 0) {
 			if (diffX < diffY) {
-				cameraPos.x = cameraPos.x - permHitBoxHolder[ObjectID].MinX < cameraPos.x - permHitBoxHolder[ObjectID].MaxX ?
-					permHitBoxHolder[ObjectID].MinX : permHitBoxHolder[ObjectID].MaxX;
+				cameraPos.x = abs(cameraPos.x - modHitBoxHolder[ObjectID].MinX) < abs(cameraPos.x - modHitBoxHolder[ObjectID].MaxX) ?
+					modHitBoxHolder[ObjectID].MinX : modHitBoxHolder[ObjectID].MaxX;
 			}
 			else {
-				cameraPos.y = cameraPos.y - permHitBoxHolder[ObjectID].MinY < cameraPos.y - permHitBoxHolder[ObjectID].MaxY ?
-					permHitBoxHolder[ObjectID].MinY : permHitBoxHolder[ObjectID].MaxY;
+				cameraPos.y = abs(cameraPos.y - modHitBoxHolder[ObjectID].MinY) < abs(cameraPos.y - modHitBoxHolder[ObjectID].MaxY) ?
+					modHitBoxHolder[ObjectID].MinY : modHitBoxHolder[ObjectID].MaxY;
 			}
-		}
 		return true;
+		}
 	}
+	return false;
+}
+
+void HitBoxes::updateHitBoxes(glm::vec3 transformation, int ObjectID) {
+	modHitBoxHolder[ObjectID].MaxX = permHitBoxHolder[ObjectID].MaxX + transformation.x;
+	modHitBoxHolder[ObjectID].MinX = permHitBoxHolder[ObjectID].MinX + transformation.x;
+	modHitBoxHolder[ObjectID].MaxY = permHitBoxHolder[ObjectID].MaxY + transformation.y;
+	modHitBoxHolder[ObjectID].MinY = permHitBoxHolder[ObjectID].MinY + transformation.y;
+	modHitBoxHolder[ObjectID].MaxZ = permHitBoxHolder[ObjectID].MaxZ + transformation.z;
+	modHitBoxHolder[ObjectID].MinZ = permHitBoxHolder[ObjectID].MinZ + transformation.z;
 }
