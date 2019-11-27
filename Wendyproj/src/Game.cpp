@@ -92,8 +92,8 @@ void Game::Resize(int newWidth, int newHeight) {
 Game::Game() :
 	myWindow(nullptr),
 	myWindowTitle("Game"),
-	myClearColor(glm::vec4(0, 0, 0, 1)),
-	myModelTransform(glm::mat4(1))
+	myClearColor(glm::vec4(0, 0, 0, 1))
+	//genTransform()
 { }
 
 Game::~Game() { }
@@ -240,42 +240,53 @@ void Game::LoadContent() {
 	//Halp
 	//std::vector <Vertex> objVertices = loadOBJ("Chair.obj");
 	//deCasteJauManager.saveDeCasteJauObject("Chair.obj", "Chair2.obj", "Chair3.obj", "Chair4.obj");
-	deCasteJauManager.saveDeCasteJauObject("Door.obj", "DoorHuge.obj", "DoorAss.obj", "DoorImplode.obj");
-	//chairVertices = deCasteJauManager.getCurrentCasteJau(0);
+	std::vector <Vertex> temp;
+	//Load objects under here
 
-	doorVertices = deCasteJauManager.getCurrentCasteJau(0);
+
+	//deCasteJauManager.saveDeCasteJauObject("Door.obj", "DoorHuge.obj", "DoorAss.obj", "DoorImplode.obj");
+	//temp = deCasteJauManager.getCurrentCasteJau(0);
+	//genObjects.push_back(temp);
+	//amountOfObjects++;
+
+
 
 //  morphObjectManager.saveMorphObject("Door.obj", "Dresser.obj");
 //	lanternVertices = loadOBJ("DoorImplode.obj");
 //	lanternVertices = morphObjectManager.getCurrentModel(0);
 
-	dresserVertices = loadOBJ("f_Key4.obj");
-
+	temp = loadOBJ(filename[1]);
+	genObjects.push_back(temp);
+	amountOfObjects++; // object 0 is floor 2
 
 
 	//MeshData lanternVertices = ObjLoader::LoadObj("Dresser.obj");
 	
 	
-	hitBoxManager.saveHitBoxes(lanternVertices);
+	for (int i = 0; i < genObjects.size(); i++) {
+		if (i != 9999) {
+			hitBoxManager.saveHitBoxes(genObjects[i]);
+		}
+		else {
+			;
+		}
+	}
 
 
 	// Create a new mesh from the data
 	
-	myMesh = std::make_shared<Mesh>(vertices, 4, indices, 6);
-	myMesh2 = std::make_shared<Mesh>(vertices2, 4, indices2, 6);
-	myMesh3 = std::make_shared<Mesh>(vertices3, 4, indices, 6);
-	myMesh4 = std::make_shared<Mesh>(chairVertices.data(), chairVertices.size(), nullptr, 0);
-	myMesh5 = std::make_shared<Mesh>(lanternVertices.data(), lanternVertices.size(), nullptr, 0);
+	//myMesh = std::make_shared<Mesh>(vertices, 4, indices, 6);
+	//myMesh2 = std::make_shared<Mesh>(vertices2, 4, indices2, 6);
+	//myMesh3 = std::make_shared<Mesh>(vertices3, 4, indices, 6);
+	//myMesh4 = std::make_shared<Mesh>(chairVertices.data(), chairVertices.size(), nullptr, 0);
+	//myMesh5 = std::make_shared<Mesh>(lanternVertices.data(), lanternVertices.size(), nullptr, 0);
 	//Mesh::Sptr myMesh5 = ObjLoader::LoadObjToMesh("Dresser.obj");
 
-	for (int i = 0; i < 7; i++)
+	
+	for (int i = 0; i < amountOfObjects; i++)
 	{
-		dresser[i] = std::make_shared<Mesh>(dresserVertices.data(), dresserVertices.size(), nullptr, 0);
-	}
-
-	for (int i = 0; i < 40; i++)
-	{
-		door[i] = std::make_shared<Mesh>(doorVertices.data(), doorVertices.size(), nullptr, 0);
+		Mesh::Sptr temp = std::make_shared<Mesh>(genObjects[i].data(), genObjects[i].size(), nullptr, 0);
+		genMesh.push_back(temp);
 	}
 
 	Shader::Sptr phong = std::make_shared<Shader>();
@@ -321,15 +332,15 @@ void Game::LoadContent() {
 	{
 
 		auto& ecs2 = GetRegistry("Test2");
-		entt::entity e2 = ecs2.create();
-		ecs2.assign<TempTransform>(e2).Scale = glm::vec3(1.0f);
-		MeshRenderer& m2 = ecs2.assign<MeshRenderer>(e2);
-		m2.Material = testMat2;
-		m2.Mesh = myMesh2;
-
-		auto rotate = [](entt::entity e, float dt) {
-			CurrentRegistry().get<TempTransform>(e).EulerRotation += glm::vec3(0, 0, 90 * dt);
-		};
+		//entt::entity e2 = ecs2.create();
+		//ecs2.assign<TempTransform>(e2).Scale = glm::vec3(1.0f);
+		//MeshRenderer& m2 = ecs2.assign<MeshRenderer>(e2);
+		//m2.Material = testMat2;
+		//m2.Mesh = myMesh2;
+		//
+		//auto rotate = [](entt::entity e, float dt) {
+		//	CurrentRegistry().get<TempTransform>(e).EulerRotation += glm::vec3(0, 0, 90 * dt);
+		//};
 		
 
 		//entt::entity e4 = ecs2.create();
@@ -364,26 +375,38 @@ void Game::LoadContent() {
 		//m4.Material = testMat2;
 		//m4.Mesh = myMesh5;
 
-		entt::entity dresserEntity[6];
+		//entt::entity dresserEntity[6];
 
-		for (int i = 0; i < 6; i++)
-		{
-			dresserEntity[i] = ecs2.create();
-			ecs2.assign<TempTransform>(dresserEntity[i]).Scale = glm::vec3(1.0f);
-			MeshRenderer& dresserMesh = ecs2.assign<MeshRenderer>(dresserEntity[i]);
-			dresserMesh.Material = testMat2;
-			dresserMesh.Mesh = dresser[i];
+		std::vector <entt::entity> genEntt;
+
+		for (int i = 0; i < amountOfObjects; i++) {
+			entt::entity temp = ecs2.create();
+			genEntt.push_back(temp);
+			ecs2.assign<TempTransform>(genEntt[i]).Scale = glm::vec3(1.0f);
+			MeshRenderer& genMesh2 = ecs2.assign<MeshRenderer>(genEntt[i]);
+			genMesh2.Material = testMat2;
+			genMesh2.Mesh = genMesh[i];
+
 		}
+		
+		//for (int i = 0; i < 6; i++)
+		//{
+		//	dresserEntity[i] = ecs2.create();
+		//	ecs2.assign<TempTransform>(dresserEntity[i]).Scale = glm::vec3(1.0f);
+		//	MeshRenderer& dresserMesh = ecs2.assign<MeshRenderer>(dresserEntity[i]);
+		//	dresserMesh.Material = testMat2;
+		//	dresserMesh.Mesh = dresser[i];
+		//}
 
 
-		auto rotate2 = [](entt::entity e, float dt) {
-			CurrentRegistry().get<TempTransform>(e).EulerRotation += glm::vec3(0, 30 * dt, 90 * dt);
-		};
-		auto rotate3 = [](entt::entity e, float dt) {
-			CurrentRegistry().get<TempTransform>(e).EulerRotation = glm::vec3(0, 90, 30);
-		};
-		auto& up = ecs2.get_or_assign<UpdateBehaviour>(e2);
-		up.Function = rotate;
+	//auto rotate2 = [](entt::entity e, float dt) {
+	//	CurrentRegistry().get<TempTransform>(e).EulerRotation += glm::vec3(0, 30 * dt, 90 * dt);
+	//};
+	//auto rotate3 = [](entt::entity e, float dt) {
+	//	CurrentRegistry().get<TempTransform>(e).EulerRotation = glm::vec3(0, 90, 30);
+	//};
+	//auto& up = ecs2.get_or_assign<UpdateBehaviour>(e2);
+	//up.Function = rotate;
 	//	auto& up2 = ecs2.get_or_assign<UpdateBehaviour>(e5);
 	//	up2.Function = rotate3;
 
@@ -392,19 +415,19 @@ void Game::LoadContent() {
 	myLanternTransform = glm::translate(myLanternTransform, glm::vec3(0, 0, 1));
 	myLanternTransform2 = glm::translate(myLanternTransform2, glm::vec3(25, 0, 1));
 
-	for (int i = 0; i < 7; i++)
+	for (int i = 0; i < genObjects.size(); i++)
 	{
 		glm::mat4 temp = glm::mat4(1.0f);
 		genTransform.push_back(temp);
-		dresserAngle[i] = glm::vec3(0, 0, 0);
+		//dresserAngle[i] = glm::vec3(0, 0, 0);
 	}
 
-	static int dummy = 1;
-	for (int i = 0; i < 7; i++)
-	{
-		genTransform[i] = glm::translate(genTransform[i], glm::vec3(10 * dummy, 10 * dummy, 10 * dummy));
-		dummy++;
-	}
+	//static int dummy = 1;
+	//for (int i = 0; i < 7; i++)
+	//{
+	//	genTransform[i] = glm::translate(genTransform[i], glm::vec3(10 * dummy, 10 * dummy, 10 * dummy));
+	//	dummy++;
+	//}
 
 }
 
@@ -631,16 +654,16 @@ void Game::Update(float deltaTime) {
 	glm::mat4 temp = myCamera->GetView();
 
 	// Rotate our transformation matrix a little bit each frame
-	myModelTransform = glm::rotate(myModelTransform, deltaTime, glm::vec3(0, 0, 1));
+	//myModelTransform = glm::rotate(myModelTransform, deltaTime, glm::vec3(0, 0, 1));
 
 
-	auto view = CurrentRegistry().view<UpdateBehaviour>();
-	for (const auto& e : view) {
-		auto& func = CurrentRegistry().get<UpdateBehaviour>(e);
-		if (func.Function) {
-			func.Function(e, deltaTime);
-		}
-	}
+	//auto view = CurrentRegistry().view<UpdateBehaviour>();
+	//for (const auto& e : view) {
+	//	auto& func = CurrentRegistry().get<UpdateBehaviour>(e);
+	//	if (func.Function) {
+	//		func.Function(e, deltaTime);
+	//	}
+	//}
 
 	
 
@@ -706,10 +729,13 @@ void Game::Update(float deltaTime) {
 
 	//myMesh4 = nullptr;
 
-	deCasteJauManager.calculatedeCasteJau();
-//	chairVertices = deCasteJauManager.getCurrentCasteJau(0);
 
-	doorVertices = deCasteJauManager.getCurrentCasteJau(0);
+	deCasteJauManager.calculatedeCasteJau();
+	morphObjectManager.updateMorphObject();
+
+	//chairVertices = deCasteJauManager.getCurrentCasteJau(0);
+
+	//doorVertices = deCasteJauManager.getCurrentCasteJau(0);
 
 	//myMesh4 = std::make_shared<Mesh>(chairVertices.data(), chairVertices.size(), nullptr, 0);
 
@@ -722,9 +748,9 @@ void Game::Draw(float deltaTime) {
 
 	//myScene.Render(deltaTime);
 
-	myShader->Bind();
-	myShader->SetUniform("a_ModelViewProjection", interactCamera->GetViewProjection());
-	myMesh->Draw();
+	//myShader->Bind();
+	//myShader->SetUniform("a_ModelViewProjection", interactCamera->GetViewProjection());
+	//myMesh->Draw();
 	
 
 

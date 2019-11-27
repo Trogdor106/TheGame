@@ -53,9 +53,9 @@ private:
 	  "f_Floor2.obj",	"f_Floor3.obj",	 "f_Bed.obj",	 "f_BigVase.obj",	 "f_SmallVase.obj",		"f_Book.obj",	"f_BookShelf.obj",
 		//8                //9								 //10								 //11
 		"f_Door.obj", "f_Door(Reverse_open_1_3).obj", "f_Door(Reverse_open_2_3).obj", "f_Door(Reverse_open_Max).obj",
-		//12					//13                    //14                //15                //16                //17
+		//12					//13                    //14                //15                //16                
 		"f_Door(open_1_3)", "f_Door(open_2_3)", "f_Door(open_Max)", "f_Drawer.obj", "f_DresserNoDrawer.obj",
-		//17					//18                //18            //19          //20        //21
+		//17					//18                //18            //19          //20       
 	  "f_Dresser.obj", "f_DresserWithMorror.obj", "f_Key1.obj", "f_Key2.obj", "f_Key3.obj",
 		//21			  //22              //23				 //24              //25                //26
 	  "f_Key4.obj", "f_Portrait.obj", "f_SmallFrame.obj", "f_SmallWindow.obj", "f_Stairs.obj", "f_LargeWindow.obj" };
@@ -69,27 +69,13 @@ private:
 
 	Camera::Sptr myCamera;
 	Camera::Sptr interactCamera;
-	
-	
-	// A shared pointer to our mesh
-	Mesh::Sptr   myMesh;
-	Mesh::Sptr   myMesh2;
-	Mesh::Sptr   myMesh3;
-	Mesh::Sptr   myMesh4;
-	Mesh::Sptr   myMesh5;
-
-	Mesh::Sptr	 dresser[6];
-	Mesh::Sptr	 door[40];
 
 	// A shared pointer to our shader
 	Shader::Sptr myShader;
 	// Shader for viewing normal maps
 	Shader::Sptr myNormalShader;
 
-	//ObjLoader hello;
-
-	// Our models transformation matrix
-	glm::mat4   myModelTransform;
+	
 
 	//float lerp(float p1, float p2, float want, glm::mat4 objTransform, int index);
 
@@ -113,17 +99,20 @@ private:
 
 	//Normal objects
 	std::vector <glm::mat4> genTransform;
+	std::vector <Mesh::Sptr> genMesh;
+	std::vector <std::vector <Vertex>> genObjects;
+
+	int amountOfObjects = 0;
 
 	//Mighty morphin' objects
 	////
 
 	glm::vec3 lanternAngle = {0.0f, 0.0f, 0.0f};
+
 	float angleForX = 0;
 	float angleForY = 0;
 	float angleForZ = 0;
-
-	glm::vec3 dresserAngle[6];
-
+	   
 
 	double mousePosX = 0;
 	double mousePosY = 0;
@@ -133,13 +122,6 @@ private:
 	int windowSizeHeight = 0;
 	int windowPosX = 0;
 	int windowPosY = 0;
-
-	//Objects
-	std::vector <Vertex> lanternVertices;
-	std::vector <Vertex> chairVertices;
-
-	std::vector <Vertex> dresserVertices;
-	std::vector <Vertex> doorVertices;
 
 	//Other
 	MorphObject morphObjectManager;
