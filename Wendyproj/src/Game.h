@@ -15,6 +15,7 @@
 #include "OBJLoader.h"
 #include "Material.h"
 #include "HitBoxes.h"
+#include "MorphObject.h"
 
 
 class Game {
@@ -54,6 +55,7 @@ private:
 
 	Camera::Sptr myCamera;
 	Camera::Sptr OrthoCameraForInteraction;
+
 	// A shared pointer to our mesh
 	Mesh::Sptr   myMesh;
 	Mesh::Sptr   myMesh2;
@@ -71,7 +73,7 @@ private:
 	// Our models transformation matrix
 	glm::mat4   myModelTransform;
 
-
+	//float lerp(float p1, float p2, float want, glm::mat4 objTransform, int index);
 
 	glm::vec3 cameraViewAngle = glm::vec3(0, 0, 1);
 	glm::vec3 cameraViewTarget = glm::vec3(0);
@@ -80,6 +82,8 @@ private:
 	Material::Sptr testMat2; //Wut?
 
 	HitBoxes hitBoxManager;
+
+	float backupDeltatime;
 
 	//Lantern stuff prob want to seperate into another file later
 	float lanternFuel = 1.0f;
@@ -103,4 +107,9 @@ private:
 	int windowPosX = 0;
 	int windowPosY = 0;
 
+	//Objects
+	std::vector <Vertex> lanternVertices;
+
+	//Morph objects
+	MorphObject morphObjectManager;
 };

@@ -16,7 +16,7 @@
 #include "SceneManager.h"
 #include "MeshRenderer.h"
 #include "Texture2D.h"
-#include "OBJLoader2.h"
+
 
 
 /*
@@ -30,6 +30,12 @@
 	@param message   The human readable message from OpenGL
 	@param userParam The pointer we set with glDebugMessageCallback (should be the game pointer)
 */
+
+
+struct MorphMesh:MorphObject {
+	MorphObject::Sptr Morph;
+
+};
 
 struct UpdateBehaviour {
 	std::function<void(entt::entity e, float dt)> Function;
@@ -221,19 +227,19 @@ void Game::LoadContent() {
 	
 	
 	//Halp
-	std::vector <Vertex> objVertices = loadOBJ("Floor1_Beeg (2).obj");
-	std::vector <Vertex> lanternVertices = loadOBJ("Lantern2.obj");
+	std::vector <Vertex> objVertices = loadOBJ("Chair.obj");
+
+
+	morphObjectManager.saveMorphObject("Door.obj", "DoorImplode.obj");
+	//lanternVertices = loadOBJ("Door.obj");
+	lanternVertices = morphObjectManager.getCurrentModel(0);
+
+
 	//MeshData lanternVertices = ObjLoader::LoadObj("Dresser.obj");
 	
 	
 	hitBoxManager.saveHitBoxes(lanternVertices);
 
-	//for (int i = 0; i < objVertices.size(); i++) {
-	//	if (dot(objVertices[i].Position, cameraViewTarget) <= 0.000001 && dot(objVertices[i].Position, cameraViewTarget) >= -0.000001) {
-	//		objVertices[i].Color[0] = 0.0f;
-	//		objVertices[i].Color[1] = 1.0f;
-	//		objVertices[i].Color[2] = 0.0f;
-	//	}
 
 	// Create a new mesh from the data
 	
@@ -305,11 +311,24 @@ void Game::LoadContent() {
 		m3.Material = testMat2;
 		m3.Mesh = myMesh4;
 
+		
+		//morphObjectManager.updateMorphObject(0.000000003, 0, myLanternTransform);
+		
+		if (backupDeltatime != -431602080.) {
+			morphObjectManager.updateMorphObject(backupDeltatime, 0, myLanternTransform);
+			lanternVertices = morphObjectManager.getCurrentModel(0);
+			myMesh5 = std::make_shared<Mesh>(lanternVertices.data(), lanternVertices.size(), nullptr, 0);
+			int hello = 0;
+		}
+
 		entt::entity e5 = ecs2.create();
 		ecs2.assign<TempTransform>(e5).Scale = glm::vec3(1.0f);
 		MeshRenderer& m4 = ecs2.assign<MeshRenderer>(e5);
 		m4.Material = testMat2;
 		m4.Mesh = myMesh5;
+
+
+
 
 		auto rotate2 = [](entt::entity e, float dt) {
 			CurrentRegistry().get<TempTransform>(e).EulerRotation += glm::vec3(0, 30 * dt, 90 * dt);
@@ -321,6 +340,8 @@ void Game::LoadContent() {
 		up.Function = rotate;
 		auto& up2 = ecs2.get_or_assign<UpdateBehaviour>(e5);
 		up2.Function = rotate3;
+
+
 	}
 	myLanternTransform = glm::translate(myLanternTransform, glm::vec3(0, 0, 1));
 
@@ -399,6 +420,10 @@ void Game::ImGuiEndFrame() {
 }
 
 void Game::Update(float deltaTime) {
+	backupDeltatime = deltaTime;
+
+	
+
 	glm::vec3 movement = glm::vec3(0.0f);
 	glm::vec3 rotation = glm::vec3(0.0f);
 
@@ -508,7 +533,20 @@ void Game::Update(float deltaTime) {
 
 	// Rotate our transformation matrix a little bit each frame
 	myModelTransform = glm::rotate(myModelTransform, deltaTime, glm::vec3(0, 0, 1));
-	myLanternTransform = glm::translate(myLanternTransform, glm::vec3(1 * deltaTime, 0, 0));
+
+	//static glm::vec3 goal = { -10, 2.5, 10 };
+	//static glm::vec3 start = myLanternTransform[3];
+	//glm::vec3 currentPos = myLanternTransform[3];
+	//static float total_time = 10;
+	//lerp(goal, start, currentPos, deltaTime, total_time);
+	//
+	//myLanternTransform[3][0] = currentPos.x;
+	//myLanternTransform[3][1] = currentPos.y;
+	//myLanternTransform[3][2] = currentPos.z;
+	
+	
+	
+	//myLanternTransform = glm::translate(myLanternTransform, glm::vec3(1 * deltaTime, 0, 0));
 
 
 	auto view = CurrentRegistry().view<UpdateBehaviour>();
@@ -518,6 +556,8 @@ void Game::Update(float deltaTime) {
 			func.Function(e, deltaTime);
 		}
 	}
+
+	
 
 
 	cameraPos = myCamera->GetPosition();
@@ -567,6 +607,15 @@ void Game::Update(float deltaTime) {
 		testMat2->Set("a_LightColor", { 0.0f, 0.0f, 0.0f });
 	}
 	
+	//morphObjectManager.updateMorphObject(deltaTime, 0, myLanternTransform);
+	///lanternVertices = morphObjectManager.getCurrentModel(0);
+	//myMesh5 = std::make_shared<Mesh>(lanternVertices.data(), lanternVertices.size(), nullptr, 0);
+	myMesh5 = nullptr;
+
+	morphObjectManager.updateMorphObject(deltaTime, 0, myLanternTransform);
+	lanternVertices = morphObjectManager.getCurrentModel(0);
+
+	myMesh5 = std::make_shared<Mesh>(lanternVertices.data(), lanternVertices.size(), nullptr, 0);
 
 }
 
@@ -577,8 +626,21 @@ void Game::Draw(float deltaTime) {
 
 	//myScene.Render(deltaTime);
 
-	 // We'll grab a reference to the ecs to make things easier   
+	myShader->Bind();
+	myShader->SetUniform("a_ModelViewProjection", OrthoCameraForInteraction->GetViewProjection());
+	myMesh->Draw();
+	
+
+
+
+
+
+
+
+
+	// We'll grab a reference to the ecs to make things easier   
 	auto& ecs = CurrentRegistry();
+
 	// We sort our mesh renderers based on material properties   
 	// This will group all of our meshes based on shader first, then material second   
 	ecs.sort<MeshRenderer>([](const MeshRenderer& lhs, const MeshRenderer& rhs) {
@@ -592,20 +654,50 @@ void Game::Draw(float deltaTime) {
 			return lhs.Material < rhs.Material;
 		});
 
+	auto& ecs2 = CurrentRegistry();
+	auto view2 = ecs2.view<MorphMesh>();
+	//view2.each([&](entt::entity entity, MorphMesh& morph) {
+	//	//morph.updateMorphObject(deltaTime, 0, myLanternTransform);
+	//
+	//
+	//	morphObjectManager.updateMorphObject(deltaTime, 0, myLanternTransform);
+	//	lanternVertices = morphObjectManager.getCurrentModel(0);
+	//	myMesh5 = std::make_shared<Mesh>(lanternVertices.data(), lanternVertices.size(), nullptr, 0);
+	//
+	//	MeshRenderer& m2 = ecs.assign<MeshRenderer>(entity);
+	//	m2.Material = testMat2;
+	//	m2.Mesh = myMesh5;
+	//
+	//
+	//
+	//	});
+	////ecs.assign<
+
+
+
 	// These will keep track of the current shader and material that we have bound    
 	Material::Sptr mat = nullptr;
 	Shader::Sptr   boundShader = nullptr;
 	// A view will let us iterate over all of our entities that have the given component types    
 	auto view = ecs.view<MeshRenderer>();
 	static int hello = 0;
+	
+	
+	
+
+
 	for (const auto& entity : view) {
 		// Get our shader    
-		const MeshRenderer& renderer = ecs.get<MeshRenderer>(entity);
+		MeshRenderer& renderer = ecs.get<MeshRenderer>(entity);
 		// Early bail if mesh is invalid 
 		if (renderer.Mesh == nullptr || renderer.Material == nullptr)
 			continue;
+		if (hello == 0) {
+			renderer.Mesh = myMesh5;
+		}
 		// If our shader has changed, we need to bind it and update our frame-level uniforms    
 		if (renderer.Material->GetShader() != boundShader) {
+			
 			boundShader = renderer.Material->GetShader();
 			boundShader->Bind();
 			boundShader->SetUniform("a_CameraPos", myCamera->GetPosition());
@@ -620,7 +712,7 @@ void Game::Draw(float deltaTime) {
 		// Our normal matrix is the inverse-transpose of our object's world rotation
 		glm::mat3 normalMatrix = glm::mat3(glm::transpose(glm::inverse(transform.GetWorldTransform())));
 		// Update the MVP using the item's transform  
-
+	
 		if (hello == 0) { //The lantern
 																													//Ask TA
 			mat->GetShader()->SetUniform("a_ModelViewProjection", myCamera->GetViewProjection() /*transform.GetWorldTransform())*/ * myLanternTransform);
@@ -636,12 +728,14 @@ void Game::Draw(float deltaTime) {
 		// Draw the item   
 		renderer.Mesh->Draw();
 	}
+
+
+	//ecs.sort<MeshRenderer>([](const MeshRenderer& lhs, const MeshRenderer& rhs) {
+	
 	hello = 0;
 
 
-	myShader->Bind();
-	myShader->SetUniform("a_ModelViewProjection", OrthoCameraForInteraction->GetViewProjection());
-	myMesh->Draw();
+	
 }
 
 void Game::DrawGui(float deltaTime) {
@@ -721,3 +815,4 @@ bool Game::interactionIsPossible(glm::vec3 playerPos, glm::vec3 objectPos)
 	}
 	return false;
 }
+
