@@ -1,0 +1,11 @@
+﻿  main.cpp
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Lecture 09\src\main.cpp(113,13): warning C4305:  '+=': truncation from 'double' to 'float'
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Lecture 09\src\main.cpp(116,13): warning C4305:  '-=': truncation from 'double' to 'float'
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Lecture 09\src\main.cpp(119,13): warning C4305:  '-=': truncation from 'double' to 'float'
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Lecture 09\src\main.cpp(122,13): warning C4305:  '+=': truncation from 'double' to 'float'
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Lecture 09\src\main.cpp(125,14): warning C4305:  '+=': truncation from 'double' to 'float'
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Lecture 09\src\main.cpp(128,14): warning C4305:  '-=': truncation from 'double' to 'float'
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Lecture 09\src\main.cpp(55): warning C4715:  'initGLAD': not all control paths return a value
+  Lecture 09.vcxproj -> C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Lecture 09\..\..\bin\Debug-windows-x86_64\Lecture 09\Lecture 09.exe
+  1 File(s) copied
+  7 File(s) copied

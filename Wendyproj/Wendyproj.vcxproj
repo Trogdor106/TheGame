@@ -112,6 +112,7 @@
     <ClInclude Include="src\MeshRenderer.h" />
     <ClInclude Include="src\MorphObject.h" />
     <ClInclude Include="src\OBJLoader.h" />
+    <ClInclude Include="src\OBJLoader2.h" />
     <ClInclude Include="src\Scene.h" />
     <ClInclude Include="src\SceneManager.h" />
     <ClInclude Include="src\Shader.h" />
@@ -126,6 +127,7 @@
     <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\MorphObject.cpp" />
     <ClCompile Include="src\OBJLoader.cpp" />
+    <ClCompile Include="src\OBJLoader2.cpp" />
     <ClCompile Include="src\SceneManager.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\Texture2D.cpp" />

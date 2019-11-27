@@ -218,12 +218,9 @@ void Game::LoadContent() {
 		{{ 2.0f, 2.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 1.0f }, { 0.0f, 1.0f }}
 	};
 
-
-
 	Texture2D::Sptr albedo = Texture2D::LoadFromFile("untitled.png");
 	Texture2D::Sptr albedo2 = Texture2D::LoadFromFile("Dresser4.png");
 	
-
 	Vertex vertices2[4] = {
 		//       Position                   Color
 		//    x      y     z         r    g     b     a
@@ -243,12 +240,17 @@ void Game::LoadContent() {
 	//Halp
 	//std::vector <Vertex> objVertices = loadOBJ("Chair.obj");
 	//deCasteJauManager.saveDeCasteJauObject("Chair.obj", "Chair2.obj", "Chair3.obj", "Chair4.obj");
-	deCasteJauManager.saveDeCasteJauObject("f_Door.obj", "f_Door(Reverse_open_1_3).obj", "f_Door(Reverse_open_2_3).obj", "f_Door(Reverse_open_Max).obj");
-	chairVertices = deCasteJauManager.getCurrentCasteJau(0);
+	deCasteJauManager.saveDeCasteJauObject("Door.obj", "DoorHuge.obj", "DoorAss.obj", "DoorImplode.obj");
+	//chairVertices = deCasteJauManager.getCurrentCasteJau(0);
 
-	morphObjectManager.saveMorphObject("f_LargeWindow.obj", "f_LargeWindow.obj");
-	//lanternVertices = loadOBJ("Door.obj");
-	lanternVertices = morphObjectManager.getCurrentModel(0);
+	doorVertices = deCasteJauManager.getCurrentCasteJau(0);
+
+//  morphObjectManager.saveMorphObject("Door.obj", "Dresser.obj");
+//	lanternVertices = loadOBJ("DoorImplode.obj");
+//	lanternVertices = morphObjectManager.getCurrentModel(0);
+
+	dresserVertices = loadOBJ("f_Key4.obj");
+
 
 
 	//MeshData lanternVertices = ObjLoader::LoadObj("Dresser.obj");
@@ -266,6 +268,15 @@ void Game::LoadContent() {
 	myMesh5 = std::make_shared<Mesh>(lanternVertices.data(), lanternVertices.size(), nullptr, 0);
 	//Mesh::Sptr myMesh5 = ObjLoader::LoadObjToMesh("Dresser.obj");
 
+	for (int i = 0; i < 7; i++)
+	{
+		dresser[i] = std::make_shared<Mesh>(dresserVertices.data(), dresserVertices.size(), nullptr, 0);
+	}
+
+	for (int i = 0; i < 40; i++)
+	{
+		door[i] = std::make_shared<Mesh>(doorVertices.data(), doorVertices.size(), nullptr, 0);
+	}
 
 	Shader::Sptr phong = std::make_shared<Shader>();
 	phong->Load("lighting.vs.glsl", "blinn-phong.fs.glsl");
@@ -321,12 +332,22 @@ void Game::LoadContent() {
 		};
 		
 
-		entt::entity e4 = ecs2.create();
-		ecs2.assign<TempTransform>(e4).Scale = glm::vec3(1.0f);
-		MeshRenderer& m3 = ecs2.assign<MeshRenderer>(e4);
-		m3.Material = testMat2;
-		m3.Mesh = myMesh4;
-
+		//entt::entity e4 = ecs2.create();
+		//ecs2.assign<TempTransform>(e4).Scale = glm::vec3(1.0f);
+		//MeshRenderer& m3 = ecs2.assign<MeshRenderer>(e4);
+		//m3.Material = testMat2;
+		//m3.Mesh = myMesh4;
+		
+		//entt::entity doorEntity[40];
+		//
+		//for (int i = 0; i < 40; i++)
+		//{
+		//	doorEntity[i] = ecs2.create();
+		//	ecs2.assign<TempTransform>(doorEntity[i]).Scale = glm::vec3(1.0f);
+		//	MeshRenderer& doorMesh = ecs2.assign<MeshRenderer>(doorEntity[i]);
+		//	doorMesh.Material = testMat2;
+		//	doorMesh.Mesh = door[i];
+		//}
 		
 		//morphObjectManager.updateMorphObject(0.000000003, 0, myLanternTransform);
 		
@@ -337,13 +358,22 @@ void Game::LoadContent() {
 		//	int hello = 0;
 		//}
 
-		entt::entity e5 = ecs2.create();
-		ecs2.assign<TempTransform>(e5).Scale = glm::vec3(1.0f);
-		MeshRenderer& m4 = ecs2.assign<MeshRenderer>(e5);
-		m4.Material = testMat2;
-		m4.Mesh = myMesh5;
+		//entt::entity e5 = ecs2.create();
+		//ecs2.assign<TempTransform>(e5).Scale = glm::vec3(1.0f);
+		//MeshRenderer& m4 = ecs2.assign<MeshRenderer>(e5);
+		//m4.Material = testMat2;
+		//m4.Mesh = myMesh5;
 
+		entt::entity dresserEntity[6];
 
+		for (int i = 0; i < 6; i++)
+		{
+			dresserEntity[i] = ecs2.create();
+			ecs2.assign<TempTransform>(dresserEntity[i]).Scale = glm::vec3(1.0f);
+			MeshRenderer& dresserMesh = ecs2.assign<MeshRenderer>(dresserEntity[i]);
+			dresserMesh.Material = testMat2;
+			dresserMesh.Mesh = dresser[i];
+		}
 
 
 		auto rotate2 = [](entt::entity e, float dt) {
@@ -354,13 +384,27 @@ void Game::LoadContent() {
 		};
 		auto& up = ecs2.get_or_assign<UpdateBehaviour>(e2);
 		up.Function = rotate;
-		auto& up2 = ecs2.get_or_assign<UpdateBehaviour>(e5);
-		up2.Function = rotate3;
+	//	auto& up2 = ecs2.get_or_assign<UpdateBehaviour>(e5);
+	//	up2.Function = rotate3;
 
 
 	}
 	myLanternTransform = glm::translate(myLanternTransform, glm::vec3(0, 0, 1));
 	myLanternTransform2 = glm::translate(myLanternTransform2, glm::vec3(25, 0, 1));
+
+	for (int i = 0; i < 7; i++)
+	{
+		glm::mat4 temp = glm::mat4(1.0f);
+		genTransform.push_back(temp);
+		dresserAngle[i] = glm::vec3(0, 0, 0);
+	}
+
+	static int dummy = 1;
+	for (int i = 0; i < 7; i++)
+	{
+		genTransform[i] = glm::translate(genTransform[i], glm::vec3(10 * dummy, 10 * dummy, 10 * dummy));
+		dummy++;
+	}
 
 }
 
@@ -589,20 +633,6 @@ void Game::Update(float deltaTime) {
 	// Rotate our transformation matrix a little bit each frame
 	myModelTransform = glm::rotate(myModelTransform, deltaTime, glm::vec3(0, 0, 1));
 
-	//static glm::vec3 goal = { -10, 2.5, 10 };
-	//static glm::vec3 start = myLanternTransform[3];
-	//glm::vec3 currentPos = myLanternTransform[3];
-	//static float total_time = 10;
-	//lerp(goal, start, currentPos, deltaTime, total_time);
-	//
-	//myLanternTransform[3][0] = currentPos.x;
-	//myLanternTransform[3][1] = currentPos.y;
-	//myLanternTransform[3][2] = currentPos.z;
-	
-	
-	
-	//myLanternTransform = glm::translate(myLanternTransform, glm::vec3(1 * deltaTime, 0, 0));
-
 
 	auto view = CurrentRegistry().view<UpdateBehaviour>();
 	for (const auto& e : view) {
@@ -665,19 +695,23 @@ void Game::Update(float deltaTime) {
 	//morphObjectManager.updateMorphObject(deltaTime, 0, myLanternTransform);
 	///lanternVertices = morphObjectManager.getCurrentModel(0);
 	//myMesh5 = std::make_shared<Mesh>(lanternVertices.data(), lanternVertices.size(), nullptr, 0);
-	myMesh5 = nullptr;
 
-	morphObjectManager.updateMorphObject();
-	lanternVertices = morphObjectManager.getCurrentModel(0);
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////mighty morphin' door rangers
+//	myMesh5 = nullptr;
+//
+//	morphObjectManager.updateMorphObject();
+//	lanternVertices = morphObjectManager.getCurrentModel(0);
+//
+//	myMesh5 = std::make_shared<Mesh>(lanternVertices.data(), lanternVertices.size(), nullptr, 0);
 
-	myMesh5 = std::make_shared<Mesh>(lanternVertices.data(), lanternVertices.size(), nullptr, 0);
-
-	myMesh4 = nullptr;
+	//myMesh4 = nullptr;
 
 	deCasteJauManager.calculatedeCasteJau();
-	chairVertices = deCasteJauManager.getCurrentCasteJau(0);
+//	chairVertices = deCasteJauManager.getCurrentCasteJau(0);
 
-	myMesh4 = std::make_shared<Mesh>(chairVertices.data(), chairVertices.size(), nullptr, 0);
+	doorVertices = deCasteJauManager.getCurrentCasteJau(0);
+
+	//myMesh4 = std::make_shared<Mesh>(chairVertices.data(), chairVertices.size(), nullptr, 0);
 
 }
 
@@ -734,11 +768,15 @@ void Game::Draw(float deltaTime) {
 		if (renderer.Mesh == nullptr || renderer.Material == nullptr)
 			continue;
 		if (hello == 0) {
-			renderer.Mesh = myMesh5;
+		//	renderer.Mesh = myMesh5;
+		//	for (int i = 0; i < 6; i++)
+		//		renderer.Mesh = dresser[i];
+		//	for (int i = 0; i < 40; i++)
+		//		renderer.Mesh = door[i];
 		}
-		else if (hello == 1) {
-			renderer.Mesh = myMesh4;
-		}
+	//	else if (hello == 1) {
+	//		renderer.Mesh = myMesh4;
+	//	}
 		// If our shader has changed, we need to bind it and update our frame-level uniforms    
 		if (renderer.Material->GetShader() != boundShader) {
 			
@@ -757,17 +795,25 @@ void Game::Draw(float deltaTime) {
 		glm::mat3 normalMatrix = glm::mat3(glm::transpose(glm::inverse(transform.GetWorldTransform())));
 		// Update the MVP using the item's transform  
 	
-		if (hello == 0) { //The lantern
-																													//Ask TA
-			mat->GetShader()->SetUniform("a_ModelViewProjection", myCamera->GetViewProjection() /*transform.GetWorldTransform())*/ * myLanternTransform);
-		}
-		else if (hello == 1) {
-			mat->GetShader()->SetUniform("a_ModelViewProjection", myCamera->GetViewProjection() /*transform.GetWorldTransform())*/ * myLanternTransform2);
-		}
-		else {
-			mat->GetShader()->SetUniform("a_ModelViewProjection", myCamera->GetViewProjection() * transform.GetWorldTransform());
-		}
+		//
+		//if (hello == 0) { //The lantern
+		////	mat->GetShader()->SetUniform("a_ModelViewProjection", myCamera->GetViewProjection() * dresserTransform[6 - hello]);
+		//	mat->GetShader()->SetUniform("a_ModelViewProjection", myCamera->GetViewProjection() /*transform.GetWorldTransform())*/ * myLanternTransform);
+		//
+		//}
+		////else if (hello == 1) {
+		////
+		////	mat->GetShader()->SetUniform("a_ModelViewProjection", myCamera->GetViewProjection() /*transform.GetWorldTransform())*/ * dresserTransform[hello]);
+		////}
+		//else {
+		//	mat->GetShader()->SetUniform("a_ModelViewProjection", myCamera->GetViewProjection() * transform.GetWorldTransform());
+		//}
+
+
+		mat->GetShader()->SetUniform("a_ModelViewProjection", myCamera->GetViewProjection() /*transform.GetWorldTransform())*/* genTransform[hello]);
+
 		hello++;
+
 		// Update the model matrix to the item's world transform
 		mat->GetShader()->SetUniform("a_Model", transform.GetWorldTransform());
 		// Update the model matrix to the item's world transform 
@@ -862,4 +908,3 @@ bool Game::interactionIsPossible(glm::vec3 playerPos, glm::vec3 objectPos)
 	}
 	return false;
 }
-

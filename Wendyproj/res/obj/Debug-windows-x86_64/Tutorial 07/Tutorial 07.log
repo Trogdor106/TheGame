@@ -1,0 +1,9 @@
+﻿  GameObject.cpp
+  PointHandle.cpp
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Tutorial 07\src\GameObject.cpp(3,10): error C1083:  Cannot open include file: 'TTK\GraphicsUtils.h': No such file or directory
+  main.cpp
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Tutorial 07\src\PointHandle.cpp(2,10): error C1083:  Cannot open include file: 'TTK\GraphicsUtils.h': No such file or directory
+  test.cpp
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Tutorial 07\src\learnopengl\model.h(9,10): error C1083:  Cannot open include file: 'assimp/Importer.hpp': No such file or directory
+  Generating Code...
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Tutorial 07\src\learnopengl\model.h(9,10): error C1083:  Cannot open include file: 'assimp/Importer.hpp': No such file or directory
