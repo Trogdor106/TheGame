@@ -111,6 +111,19 @@ private:
 	int windowPosY = 0;
 
 	//Objects
+	const char* filename[100] = { "",
+									//1				//2				//3			//4					//5				//6				//7
+								  "f_Floor2.obj", "f_Floor3.obj", "f_Bed.obj", "f_BigVase.obj", "f_SmallVase.obj", "f_Book.obj", "f_BookShelf.obj", 
+								  //8				//9				//10			//11					         //12
+								  "f_Door.obj", "f_Door(Reverse_open_1_3).obj", "f_Door(Reverse_open_2_3).obj", "f_Door(Reverse_open_Max).obj",
+								  //13					//14				//15				//16				//17	
+								  "f_Door(open_1_3)", "f_Door(open_2_3)", "f_Door(open_Max)", "f_Drawer.obj", "f_DresserNoDrawer.obj",
+									//18				//18				     //19			//20		//21
+								  "f_Dresser.obj", "f_DresserWithMorror.obj", "f_Key1.obj", "f_Key2.obj", "f_Key3.obj",
+									//22			//23			//24				//25					//26			//27
+								  "f_Key4.obj", "f_Portrait.obj", "f_SmallFrame.obj", "f_SmallWindow.obj", "f_Stairs.obj", "f_LargeWindow.obj" };
+
+
 	std::vector <Vertex> lanternVertices;
 	std::vector <Vertex> chairVertices;
 

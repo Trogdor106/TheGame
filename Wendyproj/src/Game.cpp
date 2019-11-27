@@ -243,10 +243,10 @@ void Game::LoadContent() {
 	//Halp
 	//std::vector <Vertex> objVertices = loadOBJ("Chair.obj");
 	//deCasteJauManager.saveDeCasteJauObject("Chair.obj", "Chair2.obj", "Chair3.obj", "Chair4.obj");
-	deCasteJauManager.saveDeCasteJauObject("Door.obj", "DoorHuge.obj", "DoorAss.obj", "DoorImplode.obj");
+	deCasteJauManager.saveDeCasteJauObject("f_Door.obj", "f_Door(Reverse_open_1_3).obj", "f_Door(Reverse_open_2_3).obj", "f_Door(Reverse_open_Max).obj");
 	chairVertices = deCasteJauManager.getCurrentCasteJau(0);
 
-	morphObjectManager.saveMorphObject("Door.obj", "Door.obj");
+	morphObjectManager.saveMorphObject("f_LargeWindow.obj", "f_LargeWindow.obj");
 	//lanternVertices = loadOBJ("Door.obj");
 	lanternVertices = morphObjectManager.getCurrentModel(0);
 
