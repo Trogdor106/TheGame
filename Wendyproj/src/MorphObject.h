@@ -10,7 +10,7 @@ public:
 	void lerp(glm::vec3& startPoint, glm::vec3& goal, glm::vec3& currentPos, float& deltatime, float total_time, int objectID, float current_Interval);
 	std::vector <Vertex> getCurrentModel(int objectID);
 	typedef std::shared_ptr<MorphObject> Sptr;
-
+	void switchToTrue(int objectID);
 private:
 
 	struct morphObject {
@@ -21,6 +21,7 @@ private:
 	
 	std::vector <morphObject> morphObjectList;
 
+	std::vector <bool> isAllowed;
 	std::vector <float> currentInterval;
 	std::vector <float> amountOfTimess;
 };

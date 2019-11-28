@@ -8,29 +8,32 @@ void MorphObject::saveMorphObject(const char* filenameOriginal, const char* file
 	morphObjectList.push_back(temp);
 	currentInterval.push_back(0);
 	amountOfTimess.push_back(0);
+	isAllowed.push_back(false);
 }
 
 void MorphObject::updateMorphObject() {
 	static float filler = 0;
 	for (int j = 0; j < morphObjectList.size(); j++) {
-		for (int i = 0; i < morphObjectList[j].originalModel.size(); i++) {
+		if (isAllowed[j] && currentInterval[j] <= amountOfTimess[j]) {
+			for (int i = 0; i < morphObjectList[j].originalModel.size(); i++) {
 
-			glm::vec3 tempVertices = { 0, 0, 0 };
-			glm::vec3 tempNeorm = { 0, 0, 0 };
+				glm::vec3 tempVertices = { 0, 0, 0 };
+				glm::vec3 tempNeorm = { 0, 0, 0 };
 
-			MorphObject::lerp( morphObjectList[j].originalModel[i].Position, morphObjectList[j].targetModel[i].Position, tempVertices, filler, 10, j, filler);
-			MorphObject::lerp( morphObjectList[j].originalModel[i].Normal, morphObjectList[j].targetModel[i].Normal, tempNeorm, filler, 10, j, filler);
-			morphObjectList[j].currentModel[i].Position = tempVertices;
-			morphObjectList[j].currentModel[i].Normal = glm::normalize(tempNeorm);
-			
-			
-			//or (int i = 0; i < mesh->vertices.size(); i++)
-			//
-			//	glm::vec3 v = Math::lerp(m_pMorphTargets[m_pCurrentKeyframe]->vertices[i], m_pMorphTargets[m_pNextKeyframe]->vertices[i], m_pLocalMorphTime);
-			//	glm::vec3 n = Math::lerp(m_pMorphTargets[m_pCurrentKeyframe]->normals[i], m_pMorphTargets[m_pNextKeyframe]->normals[i], m_pLocalMorphTime);
-			//	mesh->vertices[i] = v;
-			//	mesh->normals[i] = glm::normalize(n);
-			//
+				MorphObject::lerp(morphObjectList[j].originalModel[i].Position, morphObjectList[j].targetModel[i].Position, tempVertices, filler, 10, j, filler);
+				MorphObject::lerp(morphObjectList[j].originalModel[i].Normal, morphObjectList[j].targetModel[i].Normal, tempNeorm, filler, 10, j, filler);
+				morphObjectList[j].currentModel[i].Position = tempVertices;
+				morphObjectList[j].currentModel[i].Normal = glm::normalize(tempNeorm);
+
+
+				//or (int i = 0; i < mesh->vertices.size(); i++)
+				//
+				//	glm::vec3 v = Math::lerp(m_pMorphTargets[m_pCurrentKeyframe]->vertices[i], m_pMorphTargets[m_pNextKeyframe]->vertices[i], m_pLocalMorphTime);
+				//	glm::vec3 n = Math::lerp(m_pMorphTargets[m_pCurrentKeyframe]->normals[i], m_pMorphTargets[m_pNextKeyframe]->normals[i], m_pLocalMorphTime);
+				//	mesh->vertices[i] = v;
+				//	mesh->normals[i] = glm::normalize(n);
+				//
+			}
 		}
 	currentInterval[j] += 0.095;
 	}
@@ -62,6 +65,11 @@ std::vector<Vertex> MorphObject::getCurrentModel(int objectID) {
 	else {
 		return morphObjectList[objectID].targetModel;
 	}
+}
+
+void MorphObject::switchToTrue(int objectID)
+{
+	isAllowed[objectID] = true;
 }
 
 void  MorphObject::lerp(glm::vec3& startPoint, glm::vec3& goal, glm::vec3& currentPos, float& deltatime, float total_time, int objectID, float current_Interval) {

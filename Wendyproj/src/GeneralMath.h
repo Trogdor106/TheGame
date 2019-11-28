@@ -6,7 +6,7 @@ public:
 	void saveDeCasteJauObject(const char* filenameOriginal, const char* filenameOriginal2, const char* filenameTarget, const char* filenameTarget2);
 	void calculatedeCasteJau();
 	std::vector<Vertex> getCurrentCasteJau(int objectID);
-
+	void switchToTrue(int objectID);
 	typedef std::shared_ptr<deCasteJau> Sptr;
 private:
 	struct deCasteJauObject {
@@ -18,7 +18,7 @@ private:
 	};	
 
 	std::vector <deCasteJauObject> deCastleObjectList;
-
+	std::vector <bool> isAllowed;
 	std::vector <float> currentInterval;
 	std::vector <float> amountOfTimess;
 

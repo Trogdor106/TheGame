@@ -46,6 +46,7 @@ protected:
 	// Interaction
 	bool interactionIsPossible(glm::vec3, glm::vec3);
 
+	bool interact(int objectID, glm::vec3 cameraPos, bool isPressed);
 private:
 
 	const char* filename[100] = { "",
@@ -54,11 +55,22 @@ private:
 		//8                //9								 //10								 //11
 		"f_Door.obj", "f_Door(Reverse_open_1_3).obj", "f_Door(Reverse_open_2_3).obj", "f_Door(Reverse_open_Max).obj",
 		//12					//13                    //14                //15                //16                
-		"f_Door(open_1_3)", "f_Door(open_2_3)", "f_Door(open_Max)", "f_Drawer.obj", "f_DresserNoDrawer.obj",
+		"f_Door(open_1_3).obj", "f_Door(open_2_3).obj", "f_Door(open_Max).obj", "f_Drawer.obj", "f_DresserNoDrawer.obj",
 		//17					//18                 //19          //20         //21
 	  "f_Dresser.obj", "f_DresserWithMorror.obj", "f_Key1.obj", "f_Key2.obj", "f_Key3.obj",
 		//22              //23				 //24              //25                //26             //27				//28
-	  "f_Key4.obj", "f_Portrait.obj", "f_SmallFrame.obj", "f_SmallWindow.obj", "f_Stairs.obj", "f_LargeWindow.obj", "f_fatWall.obj" };
+	  "f_Key4.obj", "f_Portrait.obj", "f_SmallFrame.obj", "f_SmallWindow.obj", "f_Stairs.obj", "f_LargeWindow.obj", "f_flatWall.obj" ,
+		//29                    //30                //31                    //32
+	  "f_rotatedWall.obj", "f_rotatedDoor.obj", "f_shortFlatWall.obj", "f_rotatedShortWall.obj" };
+
+	const char* texturename[100] = { "",
+		//1			//2				//3				//4					//5						//6
+	"f_Bed.png", "f_Door.png", "f_doorFrame.png", "f_Drawer.png", "f_DresserNoDrawer.png", "F_fatWall.png",
+		//7
+	"f_Key1.png"
+
+	};
+
 
 	// Stores the main window that the game is running in
 	GLFWwindow* myWindow;
@@ -75,14 +87,14 @@ private:
 	// Shader for viewing normal maps
 	Shader::Sptr myNormalShader;
 
-	
+
 
 	//float lerp(float p1, float p2, float want, glm::mat4 objTransform, int index);
 
 	glm::vec3 cameraViewAngle = glm::vec3(0, 0, 1);
 	glm::vec3 cameraViewTarget = glm::vec3(0);
 
-	glm::vec3 cameraPos = glm::vec3(1, 1, 5);
+	glm::vec3 cameraPos = glm::vec3(1, 1, 10);
 	glm::vec3 interactPos = glm::vec3(1, 1, 5);
 	Material::Sptr testMat2; //Wut?
 
@@ -101,18 +113,28 @@ private:
 	std::vector <glm::mat4> genTransform;
 	std::vector <Mesh::Sptr> genMesh;
 	std::vector <std::vector <Vertex>> genObjects;
+	//std::vector <Material::Sptr> genMats;
+	//std::vector <int> genAlbedo;
 
-	int amountOfObjects = 0;
+	//Texture2D::Sptr Albedo  = Texture2D::LoadFromFile(texturename[0]);
+
+	std::vector <int> amountOfObjects;
+
+
+
+	//int amountOfObjects = 0;
+	//int amountOfMorphObjects = 0;
+	//int amountOfCastleObjects = 0;
 
 	//Mighty morphin' objects
 	////
 
-	glm::vec3 lanternAngle = {0.0f, 0.0f, 0.0f};
+	glm::vec3 lanternAngle = { 0.0f, 0.0f, 0.0f };
 
 	float angleForX = 0;
 	float angleForY = 0;
 	float angleForZ = 0;
-	   
+
 
 	double mousePosX = 0;
 	double mousePosY = 0;

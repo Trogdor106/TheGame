@@ -31,7 +31,6 @@
 	@param userParam The pointer we set with glDebugMessageCallback (should be the game pointer)
 */
 
-
 void lerp(glm::vec3& goal, glm::vec3& startPoint, glm::vec3& currentPos, float duration) {
 	static float totalTime = duration;
 	static float amountOfTimes = totalTime / (0.095);
@@ -194,52 +193,115 @@ void Game::LoadContent() {
 	interactCamera->LookAt(cameraViewTarget, cameraViewAngle);
 	interactCamera->Projection = glm::ortho(-4, 4, -4, 4, 1, 1000);
 
-	Texture2D::Sptr albedo = Texture2D::LoadFromFile("untitled.png");
-	Texture2D::Sptr albedo2 = Texture2D::LoadFromFile("f_fatWall.png");
+	//Texture2D::Sptr albedo = Texture2D::LoadFromFile("untitled.png");
+	//Texture2D::Sptr albedo2 = Texture2D::LoadFromFile("f_Door.png");
 	
 	//Halp
 	//std::vector <Vertex> objVertices = loadOBJ("Chair.obj");
 	//deCasteJauManager.saveDeCasteJauObject("Chair.obj", "Chair2.obj", "Chair3.obj", "Chair4.obj");
 
+
+
+	//Texture2D::Sptr tempAlbedo;
+
+	Texture2D::Sptr albedo = Texture2D::LoadFromFile("f_Door.png");
+	Texture2D::Sptr albedo2 = Texture2D::LoadFromFile("f_Door.png");
+
 	std::vector <Vertex> temp;
 	///////////////Load objects under here
 	temp = loadOBJ(filename[1]);
 	genObjects.push_back(temp);
-	amountOfObjects++; // object 0 is floor 2
+	amountOfObjects.push_back(0); // object 0 is floor 2
+	//tempAlbedo = Texture2D::LoadFromFile(texturename[6]);
+	
 
-	temp = loadOBJ(filename[8]);
-	genObjects.push_back(temp);
-	amountOfObjects++; // object 1 is door topside of saferoom
 
-	genObjects.push_back(temp);
-	amountOfObjects++; // object 2 is door leftside of saferoom
 
+	deCasteJauManager.saveDeCasteJauObject(filename[11], filename[10], filename[9], filename[8]);
+	temp = deCasteJauManager.getCurrentCasteJau(0); // object 1 is object 0 castejau
 	genObjects.push_back(temp);
-	amountOfObjects++; // object 3 is door bottomside of saferoom
+	amountOfObjects.push_back(2); // object 1 is door topside of saferoom
+	//tempAlbedo = Texture2D::LoadFromFile(texturename[2]);
 
-	genObjects.push_back(temp);
-	amountOfObjects++; // object 4 is locked red door in front of door bottomside of saferoom
 
+	deCasteJauManager.saveDeCasteJauObject(filename[8], filename[9], filename[10], filename[11]);
+	temp = deCasteJauManager.getCurrentCasteJau(1); // object 2 is object 1 castejau
 	genObjects.push_back(temp);
-	amountOfObjects++; // object 5 is door in behind of door leftside of saferoom
+	amountOfObjects.push_back(2); // object 2 is door leftside of saferoom
+
+
+	deCasteJauManager.saveDeCasteJauObject(filename[11], filename[10], filename[9], filename[8]);
+	temp = deCasteJauManager.getCurrentCasteJau(2); // object 3 is object 2 castejau
+	genObjects.push_back(temp);
+	amountOfObjects.push_back(2); // object 3 is door bottomside of saferoom
+
+
+	deCasteJauManager.saveDeCasteJauObject(filename[11], filename[10], filename[9], filename[8]);
+	temp = deCasteJauManager.getCurrentCasteJau(3); // object 4 is object 3 castejau
+	genObjects.push_back(temp);
+	amountOfObjects.push_back(2); // object 4 is locked red door in front of door bottomside of saferoom
+
+
+	deCasteJauManager.saveDeCasteJauObject(filename[8], filename[9], filename[10], filename[11]);
+	temp = deCasteJauManager.getCurrentCasteJau(4); // object 5 is object 4 castejau
+	genObjects.push_back(temp);
+	amountOfObjects.push_back(2); // object 5 is door in behind of door leftside of saferoom
+
+
 
 	temp = loadOBJ(filename[16]);
 	genObjects.push_back(temp);
-	amountOfObjects++; // object 6 is the drawer in the room where you find the red key
+	amountOfObjects.push_back(0); // object 6 is the drawer in the room where you find the red key
+	//tempAlbedo = Texture2D::LoadFromFile(texturename[5]);
+
 
 	temp = loadOBJ(filename[15]);
 	genObjects.push_back(temp);
-	amountOfObjects++; // object 7 is the drawer things in the room where you find the red key
+	amountOfObjects.push_back(3); // object 7 is the drawer things in the room where you find the red key
+	//tempAlbedo = Texture2D::LoadFromFile(texturename[4]);
 
+	temp = loadOBJ(filename[15]);
 	genObjects.push_back(temp);
-	amountOfObjects++; // object 8 is the drawer things in the room where you find the red key
+	amountOfObjects.push_back(0); // object 8 is the drawer things in the room where you find the red key
 
+	temp = loadOBJ(filename[15]);
 	genObjects.push_back(temp);
-	amountOfObjects++; // object 9 is the drawer things in the room where you find the red key
+	amountOfObjects.push_back(0); // object 9 is the drawer things in the room where you find the red key
 
+
+	temp = loadOBJ(filename[19]);
+	genObjects.push_back(temp);
+	amountOfObjects.push_back(0); // object 10 is the red key
+	//tempAlbedo = Texture2D::LoadFromFile(texturename[7]);
+	
 	temp = loadOBJ(filename[28]);
 	genObjects.push_back(temp);
-	amountOfObjects++; // object 4 is locked red door in front of door bottomside of saferoom
+	amountOfObjects.push_back(0); // object 11 is the left safe room wall
+
+	genObjects.push_back(temp);
+	amountOfObjects.push_back(0); // object 12 is the right safe room wall
+
+	genObjects.push_back(temp);
+	amountOfObjects.push_back(0); // object 13 is the bottom right hallway wall
+
+	genObjects.push_back(temp);
+	amountOfObjects.push_back(0); // object 14 is the top right hallway wall
+
+	genObjects.push_back(temp);
+	amountOfObjects.push_back(0); // object 15 is the other side of the bottom right hallway wall
+
+	genObjects.push_back(temp);
+	amountOfObjects.push_back(0); // object 16 is the other side of the top right hallway wall
+
+	temp = loadOBJ(filename[29]);
+	genObjects.push_back(temp);
+	amountOfObjects.push_back(0); // object 17 is the top wall of the safe room
+
+	temp = loadOBJ(filename[5]);
+	genObjects.push_back(temp);
+	amountOfObjects.push_back(0); // object 4 is locked red door in front of door bottomside of saferoom
+	//tempAlbedo = Texture2D::LoadFromFile(texturename[6]);
+
 
 
 	//deCasteJauManager.saveDeCasteJauObject("Door.obj", "DoorHuge.obj", "DoorAss.obj", "DoorImplode.obj");
@@ -258,15 +320,6 @@ void Game::LoadContent() {
 
 	//MeshData lanternVertices = ObjLoader::LoadObj("Dresser.obj");
 	
-	
-	for (int i = 0; i < genObjects.size(); i++) {
-		if (i != 9999) {
-			hitBoxManager.saveHitBoxes(genObjects[i]);
-		}
-		else {
-			;
-		}
-	}
 
 
 	// Create a new mesh from the data
@@ -278,15 +331,15 @@ void Game::LoadContent() {
 	//myMesh5 = std::make_shared<Mesh>(lanternVertices.data(), lanternVertices.size(), nullptr, 0);
 	//Mesh::Sptr myMesh5 = ObjLoader::LoadObjToMesh("Dresser.obj");
 
+	Shader::Sptr phong = std::make_shared<Shader>();
+	phong->Load("lighting.vs.glsl", "blinn-phong.fs.glsl");
 	
-	for (int i = 0; i < amountOfObjects; i++)
+	for (int i = 0; i < amountOfObjects.size(); i++)
 	{
 		Mesh::Sptr temp = std::make_shared<Mesh>(genObjects[i].data(), genObjects[i].size(), nullptr, 0);
 		genMesh.push_back(temp);
 	}
-
-	Shader::Sptr phong = std::make_shared<Shader>();
-	phong->Load("lighting.vs.glsl", "blinn-phong.fs.glsl");
+;
 
 	float dist = 10.0f;
 	Material::Sptr testMat = std::make_shared<Material>(phong);
@@ -306,12 +359,32 @@ void Game::LoadContent() {
 	testMat2->Set("a_AmbientColor", { 1.0f, 1.0f, 1.0f });
 	testMat2->Set("a_AmbientPower", 0.4f);
 	testMat2->Set("a_LightSpecPower", 1.0f);
-	
-	//Brightness
-	testMat2->Set("a_LightShininess", 1);
 
-	//Radius of glow
-	testMat2->Set("a_LightAttenuation", 0.1f);
+
+	//float dist = 10.0f;
+	//Material::Sptr testMat = std::make_shared<Material>(phong);
+	//testMat->Set("s_Albedo", albedo);
+	//testMat->Set("a_LightPos", { 0, 0, 1 });
+	//testMat->Set("a_LightColor", glm::vec3(1.0f, 1.0f, 0) / dist);
+	//testMat->Set("a_AmbientColor", { 1.0f, 1.0f, 1.0f });
+	//testMat->Set("a_AmbientPower", 1.1f);
+	//testMat->Set("a_LightSpecPower", 0.5f);
+	//testMat->Set("a_LightShininess", 256);
+	//testMat->Set("a_LightAttenuation", 1.0f / (dist * dist));
+	//
+	//testMat2 = std::make_shared<Material>(phong);
+	//testMat2->Set("s_Albedo", albedo2);
+	//testMat2->Set("a_LightPos", { 0, 1, 10 });
+	//testMat2->Set("a_LightColor", { 0.0f, 1.0f, 0.0f });
+	//testMat2->Set("a_AmbientColor", { 1.0f, 1.0f, 1.0f });
+	//testMat2->Set("a_AmbientPower", 0.4f);
+	//testMat2->Set("a_LightSpecPower", 1.0f);
+	//
+	////Brightness
+	//testMat2->Set("a_LightShininess", 1);
+	//
+	////Radius of glow
+	//testMat2->Set("a_LightAttenuation", 0.1f);
 
 
 
@@ -375,14 +448,15 @@ void Game::LoadContent() {
 
 		std::vector <entt::entity> genEntt;
 
-		for (int i = 0; i < amountOfObjects; i++) {
+		for (int i = 0; i < amountOfObjects.size(); i++) {
+			
 			entt::entity temp = ecs2.create();
 			genEntt.push_back(temp);
 			ecs2.assign<TempTransform>(genEntt[i]).Scale = glm::vec3(1.0f);
 			MeshRenderer& genMesh2 = ecs2.assign<MeshRenderer>(genEntt[i]);
 			genMesh2.Material = testMat2;
 			genMesh2.Mesh = genMesh[i];
-
+			
 		}
 		
 		//for (int i = 0; i < 6; i++)
@@ -408,8 +482,8 @@ void Game::LoadContent() {
 
 
 	}
-	myLanternTransform = glm::translate(myLanternTransform, glm::vec3(0, 0, 1));
-	myLanternTransform2 = glm::translate(myLanternTransform2, glm::vec3(25, 0, 1));
+	//myLanternTransform = glm::translate(myLanternTransform, glm::vec3(0, 0, 1));
+	//myLanternTransform2 = glm::translate(myLanternTransform2, glm::vec3(25, 0, 1));
 
 	for (int i = 0; i < genObjects.size(); i++)
 	{
@@ -418,23 +492,21 @@ void Game::LoadContent() {
 		//dresserAngle[i] = glm::vec3(0, 0, 0);
 	}
 
+	//Objects positions
 	for (int i = 0; i < genObjects.size(); i++) {
 		switch (i) {
 		case 1: //Door topside of the saferoom
-			genTransform[i] = glm::translate(genTransform[i], glm::vec3(-27.5f, 20.0f, 0));
-			genTransform[i] = glm::rotate(genTransform[i], halfOfPI, glm::vec3(0, 0, 1));
+			genTransform[i] = glm::translate(genTransform[i], glm::vec3(-31.5f, 15.7f, 0));
 			break;
 		case 2:// object 2 is door leftside of saferoom
 			genTransform[i] = glm::translate(genTransform[i], glm::vec3(0.0f, -37.0f, 0));
 			genTransform[i] = glm::rotate(genTransform[i], 2 * halfOfPI, glm::vec3(0, 0, 1));
 			break;
 		case 3:// object 2 is door bottomside of saferoom
-			genTransform[i] = glm::translate(genTransform[i], glm::vec3(20.0f, 15.0f, 0));
-			genTransform[i] = glm::rotate(genTransform[i], halfOfPI, glm::vec3(0, 0, 1));
+			genTransform[i] = glm::translate(genTransform[i], glm::vec3(16.5f, 10.9f, 0));
 			break;
 		case 4:// object 4 is locked red door in front of door bottomside of saferoom
-			genTransform[i] = glm::translate(genTransform[i], glm::vec3(34.0f, 15.0f, 0));
-			genTransform[i] = glm::rotate(genTransform[i], halfOfPI, glm::vec3(0, 0, 1));
+			genTransform[i] = glm::translate(genTransform[i], glm::vec3(29.5f, 10.9f, 0));
 			break;
 		case 5:// object 5 is door in behind of door leftside of saferoom
 			genTransform[i] = glm::translate(genTransform[i], glm::vec3(0.0f, -49.0f, 0));
@@ -457,6 +529,39 @@ void Game::LoadContent() {
 			genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
 			break;
 		case 10:
+			genTransform[i] = glm::translate(genTransform[i], glm::vec3(-26.0f, -80.0f, 10));
+			break;
+		case 11:// object 10 is the left safe room wall
+			genTransform[i] = glm::translate(genTransform[i], glm::vec3(0.0f, 30.0f, 0));
+			//genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+			break;
+		case 12:// object 11 is the right safe room wall
+			genTransform[i] = glm::translate(genTransform[i], glm::vec3(-20.0f, -36.0f, 0));
+			//    //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+			break;
+		case 13:// object 12 is the bottom right hallway wall
+			genTransform[i] = glm::translate(genTransform[i], glm::vec3(-41.0f, -48.0f, 0));
+			//    //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+			break;
+		case 14:// object 13 is the top right hallway wall
+			genTransform[i] = glm::translate(genTransform[i], glm::vec3(42.5f, -48.0f, -20));
+			//    //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+			break;
+		case 15:// object 16 is the far right room wall
+			genTransform[i] = glm::translate(genTransform[i], glm::vec3(0.0f, -90.0f, 0));
+			//    //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+			break;
+		case 16:// object 16 is the far right room wall
+			genTransform[i] = glm::translate(genTransform[i], glm::vec3(60.0f, -48.0f, 9.9));
+			//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+			break;
+		case 17:// object 16 is the far right room wall
+			genTransform[i] = glm::translate(genTransform[i], glm::vec3(20.5f, -10.0f, 0));
+			//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+			break;
+			///////////////////////////////////////////////////////////
+
+		case 18:
 			genTransform[i] = glm::translate(genTransform[i], glm::vec3(0.0f, 0.0f, 4));
 			break;
 
@@ -470,6 +575,21 @@ void Game::LoadContent() {
 	//	genTransform[i] = glm::translate(genTransform[i], glm::vec3(10 * dummy, 10 * dummy, 10 * dummy));
 	//	dummy++;
 	//}
+
+	for (int i = 0; i < genObjects.size(); i++) {
+		if (amountOfObjects[i] == 0) {
+			hitBoxManager.saveHitBoxes(genObjects[i], 0);
+			hitBoxManager.updateHitBoxes(genTransform[i][3], i);
+		}
+		else if (amountOfObjects[i] == 1) {
+			hitBoxManager.saveHitBoxes(genObjects[i], 1);
+			hitBoxManager.updateHitBoxes(genTransform[i][3], i);
+		}
+		else {
+			hitBoxManager.saveHitBoxes(genObjects[i], 2);
+			hitBoxManager.updateHitBoxes(genTransform[i][3], i);
+		}
+	}
 
 }
 
@@ -642,36 +762,16 @@ void Game::Update(float deltaTime) {
 		angleForY -= 0.01;
 		angleForX += 0.01;
 	}
-
-	bool inRange = false;
-	glm::vec3 distance = {  abs(abs(myLanternTransform[3][0]) - abs(myCamera->GetPosition().x)),
-							abs(abs(myLanternTransform[3][1]) - abs(myCamera->GetPosition().y)),
-							abs(abs(myLanternTransform[3][2]) - abs(myCamera->GetPosition().z)) };
-
-	if (distance.x < 5 && distance.y < 5 && distance.z < 5)
-		inRange = true;
-
-	static float currentTime = 0;
-	currentTime = currentTime + deltaTime;
-	static bool wasLPressed = false;
-	static bool isLPressed = false;
-	if (glfwGetKey(myWindow, GLFW_KEY_L) == GLFW_PRESS && wasLPressed == false && inRange == true)
-	{
-		wasLPressed = true;
+	
+	static bool isEPressed = false;
+	if (glfwGetKey(myWindow, GLFW_KEY_E) == GLFW_PRESS) {
+		if (isEPressed == false) {
+			isEPressed = true;
+		}
 	}
-
-	static glm::vec3 start = myLanternTransform[3];
-	glm::vec3 currentPos = myLanternTransform[3];
-	static glm::vec3 end = glm::vec3(myLanternTransform[3][0], myLanternTransform[3][1], myLanternTransform[3][2] + 20);
-	static float startTime = 0;
-
-	if (wasLPressed)
-		lerp(end, start, currentPos, (10));
-
-	myLanternTransform[3][0] = currentPos.x;
-	myLanternTransform[3][1] = currentPos.y;
-	myLanternTransform[3][2] = currentPos.z;
-
+	else {
+		isEPressed = false;
+	}
 
 	// Rotate and move our camera based on input
 	
@@ -681,13 +781,7 @@ void Game::Update(float deltaTime) {
 
 	myCamera->SetPosition({ myCamera->GetPosition().x + movement.z * cos(angleForX) + movement.x * cos(angleForX + 1.57078145), myCamera->GetPosition().y + movement.z * sin(angleForX) + movement.x * sin(angleForX + 1.57078145), myCamera->GetPosition().z });
 
-	float extraDist = 10;
-	float offSet = 0.5;
-
-	testMat2->Set("a_LightPos", { (myCamera->GetPosition().x + cos(-angleForX) + extraDist * cos (angleForX - offSet)), //+ offSet * cos(angleForX), 
-								  (myCamera->GetPosition().y + sin(-angleForY) + extraDist * sin(-angleForY - offSet)), //+ offSet * sin(-angleForY),
-								  myCamera->GetPosition().z + (angleForZ > -1 ? (angleForZ < 1 ? tan(angleForZ) : 1) : -1) });
-
+	
 
 	//myCamera->Move(movement);
 
@@ -727,35 +821,43 @@ void Game::Update(float deltaTime) {
 
 
 	//myLanternTransform = glm::translate(myLanternTransform, glm::vec3(cameraPos + glm::vec3(-6, -2, 0)));
+	float extraDist = 10;
+	float offSet = 0.5;
 
-	if (glfwGetKey(myWindow, GLFW_KEY_U) == GLFW_PRESS) {
-		lanternFuel = 2000; //How long will the lantern last
-		lightAttenuationModifyer = 1.0f;
-		lightShyninessModifyer = 1.0f;
-	}
+	testMat2->Set("a_LightPos", { (myCamera->GetPosition().x + cos(-angleForX) + extraDist * cos(angleForX - offSet)), //+ offSet * cos(angleForX), 
+									  (myCamera->GetPosition().y + sin(-angleForY) + extraDist * sin(-angleForY - offSet)), //+ offSet * sin(-angleForY),
+									  myCamera->GetPosition().z + (angleForZ > -1 ? (angleForZ < 1 ? tan(angleForZ) : 1) : -1) });
+
+		if (glfwGetKey(myWindow, GLFW_KEY_U) == GLFW_PRESS) {
+			lanternFuel = 2000; //How long will the lantern last
+			lightAttenuationModifyer = 1.0f;
+			lightShyninessModifyer = 1.0f;
+		}
+		
+
+		if (lanternFuel > 1000) {
+			testMat2->Set("a_LightColor", { 1.0f, 1.0f, 1.0f });
+
+			//Brightness Smaller the more shinny the surface is and the better it will show light
+			testMat2->Set("a_LightShininess", 85.0f);
+
+			//Radius of glow Bigger the wider range and brighter it becomes
+			testMat2->Set("a_LightAttenuation", 0.00125f);
+		}
+		else if (lanternFuel > 100) {
+			//lightShyninessModifyer += 0.001;
+			lightAttenuationModifyer += 0.05;
+			//Brightness Smaller the more shinny the surface is and the better it will show light
+			testMat2->Set("a_LightShininess", 56.0f * lightShyninessModifyer);
+
+			//Radius of glow Bigger the wider range and brighter it becomes
+			testMat2->Set("a_LightAttenuation", 0.00125f * lightAttenuationModifyer);
+		}
+		else {
+			testMat2->Set("a_LightColor", { 0.0f, 0.0f, 0.0f });
+		}
+	
 	lanternFuel -= 1; //Just makes the lantern fuel drain
-
-	if (lanternFuel > 1000) {
-		testMat2->Set("a_LightColor", { 1.0f, 1.0f, 1.0f });
-
-		//Brightness Smaller the more shinny the surface is and the better it will show light
-		testMat2->Set("a_LightShininess", 85.0f);
-
-		//Radius of glow Bigger the wider range and brighter it becomes
-		testMat2->Set("a_LightAttenuation", 0.00125f);
-	}
-	else if (lanternFuel > 100) {
-		//lightShyninessModifyer += 0.001;
-		lightAttenuationModifyer += 0.05;
-		//Brightness Smaller the more shinny the surface is and the better it will show light
-		testMat2->Set("a_LightShininess", 56.0f * lightShyninessModifyer);
-
-		//Radius of glow Bigger the wider range and brighter it becomes
-		testMat2->Set("a_LightAttenuation", 0.00125f * lightAttenuationModifyer);
-	}
-	else {
-		testMat2->Set("a_LightColor", { 0.0f, 0.0f, 0.0f });
-	}
 	
 	//morphObjectManager.updateMorphObject(deltaTime, 0, myLanternTransform);
 	///lanternVertices = morphObjectManager.getCurrentModel(0);
@@ -771,9 +873,52 @@ void Game::Update(float deltaTime) {
 
 	//myMesh4 = nullptr;
 
-
 	deCasteJauManager.calculatedeCasteJau();
 	morphObjectManager.updateMorphObject();
+
+
+	int deCasteObj = 0;
+	int morphObject = 0;
+	int lerpObject = 0;
+	static glm::vec3 start = genTransform[7][3];
+	static bool isLerpActive = false;
+	for (int i = 0; i < amountOfObjects.size(); i++) {
+		if (amountOfObjects[i] == 0) {
+			;
+		}
+		else if (amountOfObjects[i] == 2) {
+			genMesh[i] = nullptr;
+			genObjects[i] = deCasteJauManager.getCurrentCasteJau(deCasteObj);
+			genMesh[i] = std::make_shared<Mesh>(genObjects[i].data(), genObjects[i].size(), nullptr, 0);
+			if (Game::interact(i, myCamera->GetPosition(), isEPressed)) {
+					deCasteJauManager.switchToTrue(deCasteObj);
+			}
+			deCasteObj++;
+		}
+		else if (amountOfObjects[i] == 1) {
+			genMesh[i] = nullptr;
+			genObjects[i] = morphObjectManager.getCurrentModel(morphObject);
+			genMesh[i] = std::make_shared<Mesh>(genObjects[i].data(), genObjects[i].size(), nullptr, 0);
+			if (Game::interact(i, myCamera->GetPosition(), isEPressed)) {
+				morphObjectManager.switchToTrue(deCasteObj);
+			}
+			morphObject++;
+		}
+		else if (amountOfObjects[i] == 3 && isLerpActive == false) {
+			if (Game::interact(i, myCamera->GetPosition(), isEPressed)) {
+				isLerpActive = true;
+			}
+		}
+	}
+
+	if (isLerpActive) {
+		glm::vec3 temp = genTransform[7][3];
+		lerp(start + glm::vec3(1.5f, 0.0f, 0.0f), start, temp, 3);
+		genTransform[7][3].x = temp.x;
+		genTransform[7][3].y = temp.y;
+		genTransform[7][3].z = temp.z;
+	}
+
 
 	//chairVertices = deCasteJauManager.getCurrentCasteJau(0);
 
@@ -974,6 +1119,16 @@ bool Game::interactionIsPossible(glm::vec3 playerPos, glm::vec3 objectPos)
 {
 	if (playerPos.x - objectPos.x < 3 && playerPos.x - objectPos.x > 3) {
 		return true;
+	}
+	return false;
+}
+
+bool Game::interact(int objectID, glm::vec3 cameraPos, bool isPressed)
+{
+	if (isPressed) {
+		if ((hitBoxManager.isInRangeToInteract(cameraPos, objectID))) {
+			return true;
+		}
 	}
 	return false;
 }
