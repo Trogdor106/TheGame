@@ -194,54 +194,52 @@ void Game::LoadContent() {
 	interactCamera->LookAt(cameraViewTarget, cameraViewAngle);
 	interactCamera->Projection = glm::ortho(-4, 4, -4, 4, 1, 1000);
 
-	// Create our 4 vertices
-	Vertex vertices[4] = {
-		// Position Color Normal Tex Coords 
-		// x y z r g b a x y z u v
-		{{ -2.0f, -2.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 1.0f }, { 1.0f, 0.0f }},
-		{{ 2.0f, -2.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f }},
-		{{ -2.0f, 2.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f }},
-		{{ 2.0f, 2.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 1.0f }, { 0.0f, 1.0f }}
-	};
-
-	// Create our 6 indices
-	uint32_t indices[6] = {
-		0, 1, 2,
-		2, 1, 3
-	};
-	Vertex vertices3[4] = {
-		// Position Color Normal Tex Coords 
-		// x y z r g b a x y z u v
-		{{ -2.0f, -2.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 1.0f }, { 1.0f, 0.0f }},
-		{{ 2.0f, -2.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f }},
-		{{ -2.0f, 2.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f }},
-		{{ 2.0f, 2.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 1.0f }, { 0.0f, 1.0f }}
-	};
-
 	Texture2D::Sptr albedo = Texture2D::LoadFromFile("untitled.png");
-	Texture2D::Sptr albedo2 = Texture2D::LoadFromFile("Dresser4.png");
-	
-	Vertex vertices2[4] = {
-		//       Position                   Color
-		//    x      y     z         r    g     b     a
-		{{ -10.0f, -10.0f, 0.5f }, { 1.0f, 0.0f, 0.0f, 1.0f }, {0.0f, 0.0f, 1.0f}, {0, 1}},
-		{{  10.0f, -10.0f, 0.5f }, { 1.0f, 1.0f, 0.0f, 1.0f }, {0.0f, 0.0f, 1.0f}, {1, 1}},
-		{{ -10.0f,  10.0f, 0.5f }, { 1.0f, 0.0f, 1.0f, 1.0f }, {0.0f, 0.0f, 1.0f}, {0, 0}},
-		{{  10.0f,  10.0f, 0.5f }, { 0.0f, 1.0f, 0.0f, 1.0f }, {0.0f, 0.0f, 1.0f}, {1, 0}},
-	};
-	
-	// Create our 6 indices
-	uint32_t indices2[6] = {
-		0, 1, 2,
-		2, 1, 3
-	};
-	
+	Texture2D::Sptr albedo2 = Texture2D::LoadFromFile("f_fatWall.png");
 	
 	//Halp
 	//std::vector <Vertex> objVertices = loadOBJ("Chair.obj");
 	//deCasteJauManager.saveDeCasteJauObject("Chair.obj", "Chair2.obj", "Chair3.obj", "Chair4.obj");
+
 	std::vector <Vertex> temp;
-	//Load objects under here
+	///////////////Load objects under here
+	temp = loadOBJ(filename[1]);
+	genObjects.push_back(temp);
+	amountOfObjects++; // object 0 is floor 2
+
+	temp = loadOBJ(filename[8]);
+	genObjects.push_back(temp);
+	amountOfObjects++; // object 1 is door topside of saferoom
+
+	genObjects.push_back(temp);
+	amountOfObjects++; // object 2 is door leftside of saferoom
+
+	genObjects.push_back(temp);
+	amountOfObjects++; // object 3 is door bottomside of saferoom
+
+	genObjects.push_back(temp);
+	amountOfObjects++; // object 4 is locked red door in front of door bottomside of saferoom
+
+	genObjects.push_back(temp);
+	amountOfObjects++; // object 5 is door in behind of door leftside of saferoom
+
+	temp = loadOBJ(filename[16]);
+	genObjects.push_back(temp);
+	amountOfObjects++; // object 6 is the drawer in the room where you find the red key
+
+	temp = loadOBJ(filename[15]);
+	genObjects.push_back(temp);
+	amountOfObjects++; // object 7 is the drawer things in the room where you find the red key
+
+	genObjects.push_back(temp);
+	amountOfObjects++; // object 8 is the drawer things in the room where you find the red key
+
+	genObjects.push_back(temp);
+	amountOfObjects++; // object 9 is the drawer things in the room where you find the red key
+
+	temp = loadOBJ(filename[28]);
+	genObjects.push_back(temp);
+	amountOfObjects++; // object 4 is locked red door in front of door bottomside of saferoom
 
 
 	//deCasteJauManager.saveDeCasteJauObject("Door.obj", "DoorHuge.obj", "DoorAss.obj", "DoorImplode.obj");
@@ -255,9 +253,7 @@ void Game::LoadContent() {
 //	lanternVertices = loadOBJ("DoorImplode.obj");
 //	lanternVertices = morphObjectManager.getCurrentModel(0);
 
-	temp = loadOBJ(filename[1]);
-	genObjects.push_back(temp);
-	amountOfObjects++; // object 0 is floor 2
+	
 
 
 	//MeshData lanternVertices = ObjLoader::LoadObj("Dresser.obj");
@@ -320,8 +316,8 @@ void Game::LoadContent() {
 
 
 	// Create and compile shader
-	myShader = std::make_shared<Shader>();
-	myShader->Load("passthrough.vs", "passthrough.fs");
+	//myShader = std::make_shared<Shader>();
+	//myShader->Load("passthrough.vs", "passthrough.fs");
 
 	//myNormalShader = std::make_shared<Shader>();
 	//myNormalShader->Load("passthrough.vs", "normalView.fs");
@@ -420,6 +416,52 @@ void Game::LoadContent() {
 		glm::mat4 temp = glm::mat4(1.0f);
 		genTransform.push_back(temp);
 		//dresserAngle[i] = glm::vec3(0, 0, 0);
+	}
+
+	for (int i = 0; i < genObjects.size(); i++) {
+		switch (i) {
+		case 1: //Door topside of the saferoom
+			genTransform[i] = glm::translate(genTransform[i], glm::vec3(-27.5f, 20.0f, 0));
+			genTransform[i] = glm::rotate(genTransform[i], halfOfPI, glm::vec3(0, 0, 1));
+			break;
+		case 2:// object 2 is door leftside of saferoom
+			genTransform[i] = glm::translate(genTransform[i], glm::vec3(0.0f, -37.0f, 0));
+			genTransform[i] = glm::rotate(genTransform[i], 2 * halfOfPI, glm::vec3(0, 0, 1));
+			break;
+		case 3:// object 2 is door bottomside of saferoom
+			genTransform[i] = glm::translate(genTransform[i], glm::vec3(20.0f, 15.0f, 0));
+			genTransform[i] = glm::rotate(genTransform[i], halfOfPI, glm::vec3(0, 0, 1));
+			break;
+		case 4:// object 4 is locked red door in front of door bottomside of saferoom
+			genTransform[i] = glm::translate(genTransform[i], glm::vec3(34.0f, 15.0f, 0));
+			genTransform[i] = glm::rotate(genTransform[i], halfOfPI, glm::vec3(0, 0, 1));
+			break;
+		case 5:// object 5 is door in behind of door leftside of saferoom
+			genTransform[i] = glm::translate(genTransform[i], glm::vec3(0.0f, -49.0f, 0));
+			genTransform[i] = glm::rotate(genTransform[i], 2 * halfOfPI, glm::vec3(0, 0, 1));
+			break;
+		case 6:// object 6 is the drawer in the room where you find the red key
+			genTransform[i] = glm::translate(genTransform[i], glm::vec3(-25.0f, -80.0f, 0));
+			genTransform[i] = glm::rotate(genTransform[i], 2 * halfOfPI, glm::vec3(0, 0, 1));
+			break;
+		case 7:// object 7 is the drawer things in the room where you find the red key
+			genTransform[i] = glm::translate(genTransform[i], glm::vec3(-25.0f, -80.0f, 0));
+			genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+			break;
+		case 8:// object 8 is the drawer things in the room where you find the red key
+			genTransform[i] = glm::translate(genTransform[i], glm::vec3(-25.0f, -80.0f, -0.6));
+			genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+			break;
+		case 9:// object 9 is the drawer things in the room where you find the red key
+			genTransform[i] = glm::translate(genTransform[i], glm::vec3(-25.0f, -80.0f, -1.2));
+			genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+			break;
+		case 10:
+			genTransform[i] = glm::translate(genTransform[i], glm::vec3(0.0f, 0.0f, 4));
+			break;
+
+
+		}
 	}
 
 	//static int dummy = 1;
@@ -678,9 +720,9 @@ void Game::Update(float deltaTime) {
 
 	
 	//HitBoxing, will be a for loop going through objects once we have things in place
-	if (hitBoxManager.testHitBoxes(cameraPos, 0)) {
-		myCamera->SetPosition(cameraPos);
-	}
+	//if (hitBoxManager.testHitBoxes(cameraPos, 0)) {
+	//	myCamera->SetPosition(cameraPos);
+	//}
 
 
 
@@ -800,9 +842,10 @@ void Game::Draw(float deltaTime) {
 		//	for (int i = 0; i < 40; i++)
 		//		renderer.Mesh = door[i];
 		}
-	//	else if (hello == 1) {
-	//		renderer.Mesh = myMesh4;
-	//	}
+		//	else if (hello == 1) {
+		//		renderer.Mesh = myMesh4;
+		//	}
+		renderer.Mesh = genMesh[hello];
 		// If our shader has changed, we need to bind it and update our frame-level uniforms    
 		if (renderer.Material->GetShader() != boundShader) {
 			

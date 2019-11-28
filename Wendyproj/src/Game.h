@@ -55,10 +55,10 @@ private:
 		"f_Door.obj", "f_Door(Reverse_open_1_3).obj", "f_Door(Reverse_open_2_3).obj", "f_Door(Reverse_open_Max).obj",
 		//12					//13                    //14                //15                //16                
 		"f_Door(open_1_3)", "f_Door(open_2_3)", "f_Door(open_Max)", "f_Drawer.obj", "f_DresserNoDrawer.obj",
-		//17					//18                //18            //19          //20       
+		//17					//18                 //19          //20         //21
 	  "f_Dresser.obj", "f_DresserWithMorror.obj", "f_Key1.obj", "f_Key2.obj", "f_Key3.obj",
-		//21			  //22              //23				 //24              //25                //26
-	  "f_Key4.obj", "f_Portrait.obj", "f_SmallFrame.obj", "f_SmallWindow.obj", "f_Stairs.obj", "f_LargeWindow.obj" };
+		//22              //23				 //24              //25                //26             //27				//28
+	  "f_Key4.obj", "f_Portrait.obj", "f_SmallFrame.obj", "f_SmallWindow.obj", "f_Stairs.obj", "f_LargeWindow.obj", "f_fatWall.obj" };
 
 	// Stores the main window that the game is running in
 	GLFWwindow* myWindow;
@@ -126,4 +126,6 @@ private:
 	//Other
 	MorphObject morphObjectManager;
 	deCasteJau deCasteJauManager;
+
+	float halfOfPI = 1.57079633;
 };
