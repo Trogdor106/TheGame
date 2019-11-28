@@ -302,7 +302,33 @@ void Game::LoadContent() {
 	amountOfObjects.push_back(0); // object 4 is locked red door in front of door bottomside of saferoom
 	//tempAlbedo = Texture2D::LoadFromFile(texturename[6]);
 
+	temp = loadOBJ(filename[4]);
+	genObjects.push_back(temp);
+	amountOfObjects.push_back(0);
 
+	temp = loadOBJ(filename[3]);
+	genObjects.push_back(temp);
+	amountOfObjects.push_back(0);
+
+	temp = loadOBJ(filename[27]);
+	genObjects.push_back(temp);
+	amountOfObjects.push_back(0);
+
+	temp = loadOBJ(filename[7]);
+	genObjects.push_back(temp);
+	amountOfObjects.push_back(0);
+
+	temp = loadOBJ(filename[21]);
+	genObjects.push_back(temp);
+	amountOfObjects.push_back(0);
+
+	temp = loadOBJ(filename[20]);
+	genObjects.push_back(temp);
+	amountOfObjects.push_back(0);
+
+	temp = loadOBJ(filename[19]);
+	genObjects.push_back(temp);
+	amountOfObjects.push_back(0); //24th
 
 	//deCasteJauManager.saveDeCasteJauObject("Door.obj", "DoorHuge.obj", "DoorAss.obj", "DoorImplode.obj");
 	//temp = deCasteJauManager.getCurrentCasteJau(0);
@@ -559,11 +585,46 @@ void Game::LoadContent() {
 			genTransform[i] = glm::translate(genTransform[i], glm::vec3(20.5f, -10.0f, 0));
 			//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
 			break;
+
+		case 18:// object 16 is the far right room wall
+			genTransform[i] = glm::translate(genTransform[i], glm::vec3(10.5f, -10.0f, 0));
+			//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+			break;
+
+		case 19:// object 16 is the far right room wall
+			genTransform[i] = glm::translate(genTransform[i], glm::vec3(15.5f, -10.0f, 0));
+			//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+			break;
+
+		case 20:// object 16 is the far right room wall
+			genTransform[i] = glm::translate(genTransform[i], glm::vec3(15.5f, -20.0f, 0));
+			//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+			break;
+
+		case 21:// object 16 is the far right room wall
+			genTransform[i] = glm::translate(genTransform[i], glm::vec3(20.0f, -10.0f, 10));
+			//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+			break;
+
+		case 22:// object 16 is the far right room wall
+			genTransform[i] = glm::translate(genTransform[i], glm::vec3(25.5f, -5.0f, 0));
+			//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+			break;
+
+		case 23:// object 16 is the far right room wall
+			genTransform[i] = glm::translate(genTransform[i], glm::vec3(10.5f, -5.0f, 0));
+			//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+			break;
+
+		case 24:// object 16 is the far right room wall
+			genTransform[i] = glm::translate(genTransform[i], glm::vec3(30.5f, -10.0f, 0));
+			//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+			break;
 			///////////////////////////////////////////////////////////
 
-		case 18:
-			genTransform[i] = glm::translate(genTransform[i], glm::vec3(0.0f, 0.0f, 4));
-			break;
+		//case 25:
+		//	genTransform[i] = glm::translate(genTransform[i], glm::vec3(0.0f, 0.0f, 4));
+		//	break;
 
 
 		}
@@ -811,13 +872,16 @@ void Game::Update(float deltaTime) {
 	
 	//testMat2->Set("a_LightPos", { cameraPos + glm::vec3(-6, -2, 0) + glm::vec3(cos(lanternAngle.x), sin(lanternAngle.y), tan(lanternAngle.z)) });
 	
-
-	
 	//HitBoxing, will be a for loop going through objects once we have things in place
-	//if (hitBoxManager.testHitBoxes(cameraPos, 0)) {
-	//	myCamera->SetPosition(cameraPos);
+	//for (int i = 0; i < genObjects.size(); i++)
+	//{
+	//	if (i == 0)
+	//		;
+	//
+	//	else if (hitBoxManager.testHitBoxes(cameraPos, 0)) {
+	//		myCamera->SetPosition(cameraPos);
+	//	}
 	//}
-
 
 
 	//myLanternTransform = glm::translate(myLanternTransform, glm::vec3(cameraPos + glm::vec3(-6, -2, 0)));
@@ -828,7 +892,7 @@ void Game::Update(float deltaTime) {
 									  (myCamera->GetPosition().y + sin(-angleForY) + extraDist * sin(-angleForY - offSet)), //+ offSet * sin(-angleForY),
 									  myCamera->GetPosition().z + (angleForZ > -1 ? (angleForZ < 1 ? tan(angleForZ) : 1) : -1) });
 
-		if (glfwGetKey(myWindow, GLFW_KEY_U) == GLFW_PRESS) {
+		if (glfwGetKey(myWindow, GLFW_KEY_R) == GLFW_PRESS) {
 			lanternFuel = 2000; //How long will the lantern last
 			lightAttenuationModifyer = 1.0f;
 			lightShyninessModifyer = 1.0f;
