@@ -33,6 +33,8 @@ protected:
 	void LoadContent();
 	void UnloadContent();
 
+	//struct objCreate = filename, interactable, texture, transformations
+	void CreateObjects(int objectNameID, int typeOfObject, int textureNameID, glm::mat4 transformation = glm::mat4(1.0f));
 	void InitImGui();
 	void ShutdownImGui();
 
@@ -54,20 +56,20 @@ private:
 	  "f_Floor2.obj",	"f_Floor3.obj",	 "f_Bed.obj",	 "f_BigVase.obj",	 "f_SmallVase.obj",		"f_Book.obj",	"f_BookShelf.obj",
 		//8                //9								 //10								 //11
 		"f_Door.obj", "f_Door(Reverse_open_1_3).obj", "f_Door(Reverse_open_2_3).obj", "f_Door(Reverse_open_Max).obj",
-		//12					//13                    //14                //15                //16                
+		//12					//13                    //14					   //15                //16                
 		"f_Door(open_1_3).obj", "f_Door(open_2_3).obj", "f_Door(open_Max).obj", "f_Drawer.obj", "f_DresserNoDrawer.obj",
 		//17					//18                 //19          //20         //21
 	  "f_Dresser.obj", "f_DresserWithMorror.obj", "f_Key1.obj", "f_Key2.obj", "f_Key3.obj",
 		//22              //23				 //24              //25                //26             //27				//28
 	  "f_Key4.obj", "f_Portrait.obj", "f_SmallFrame.obj", "f_SmallWindow.obj", "f_Stairs.obj", "f_LargeWindow.obj", "f_flatWall.obj" ,
 		//29                    //30                //31                    //32
-	  "f_rotatedWall.obj", "f_rotatedDoor.obj", "f_shortFlatWall.obj", "f_rotatedShortWall.obj" };
+	  "f_rotatedWall.obj", "f_rotatedDoor.obj", "f_shortFlatWall.obj", "f_rotatedShortWall.obj", "note.obj", "note.obj" };
 
 	const char* texturename[100] = { "",
 		//1			//2				//3				//4					//5						//6
 	"f_Bed.png", "f_Door.png", "f_doorFrame.png", "f_Drawer.png", "f_DresserNoDrawer.png", "F_fatWall.png",
 		//7
-	"f_Key1.png"
+	"f_Key1.png", "Note.png"
 
 	};
 
@@ -97,6 +99,7 @@ private:
 	glm::vec3 cameraPos = glm::vec3(1, 1, 10);
 	glm::vec3 interactPos = glm::vec3(1, 1, 5);
 	Material::Sptr testMat2; //Wut?
+	Material::Sptr testMat; //Exacly
 
 	HitBoxes hitBoxManager;
 
@@ -111,8 +114,9 @@ private:
 
 	//Normal objects
 	std::vector <glm::mat4> genTransform;
-	std::vector <Mesh::Sptr> genMesh;
-	std::vector <std::vector <Vertex>> genObjects;
+	//std::vector <Mesh::Sptr> genMesh;
+	std::vector <MeshData> genObjects;
+	std::vector <Texture2D::Sptr> genMats;
 	//std::vector <Material::Sptr> genMats;
 	//std::vector <int> genAlbedo;
 
@@ -120,6 +124,8 @@ private:
 
 	std::vector <int> amountOfObjects;
 
+	bool isPickedUp = false;
+	bool isDoneReading = false;
 
 
 	//int amountOfObjects = 0;
@@ -127,7 +133,7 @@ private:
 	//int amountOfCastleObjects = 0;
 
 	//Mighty morphin' objects
-	////
+	////It's gone :(
 
 	glm::vec3 lanternAngle = { 0.0f, 0.0f, 0.0f };
 

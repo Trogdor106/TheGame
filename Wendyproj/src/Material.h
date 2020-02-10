@@ -29,6 +29,18 @@ public:
 	void Set(const std::string& name, const float& value) {
 		myFloats[name] = value;
 	}
+	void Set2(const std::string& name, const glm::mat4& value) {
+		myMat4s[name] = value;
+	}
+	void Set2(const std::string& name, const glm::vec4& value) {
+		myVec4s[name] = value;
+	}
+	void Set2(const std::string& name, const glm::vec3& value) {
+		myVec3s[name] = value;
+	}
+	void Set2(const std::string& name, const float& value) {
+		myFloats[name] = value;
+	}
 	// New in tutorial 08   
 	void Set(const std::string& name, const Texture2D::Sptr& value) { myTextures[name] = value; }
 

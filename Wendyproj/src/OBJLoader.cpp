@@ -1,4 +1,5 @@
 #include "OBJLoader.h"
+#include <unordered_map>
 
 std::vector <Vertex> loadOBJ(
 	const char* path
@@ -10,12 +11,23 @@ std::vector <Vertex> loadOBJ(
 	std::vector<glm::vec3> t_vert;
 	std::vector<glm::vec2> t_uvs;
 	std::vector<glm::vec3> t_norms;
+	std::vector<glm::mat<3, 3, uint32_t>>  t_faces;
 
 	FILE* file = fopen(path, "r");
 	if (file == NULL) {
 		printf("Can't open file!\n");
 		exit(1);
 	}
+
+	float grabW; //stores the w if there is one
+
+	//saves the line we are on in the obj file
+	std::string currentLine;
+
+	//A cache for mapping face vertex indices to a mesh vertex index
+	std::unordered_map<uint64_t, int> vectorCache;
+
+
 	while (1) {
 		char lineHeader[128];
 		//read the first word of the line

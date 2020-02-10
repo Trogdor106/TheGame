@@ -25,38 +25,11 @@ void MorphObject::updateMorphObject() {
 				morphObjectList[j].currentModel[i].Position = tempVertices;
 				morphObjectList[j].currentModel[i].Normal = glm::normalize(tempNeorm);
 
-
-				//or (int i = 0; i < mesh->vertices.size(); i++)
-				//
-				//	glm::vec3 v = Math::lerp(m_pMorphTargets[m_pCurrentKeyframe]->vertices[i], m_pMorphTargets[m_pNextKeyframe]->vertices[i], m_pLocalMorphTime);
-				//	glm::vec3 n = Math::lerp(m_pMorphTargets[m_pCurrentKeyframe]->normals[i], m_pMorphTargets[m_pNextKeyframe]->normals[i], m_pLocalMorphTime);
-				//	mesh->vertices[i] = v;
-				//	mesh->normals[i] = glm::normalize(n);
-				//
 			}
+			currentInterval[j] += 1;
 		}
-	currentInterval[j] += 0.095;
 	}
 }
-
-// Uses start point, end point, the percentage to move each frame (speed, essentially), the matrix you're modifying, and the xyz index
-//float MorphObject::justLerp(float p1, float p2, float want, glm::mat4 objTransform, int index) //Index 0 = x, 1 = y, 2 = z
-//{
-//
-//	float newPos;
-//
-//	float t = (want - p1) / (p2 - p1);
-//
-//	newPos = ((1 - t) * p1) + (t * p2);
-//
-//	//If you've reached/exceeded p2, stop moving each frame
-//	if (objTransform[3][index] >= p2)
-//	{
-//		newPos = 0;
-//	}
-//
-//	return newPos;
-//}
 
 std::vector<Vertex> MorphObject::getCurrentModel(int objectID) {
 	if (currentInterval[objectID] <= amountOfTimess[objectID] || amountOfTimess[objectID] == 0) {
@@ -75,8 +48,8 @@ void MorphObject::switchToTrue(int objectID)
 void  MorphObject::lerp(glm::vec3& startPoint, glm::vec3& goal, glm::vec3& currentPos, float& deltatime, float total_time, int objectID, float current_Interval) {
 	//glm::vec3 diffVec = { goal.x - startPoint.x, goal.y - startPoint.y, goal.z - startPoint.z }
 	float totalTime = total_time;
-	int amountOfTimes = totalTime / 0.095;
-	float percentagePerIntervals = 0.095 / totalTime;
+	int amountOfTimes = totalTime /0.009025;
+	float percentagePerIntervals = 0.009025/ totalTime;
 	if (amountOfTimess.empty() != true) {
 		if (amountOfTimess[objectID] == 0) {
 			amountOfTimess[objectID] = amountOfTimes;
@@ -110,13 +83,5 @@ void  MorphObject::lerp(glm::vec3& startPoint, glm::vec3& goal, glm::vec3& curre
 		}
 	}
 
-	//if (currentInterval == amountOfTimes) {
-	//	glm::vec3 temp = startPoint;
-	//	startPoint = goal;
-	//	goal = startPoint;
-	//	currentInterval = 0;
-	//}
 	
 }
-
-//Fowards kinematic here if we have time

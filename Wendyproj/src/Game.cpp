@@ -2,7 +2,7 @@
 #include "Game.h"
 #include "Logging.h"
 #include <functional>
-
+#include "ObjectLoader2.h"
 #include <stdexcept>
 
 #define IMGUI_IMPL_OPENGL_LOADER_GLAD
@@ -33,8 +33,8 @@
 
 void lerp(glm::vec3& goal, glm::vec3& startPoint, glm::vec3& currentPos, float duration) {
 	static float totalTime = duration;
-	static float amountOfTimes = totalTime / (0.095);
-	static float percentagePerIntervals = (0.095) / totalTime;
+	static float amountOfTimes = totalTime / (0.009025);
+	static float percentagePerIntervals = (0.009025) / totalTime;
 	static float currentInterval = 0;
 	if (currentInterval <= amountOfTimes && currentInterval >= 0) {
 		float t = startPoint.x != goal.x ? (((percentagePerIntervals * currentInterval) * (goal.x - startPoint.x) + startPoint.x) - startPoint.x) / (goal.x - startPoint.x) : 1;
@@ -44,7 +44,7 @@ void lerp(glm::vec3& goal, glm::vec3& startPoint, glm::vec3& currentPos, float d
 		float t3 = startPoint.z != goal.z ? (((percentagePerIntervals * currentInterval) * (goal.z - startPoint.z) + startPoint.z) - startPoint.z) / (goal.z - startPoint.z) : 1;
 		currentPos.z = (1 - t3) * startPoint.z + t3 * goal.z;
 
-		currentInterval += 0.095;
+		currentInterval += 1;
 
 		//All the 0.095s are because delta time was giving us varying results based on the computers, so this constant works better with smaller numbers
 	}
@@ -90,7 +90,7 @@ void Game::Resize(int newWidth, int newHeight) {
 
 Game::Game() :
 	myWindow(nullptr),
-	myWindowTitle("Game"),
+	myWindowTitle("Mallory"),
 	myClearColor(glm::vec4(0, 0, 0, 1))
 	//genTransform()
 { }
@@ -174,6 +174,7 @@ void Game::Initialize() {
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
+
 }
 
 void Game::Shutdown() {
@@ -189,237 +190,90 @@ void Game::LoadContent() {
 	myCamera->Projection = glm::perspective(glm::radians(60.0f), 1.0f, 0.01f, 1000.0f);
 
 	interactCamera = std::make_shared<Camera>();
-	interactCamera->SetPosition(cameraPos);
-	interactCamera->LookAt(cameraViewTarget, cameraViewAngle);
-	interactCamera->Projection = glm::ortho(-4, 4, -4, 4, 1, 1000);
-
-	//Texture2D::Sptr albedo = Texture2D::LoadFromFile("untitled.png");
-	//Texture2D::Sptr albedo2 = Texture2D::LoadFromFile("f_Door.png");
-	
-	//Halp
-	//std::vector <Vertex> objVertices = loadOBJ("Chair.obj");
-	//deCasteJauManager.saveDeCasteJauObject("Chair.obj", "Chair2.obj", "Chair3.obj", "Chair4.obj");
-
-
-
-	//Texture2D::Sptr tempAlbedo;
+	interactCamera->SetPosition(glm::vec3(1, 1, 10));
+	interactCamera->LookAt(glm::vec3(0.0f, 0.0f, 4), glm::vec3(0, 0, 1));
+	interactCamera->Projection = glm::ortho(-22.0f, 22.0f, -10.0f, 10.0f, 0.0f, 1000.0f);
 
 	Texture2D::Sptr albedo = Texture2D::LoadFromFile("f_Door.png");
-	Texture2D::Sptr albedo2 = Texture2D::LoadFromFile("f_Door.png");
+	Texture2D::Sptr albedo2 = Texture2D::LoadFromFile("F_fatWall.png");
 
-	std::vector <Vertex> temp;
-	///////////////Load objects under here
-	temp = loadOBJ(filename[1]);
-	genObjects.push_back(temp);
-	amountOfObjects.push_back(0); // object 0 is floor 2
-	//tempAlbedo = Texture2D::LoadFromFile(texturename[6]);
+
+
+	//std::vector <Vertex> temp;
+	//Replaced with
+	MeshData MeshTemp = ObjLoader::LoadObj("f_Door.obj", glm::vec4(1.0f));
 	
-
-
-
-	deCasteJauManager.saveDeCasteJauObject(filename[11], filename[10], filename[9], filename[8]);
-	temp = deCasteJauManager.getCurrentCasteJau(0); // object 1 is object 0 castejau
-	genObjects.push_back(temp);
-	amountOfObjects.push_back(2); // object 1 is door topside of saferoom
-	//tempAlbedo = Texture2D::LoadFromFile(texturename[2]);
-
-
-	deCasteJauManager.saveDeCasteJauObject(filename[8], filename[9], filename[10], filename[11]);
-	temp = deCasteJauManager.getCurrentCasteJau(1); // object 2 is object 1 castejau
-	genObjects.push_back(temp);
-	amountOfObjects.push_back(2); // object 2 is door leftside of saferoom
-
-
-	deCasteJauManager.saveDeCasteJauObject(filename[11], filename[10], filename[9], filename[8]);
-	temp = deCasteJauManager.getCurrentCasteJau(2); // object 3 is object 2 castejau
-	genObjects.push_back(temp);
-	amountOfObjects.push_back(2); // object 3 is door bottomside of saferoom
-
-
-	deCasteJauManager.saveDeCasteJauObject(filename[11], filename[10], filename[9], filename[8]);
-	temp = deCasteJauManager.getCurrentCasteJau(3); // object 4 is object 3 castejau
-	genObjects.push_back(temp);
-	amountOfObjects.push_back(2); // object 4 is locked red door in front of door bottomside of saferoom
-
-
-	deCasteJauManager.saveDeCasteJauObject(filename[8], filename[9], filename[10], filename[11]);
-	temp = deCasteJauManager.getCurrentCasteJau(4); // object 5 is object 4 castejau
-	genObjects.push_back(temp);
-	amountOfObjects.push_back(2); // object 5 is door in behind of door leftside of saferoom
-
-
-
-	temp = loadOBJ(filename[16]);
-	genObjects.push_back(temp);
-	amountOfObjects.push_back(0); // object 6 is the drawer in the room where you find the red key
-	//tempAlbedo = Texture2D::LoadFromFile(texturename[5]);
-
-
-	temp = loadOBJ(filename[15]);
-	genObjects.push_back(temp);
-	amountOfObjects.push_back(3); // object 7 is the drawer things in the room where you find the red key
-	//tempAlbedo = Texture2D::LoadFromFile(texturename[4]);
-
-	temp = loadOBJ(filename[15]);
-	genObjects.push_back(temp);
-	amountOfObjects.push_back(0); // object 8 is the drawer things in the room where you find the red key
-
-	temp = loadOBJ(filename[15]);
-	genObjects.push_back(temp);
-	amountOfObjects.push_back(0); // object 9 is the drawer things in the room where you find the red key
-
-
-	temp = loadOBJ(filename[19]);
-	genObjects.push_back(temp);
-	amountOfObjects.push_back(0); // object 10 is the red key
-	//tempAlbedo = Texture2D::LoadFromFile(texturename[7]);
 	
-	temp = loadOBJ(filename[28]);
-	genObjects.push_back(temp);
-	amountOfObjects.push_back(0); // object 11 is the left safe room wall
+	///////////////Load objects and textures under here
+	Game::CreateObjects(1, 0, 5);
+	// object 0 is floor 2  
+	//texture 5 is dresser no drawers
+	Game::CreateObjects(11, 2, 2);
+	Game::CreateObjects(8, 2, 2);
+	Game::CreateObjects(11, 2, 2);
+	Game::CreateObjects(11, 2, 2);
+	Game::CreateObjects(8, 2, 2);
+	Game::CreateObjects(16, 0, 5);
+	Game::CreateObjects(15, 3, 4);
+	Game::CreateObjects(15, 0, 4);
+	Game::CreateObjects(15, 0, 4);
+	Game::CreateObjects(19, 0, 7);
+	Game::CreateObjects(28, 0, 6);
+	Game::CreateObjects(28, 0, 6);
+	Game::CreateObjects(28, 0, 6);
+	Game::CreateObjects(28, 0, 6);
+	Game::CreateObjects(28, 0, 6);
+	Game::CreateObjects(28, 0, 6);
+	Game::CreateObjects(29, 0, 6);
+	Game::CreateObjects(5, 0, 6);
+	Game::CreateObjects(4, 0, 6);
+	Game::CreateObjects(3, 0, 6);
+	Game::CreateObjects(27, 0, 6);
+	Game::CreateObjects(7, 0, 6);
+	Game::CreateObjects(21, 0, 6);
+	Game::CreateObjects(20, 0, 6);
+	Game::CreateObjects(19, 0, 6);
+	Game::CreateObjects(8, 1, 2);
+	Game::CreateObjects(34, 4, 8);
 
-	genObjects.push_back(temp);
-	amountOfObjects.push_back(0); // object 12 is the right safe room wall
-
-	genObjects.push_back(temp);
-	amountOfObjects.push_back(0); // object 13 is the bottom right hallway wall
-
-	genObjects.push_back(temp);
-	amountOfObjects.push_back(0); // object 14 is the top right hallway wall
-
-	genObjects.push_back(temp);
-	amountOfObjects.push_back(0); // object 15 is the other side of the bottom right hallway wall
-
-	genObjects.push_back(temp);
-	amountOfObjects.push_back(0); // object 16 is the other side of the top right hallway wall
-
-	temp = loadOBJ(filename[29]);
-	genObjects.push_back(temp);
-	amountOfObjects.push_back(0); // object 17 is the top wall of the safe room
-
-	temp = loadOBJ(filename[5]);
-	genObjects.push_back(temp);
-	amountOfObjects.push_back(0); // object 4 is locked red door in front of door bottomside of saferoom
-	//tempAlbedo = Texture2D::LoadFromFile(texturename[6]);
-
-	temp = loadOBJ(filename[4]);
-	genObjects.push_back(temp);
-	amountOfObjects.push_back(0);
-
-	temp = loadOBJ(filename[3]);
-	genObjects.push_back(temp);
-	amountOfObjects.push_back(0);
-
-	temp = loadOBJ(filename[27]);
-	genObjects.push_back(temp);
-	amountOfObjects.push_back(0);
-
-	temp = loadOBJ(filename[7]);
-	genObjects.push_back(temp);
-	amountOfObjects.push_back(0);
-
-	temp = loadOBJ(filename[21]);
-	genObjects.push_back(temp);
-	amountOfObjects.push_back(0);
-
-	temp = loadOBJ(filename[20]);
-	genObjects.push_back(temp);
-	amountOfObjects.push_back(0);
-
-	temp = loadOBJ(filename[19]);
-	genObjects.push_back(temp);
-	amountOfObjects.push_back(0); //24th
-
-	//deCasteJauManager.saveDeCasteJauObject("Door.obj", "DoorHuge.obj", "DoorAss.obj", "DoorImplode.obj");
-	//temp = deCasteJauManager.getCurrentCasteJau(0);
-	//genObjects.push_back(temp);
-	//amountOfObjects++;
-
-
-
-//  morphObjectManager.saveMorphObject("Door.obj", "Dresser.obj");
-//	lanternVertices = loadOBJ("DoorImplode.obj");
-//	lanternVertices = morphObjectManager.getCurrentModel(0);
-
-	
-
-
-	//MeshData lanternVertices = ObjLoader::LoadObj("Dresser.obj");
-	
-
-
-	// Create a new mesh from the data
-	
-	//myMesh = std::make_shared<Mesh>(vertices, 4, indices, 6);
-	//myMesh2 = std::make_shared<Mesh>(vertices2, 4, indices2, 6);
-	//myMesh3 = std::make_shared<Mesh>(vertices3, 4, indices, 6);
-	//myMesh4 = std::make_shared<Mesh>(chairVertices.data(), chairVertices.size(), nullptr, 0);
-	//myMesh5 = std::make_shared<Mesh>(lanternVertices.data(), lanternVertices.size(), nullptr, 0);
-	//Mesh::Sptr myMesh5 = ObjLoader::LoadObjToMesh("Dresser.obj");
-
+	int hello = 0;
 	Shader::Sptr phong = std::make_shared<Shader>();
 	phong->Load("lighting.vs.glsl", "blinn-phong.fs.glsl");
 	
-	for (int i = 0; i < amountOfObjects.size(); i++)
-	{
-		Mesh::Sptr temp = std::make_shared<Mesh>(genObjects[i].data(), genObjects[i].size(), nullptr, 0);
-		genMesh.push_back(temp);
-	}
-;
+	Shader::Sptr phong2 = std::make_shared<Shader>();
+	phong2->Load("lighting.vs.glsl", "blinn-phong.fs.glsl");
 
-	float dist = 10.0f;
-	Material::Sptr testMat = std::make_shared<Material>(phong);
-	testMat->Set("s_Albedo", albedo);
-	testMat->Set("a_LightPos", { 0, 0, 1 });
-	testMat->Set("a_LightColor", glm::vec3(1.0f, 1.0f, 0) / dist);
+	//lerpVS->Load("lerp.vs.glsl", "blinn-phong.fs.glsl");
+
+	//for (int i = 0; i < amountOfObjects.size(); i++)
+	//{
+	//	Mesh::Sptr temp;
+	//	if (amountOfObjects[i] == 3)
+	//		temp = std::make_shared<Mesh>(genObjects[i].data(), genObjects[i].size(), nullptr, 0);// , genObjects[2].data(), genObjects[2].size(), nullptr, 0);
+	//	else 
+	//		temp = std::make_shared<Mesh>(genObjects[i].data(), genObjects[i].size(), nullptr, 0);// , genObjects[i].data(), genObjects[i].size(), nullptr, 0);
+	//	//MeshBuilder::Bake(data2);
+	//	//temp =
+	//	Bake(genObjects[0])
+	//	genMesh.push_back(temp);
+	//}
+
+	testMat = std::make_shared<Material>(phong2);
+
+	testMat->Set("s_Albedo", albedo2);
+	testMat->Set("a_LightPos", { 0, 1, 10 });
+	testMat->Set("a_LightColor", { 1.0f, 1.0f, 0.0f });
 	testMat->Set("a_AmbientColor", { 1.0f, 1.0f, 1.0f });
-	testMat->Set("a_AmbientPower", 1.1f);
-	testMat->Set("a_LightSpecPower", 0.5f);
-	testMat->Set("a_LightShininess", 256);
-	testMat->Set("a_LightAttenuation", 1.0f / (dist * dist));
+	testMat->Set("a_AmbientPower", 0.1f);
+	testMat->Set("a_LightSpecPower", 1.0f);
 
 	testMat2 = std::make_shared<Material>(phong);
 	testMat2->Set("s_Albedo", albedo2);
 	testMat2->Set("a_LightPos", { 0, 1, 10 });
-	testMat2->Set("a_LightColor", { 0.0f, 1.0f, 0.0f });
+	testMat2->Set("a_LightColor", { 1.0f, 1.0f, 0.0f });
 	testMat2->Set("a_AmbientColor", { 1.0f, 1.0f, 1.0f });
-	testMat2->Set("a_AmbientPower", 0.4f);
+	testMat2->Set("a_AmbientPower", 0.1f);
 	testMat2->Set("a_LightSpecPower", 1.0f);
-
-
-	//float dist = 10.0f;
-	//Material::Sptr testMat = std::make_shared<Material>(phong);
-	//testMat->Set("s_Albedo", albedo);
-	//testMat->Set("a_LightPos", { 0, 0, 1 });
-	//testMat->Set("a_LightColor", glm::vec3(1.0f, 1.0f, 0) / dist);
-	//testMat->Set("a_AmbientColor", { 1.0f, 1.0f, 1.0f });
-	//testMat->Set("a_AmbientPower", 1.1f);
-	//testMat->Set("a_LightSpecPower", 0.5f);
-	//testMat->Set("a_LightShininess", 256);
-	//testMat->Set("a_LightAttenuation", 1.0f / (dist * dist));
-	//
-	//testMat2 = std::make_shared<Material>(phong);
-	//testMat2->Set("s_Albedo", albedo2);
-	//testMat2->Set("a_LightPos", { 0, 1, 10 });
-	//testMat2->Set("a_LightColor", { 0.0f, 1.0f, 0.0f });
-	//testMat2->Set("a_AmbientColor", { 1.0f, 1.0f, 1.0f });
-	//testMat2->Set("a_AmbientPower", 0.4f);
-	//testMat2->Set("a_LightSpecPower", 1.0f);
-	//
-	////Brightness
-	//testMat2->Set("a_LightShininess", 1);
-	//
-	////Radius of glow
-	//testMat2->Set("a_LightAttenuation", 0.1f);
-
-
-
-	// Create and compile shader
-	//myShader = std::make_shared<Shader>();
-	//myShader->Load("passthrough.vs", "passthrough.fs");
-
-	//myNormalShader = std::make_shared<Shader>();
-	//myNormalShader->Load("passthrough.vs", "normalView.fs");
 
 	SceneManager::RegisterScene("Test2");
 	SceneManager::SetCurrentScene("Test2");
@@ -427,237 +281,179 @@ void Game::LoadContent() {
 	{
 
 		auto& ecs2 = GetRegistry("Test2");
-		//entt::entity e2 = ecs2.create();
-		//ecs2.assign<TempTransform>(e2).Scale = glm::vec3(1.0f);
-		//MeshRenderer& m2 = ecs2.assign<MeshRenderer>(e2);
-		//m2.Material = testMat2;
-		//m2.Mesh = myMesh2;
-		//
-		//auto rotate = [](entt::entity e, float dt) {
-		//	CurrentRegistry().get<TempTransform>(e).EulerRotation += glm::vec3(0, 0, 90 * dt);
-		//};
 		
-
-		//entt::entity e4 = ecs2.create();
-		//ecs2.assign<TempTransform>(e4).Scale = glm::vec3(1.0f);
-		//MeshRenderer& m3 = ecs2.assign<MeshRenderer>(e4);
-		//m3.Material = testMat2;
-		//m3.Mesh = myMesh4;
-		
-		//entt::entity doorEntity[40];
-		//
-		//for (int i = 0; i < 40; i++)
-		//{
-		//	doorEntity[i] = ecs2.create();
-		//	ecs2.assign<TempTransform>(doorEntity[i]).Scale = glm::vec3(1.0f);
-		//	MeshRenderer& doorMesh = ecs2.assign<MeshRenderer>(doorEntity[i]);
-		//	doorMesh.Material = testMat2;
-		//	doorMesh.Mesh = door[i];
-		//}
-		
-		//morphObjectManager.updateMorphObject(0.000000003, 0, myLanternTransform);
-		
-		//if (backupDeltatime != -431602080.) {
-		//	morphObjectManager.updateMorphObject();
-		//	lanternVertices = morphObjectManager.getCurrentModel(0);
-		//	myMesh5 = std::make_shared<Mesh>(lanternVertices.data(), lanternVertices.size(), nullptr, 0);
-		//	int hello = 0;
-		//}
-
-		//entt::entity e5 = ecs2.create();
-		//ecs2.assign<TempTransform>(e5).Scale = glm::vec3(1.0f);
-		//MeshRenderer& m4 = ecs2.assign<MeshRenderer>(e5);
-		//m4.Material = testMat2;
-		//m4.Mesh = myMesh5;
-
-		//entt::entity dresserEntity[6];
-
 		std::vector <entt::entity> genEntt;
 
 		for (int i = 0; i < amountOfObjects.size(); i++) {
-			
 			entt::entity temp = ecs2.create();
 			genEntt.push_back(temp);
 			ecs2.assign<TempTransform>(genEntt[i]).Scale = glm::vec3(1.0f);
 			MeshRenderer& genMesh2 = ecs2.assign<MeshRenderer>(genEntt[i]);
-			genMesh2.Material = testMat2;
-			genMesh2.Mesh = genMesh[i];
-			
-		}
-		
-		//for (int i = 0; i < 6; i++)
-		//{
-		//	dresserEntity[i] = ecs2.create();
-		//	ecs2.assign<TempTransform>(dresserEntity[i]).Scale = glm::vec3(1.0f);
-		//	MeshRenderer& dresserMesh = ecs2.assign<MeshRenderer>(dresserEntity[i]);
-		//	dresserMesh.Material = testMat2;
-		//	dresserMesh.Mesh = dresser[i];
-		//}
+
+			//Texture2D::Sptr tempText = Texture2D::LoadFromFile(genMats[i]);
+			//testMat2->Set("s_Albedo", tempText);
+			if (amountOfObjects[i] != 3) {
+				genMesh2.Material = testMat2;
+				genMesh2.Mesh = Bake(genObjects[i]);
+			}
+			else {
+				genMesh2.Material = testMat;
+				genMesh2.Mesh = Bake(genObjects[i]);
+				int hello = 0;
+			}
 
 
-	//auto rotate2 = [](entt::entity e, float dt) {
-	//	CurrentRegistry().get<TempTransform>(e).EulerRotation += glm::vec3(0, 30 * dt, 90 * dt);
-	//};
-	//auto rotate3 = [](entt::entity e, float dt) {
-	//	CurrentRegistry().get<TempTransform>(e).EulerRotation = glm::vec3(0, 90, 30);
-	//};
-	//auto& up = ecs2.get_or_assign<UpdateBehaviour>(e2);
-	//up.Function = rotate;
-	//	auto& up2 = ecs2.get_or_assign<UpdateBehaviour>(e5);
-	//	up2.Function = rotate3;
+			glm::mat4 tempMat = glm::mat4(1.0f);
+			genTransform.push_back(tempMat);
 
+			switch (i) {
+			case 1: //Door topside of the saferoom
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(-31.5f, 15.7f, 0));
+				break;
+			case 2:// object 2 is door leftside of saferoom
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(0.0f, -37.0f, 0));
+				genTransform[i] = glm::rotate(genTransform[i], 2 * halfOfPI, glm::vec3(0, 0, 1));
+				break;
+			case 3:// object 2 is door bottomside of saferoom
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(16.5f, 10.9f, 0));
+				break;
+			case 4:// object 4 is locked red door in front of door bottomside of saferoom
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(29.5f, 10.9f, 0));
+				break;
+			case 5:// object 5 is door in behind of door leftside of saferoom
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(0.0f, -49.0f, 0));
+				genTransform[i] = glm::rotate(genTransform[i], 2 * halfOfPI, glm::vec3(0, 0, 1));
+				break;
+			case 6:// object 6 is the drawer in the room where you find the red key
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(-25.0f, -80.0f, 0));
+				genTransform[i] = glm::rotate(genTransform[i], 2 * halfOfPI, glm::vec3(0, 0, 1));
+				break;
+			case 7:// object 7 is the drawer things in the room where you find the red key
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(-25.0f, -80.0f, 0));
+				genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+				break;
+			case 8:// object 8 is the drawer things in the room where you find the red key
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(-25.0f, -80.0f, -0.6));
+				genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+				break;
+			case 9:// object 9 is the drawer things in the room where you find the red key
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(-25.0f, -80.0f, -1.2));
+				genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+				break;
+			case 10:
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(-26.0f, -80.0f, 10));
+				break;
+			case 11:// object 10 is the left safe room wall
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(0.0f, 30.0f, 0));
+				//genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+				break;
+			case 12:// object 11 is the right safe room wall
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(-20.0f, -36.0f, 0));
+				//    //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+				break;
+			case 13:// object 12 is the bottom right hallway wall
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(-41.0f, -48.0f, 0));
+				//    //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+				break;
+			case 14:// object 13 is the top right hallway wall
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(42.5f, -48.0f, -20));
+				//    //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+				break;
+			case 15:// object 16 is the far right room wall
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(0.0f, -90.0f, 0));
+				//    //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+				break;
+			case 16:// object 16 is the far right room wall
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(60.0f, -48.0f, 9.9));
+				//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+				break;
+			case 17:// object 16 is the far right room wall
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(20.5f, -10.0f, 0));
+				//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+				break;
 
-	}
-	//myLanternTransform = glm::translate(myLanternTransform, glm::vec3(0, 0, 1));
-	//myLanternTransform2 = glm::translate(myLanternTransform2, glm::vec3(25, 0, 1));
+			case 18:// object 16 is the far right room wall
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(10.5f, -10.0f, 0));
+				//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+				break;
 
-	for (int i = 0; i < genObjects.size(); i++)
-	{
-		glm::mat4 temp = glm::mat4(1.0f);
-		genTransform.push_back(temp);
-		//dresserAngle[i] = glm::vec3(0, 0, 0);
-	}
+			case 19:// object 16 is the far right room wall
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(15.5f, -10.0f, 0));
+				//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+				break;
 
-	//Objects positions
-	for (int i = 0; i < genObjects.size(); i++) {
-		switch (i) {
-		case 1: //Door topside of the saferoom
-			genTransform[i] = glm::translate(genTransform[i], glm::vec3(-31.5f, 15.7f, 0));
-			break;
-		case 2:// object 2 is door leftside of saferoom
-			genTransform[i] = glm::translate(genTransform[i], glm::vec3(0.0f, -37.0f, 0));
-			genTransform[i] = glm::rotate(genTransform[i], 2 * halfOfPI, glm::vec3(0, 0, 1));
-			break;
-		case 3:// object 2 is door bottomside of saferoom
-			genTransform[i] = glm::translate(genTransform[i], glm::vec3(16.5f, 10.9f, 0));
-			break;
-		case 4:// object 4 is locked red door in front of door bottomside of saferoom
-			genTransform[i] = glm::translate(genTransform[i], glm::vec3(29.5f, 10.9f, 0));
-			break;
-		case 5:// object 5 is door in behind of door leftside of saferoom
-			genTransform[i] = glm::translate(genTransform[i], glm::vec3(0.0f, -49.0f, 0));
-			genTransform[i] = glm::rotate(genTransform[i], 2 * halfOfPI, glm::vec3(0, 0, 1));
-			break;
-		case 6:// object 6 is the drawer in the room where you find the red key
-			genTransform[i] = glm::translate(genTransform[i], glm::vec3(-25.0f, -80.0f, 0));
-			genTransform[i] = glm::rotate(genTransform[i], 2 * halfOfPI, glm::vec3(0, 0, 1));
-			break;
-		case 7:// object 7 is the drawer things in the room where you find the red key
-			genTransform[i] = glm::translate(genTransform[i], glm::vec3(-25.0f, -80.0f, 0));
-			genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
-			break;
-		case 8:// object 8 is the drawer things in the room where you find the red key
-			genTransform[i] = glm::translate(genTransform[i], glm::vec3(-25.0f, -80.0f, -0.6));
-			genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
-			break;
-		case 9:// object 9 is the drawer things in the room where you find the red key
-			genTransform[i] = glm::translate(genTransform[i], glm::vec3(-25.0f, -80.0f, -1.2));
-			genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
-			break;
-		case 10:
-			genTransform[i] = glm::translate(genTransform[i], glm::vec3(-26.0f, -80.0f, 10));
-			break;
-		case 11:// object 10 is the left safe room wall
-			genTransform[i] = glm::translate(genTransform[i], glm::vec3(0.0f, 30.0f, 0));
-			//genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
-			break;
-		case 12:// object 11 is the right safe room wall
-			genTransform[i] = glm::translate(genTransform[i], glm::vec3(-20.0f, -36.0f, 0));
-			//    //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
-			break;
-		case 13:// object 12 is the bottom right hallway wall
-			genTransform[i] = glm::translate(genTransform[i], glm::vec3(-41.0f, -48.0f, 0));
-			//    //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
-			break;
-		case 14:// object 13 is the top right hallway wall
-			genTransform[i] = glm::translate(genTransform[i], glm::vec3(42.5f, -48.0f, -20));
-			//    //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
-			break;
-		case 15:// object 16 is the far right room wall
-			genTransform[i] = glm::translate(genTransform[i], glm::vec3(0.0f, -90.0f, 0));
-			//    //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
-			break;
-		case 16:// object 16 is the far right room wall
-			genTransform[i] = glm::translate(genTransform[i], glm::vec3(60.0f, -48.0f, 9.9));
-			//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
-			break;
-		case 17:// object 16 is the far right room wall
-			genTransform[i] = glm::translate(genTransform[i], glm::vec3(20.5f, -10.0f, 0));
-			//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
-			break;
+			case 20:// object 16 is the far right room wall
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(15.5f, -20.0f, 0));
+				//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+				break;
 
-		case 18:// object 16 is the far right room wall
-			genTransform[i] = glm::translate(genTransform[i], glm::vec3(10.5f, -10.0f, 0));
-			//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
-			break;
+			case 21:// object 16 is the far right room wall
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(20.0f, -10.0f, 10));
+				//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+				break;
 
-		case 19:// object 16 is the far right room wall
-			genTransform[i] = glm::translate(genTransform[i], glm::vec3(15.5f, -10.0f, 0));
-			//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
-			break;
+			case 22:// object 16 is the far right room wall
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(25.5f, -5.0f, 0));
+				//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+				break;
 
-		case 20:// object 16 is the far right room wall
-			genTransform[i] = glm::translate(genTransform[i], glm::vec3(15.5f, -20.0f, 0));
-			//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
-			break;
+			case 23:// object 16 is the far right room wall
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(10.5f, -5.0f, 0));
+				//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+				break;
 
-		case 21:// object 16 is the far right room wall
-			genTransform[i] = glm::translate(genTransform[i], glm::vec3(20.0f, -10.0f, 10));
-			//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
-			break;
+			case 24:// object 16 is the far right room wall
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(30.5f, -10.0f, 0));
+				//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+				break;
+				///////////////////////////////////////////////////////////
 
-		case 22:// object 16 is the far right room wall
-			genTransform[i] = glm::translate(genTransform[i], glm::vec3(25.5f, -5.0f, 0));
-			//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
-			break;
-
-		case 23:// object 16 is the far right room wall
-			genTransform[i] = glm::translate(genTransform[i], glm::vec3(10.5f, -5.0f, 0));
-			//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
-			break;
-
-		case 24:// object 16 is the far right room wall
-			genTransform[i] = glm::translate(genTransform[i], glm::vec3(30.5f, -10.0f, 0));
-			//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
-			break;
-			///////////////////////////////////////////////////////////
-
-		//case 25:
-		//	genTransform[i] = glm::translate(genTransform[i], glm::vec3(0.0f, 0.0f, 4));
-		//	break;
-
-
+			case 25:
+				//	genTransform[i] = glm::translate(genTransform[i], glm::vec3(0.0f, 0.0f, 4));
+				break;
+			case 26:
+				//	genTransform[i] = glm::translate(genTransform[i], glm::vec3(0.0f, 0.0f, 4));
+				break;
+			case 27:
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(0.0f, 1.0f, 4));
+				break;
+			case 28:
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(0.0f, 0.0f, 4));
+				break;
+			}
 		}
 	}
 
-	//static int dummy = 1;
-	//for (int i = 0; i < 7; i++)
-	//{
-	//	genTransform[i] = glm::translate(genTransform[i], glm::vec3(10 * dummy, 10 * dummy, 10 * dummy));
-	//	dummy++;
+
+	//for (int i = 0; i < genObjects.size(); i++) {
+	//	if (amountOfObjects[i] == 0) {
+	//		hitBoxManager.saveHitBoxes(genObjects[i], 0);
+	//		hitBoxManager.updateHitBoxes(genTransform[i][3], i);
+	//	}
+	//	else if (amountOfObjects[i] == 1) {
+	//		hitBoxManager.saveHitBoxes(genObjects[i], 1);
+	//		hitBoxManager.updateHitBoxes(genTransform[i][3], i);
+	//	}
+	//	else {
+	//		hitBoxManager.saveHitBoxes(genObjects[i], 2);
+	//		hitBoxManager.updateHitBoxes(genTransform[i][3], i);
+	//	}
 	//}
-
-	for (int i = 0; i < genObjects.size(); i++) {
-		if (amountOfObjects[i] == 0) {
-			hitBoxManager.saveHitBoxes(genObjects[i], 0);
-			hitBoxManager.updateHitBoxes(genTransform[i][3], i);
-		}
-		else if (amountOfObjects[i] == 1) {
-			hitBoxManager.saveHitBoxes(genObjects[i], 1);
-			hitBoxManager.updateHitBoxes(genTransform[i][3], i);
-		}
-		else {
-			hitBoxManager.saveHitBoxes(genObjects[i], 2);
-			hitBoxManager.updateHitBoxes(genTransform[i][3], i);
-		}
-	}
-
+    /////////////////////////////////////////////////////////////////////////HitBoxes
 }
 
+void Game::CreateObjects(int objectNameID, int typeOfObject, int textureNameID, glm::mat4 transformation)
+{
+	genObjects.push_back(ObjLoader::LoadObj(filename[objectNameID], glm::vec4(1.0f)));
+	amountOfObjects.push_back(typeOfObject);  
+	genMats.push_back(Texture2D::LoadFromFile(texturename[textureNameID]));
+	genTransform.push_back(transformation);
+}
 
 void Game::UnloadContent() {
 
 }
+
 
 void Game::InitImGui() {
 	// Creates a new ImGUI context
@@ -773,20 +569,31 @@ void Game::Update(float deltaTime) {
 	float speed = 30.0f;
 	float speed2 = 15.0f;
 	float rotSpeed = 1.0f;
+	bool isheadBob = false;
 	//myCamera->LookAt(cameraViewTarget, cameraViewAngle);
 
-	if (glfwGetKey(myWindow, GLFW_KEY_S) == GLFW_PRESS)
+	if (glfwGetKey(myWindow, GLFW_KEY_S) == GLFW_PRESS) {
 		movement.z = -speed2 * deltaTime;
-	else if (glfwGetKey(myWindow, GLFW_KEY_W) == GLFW_PRESS)
+		isheadBob = true;
+	}
+	else if (glfwGetKey(myWindow, GLFW_KEY_W) == GLFW_PRESS) {
 		movement.z = speed2 * deltaTime;
-	else
+		isheadBob = true;
+	}
+	else {
 		movement.z = 0 * deltaTime;
-	if (glfwGetKey(myWindow, GLFW_KEY_D) == GLFW_PRESS)
+	}
+	if (glfwGetKey(myWindow, GLFW_KEY_D) == GLFW_PRESS) {
 		movement.x = -speed2 * deltaTime;
-	else if (glfwGetKey(myWindow, GLFW_KEY_A) == GLFW_PRESS)
+		isheadBob = true;
+	}
+	else if (glfwGetKey(myWindow, GLFW_KEY_A) == GLFW_PRESS) {
 		movement.x = speed2 * deltaTime;
-	else
+		isheadBob = true;
+	}
+	else {
 		movement.x = 0;
+	}
 
 	if (glfwGetKey(myWindow, GLFW_KEY_SPACE) == GLFW_PRESS)
 		movement.y += speed * deltaTime;
@@ -798,28 +605,22 @@ void Game::Update(float deltaTime) {
 	}
 
 	if (glfwGetKey(myWindow, GLFW_KEY_DOWN) == GLFW_PRESS) {
-		//rotation.x -= rotSpeed * deltaTime;
-		//angleForX -= 0.01;
 		angleForZ -= 0.01;
 		if (angleForZ < -1.4) {
 			angleForZ = -1.4;
 		}
 	}
 	if (glfwGetKey(myWindow, GLFW_KEY_UP) == GLFW_PRESS) {
-		//rotation.x += rotSpeed * deltaTime;
-		//angleForX += 0.01;
 		angleForZ += 0.01;
 		if (angleForZ > 1.4) {
 			angleForZ = 1.4;
 		}
 	}
 	if (glfwGetKey(myWindow, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-		//rotation.y -= rotSpeed * deltaTime;
 		angleForY += 0.01;
 		angleForX -= 0.01;
 	}
 	if (glfwGetKey(myWindow, GLFW_KEY_LEFT) == GLFW_PRESS) {
-		//rotation.y += rotSpeed * deltaTime;
 		angleForY -= 0.01;
 		angleForX += 0.01;
 	}
@@ -837,37 +638,36 @@ void Game::Update(float deltaTime) {
 	// Rotate and move our camera based on input
 	
 	//myCamera->Rotate(rotation);
-	
+
+	static float headBob = 0.0f;
+	float finalHeadBob = sin(headBob) * 0.03;
+	float finalHeadBobSide = sin(headBob * 0.5) * 0.01;
+	if (isheadBob == true) {
+		headBob += 0.10;
+	}
+	else {
+		finalHeadBob = 0;
+		finalHeadBobSide = 0;
+	}
+
 	myCamera->LookAt({ myCamera->GetPosition().x + cos(-angleForX), myCamera->GetPosition().y + sin(-angleForY), myCamera->GetPosition().z + tan(angleForZ)}, cameraViewAngle);
 
-	myCamera->SetPosition({ myCamera->GetPosition().x + movement.z * cos(angleForX) + movement.x * cos(angleForX + 1.57078145), myCamera->GetPosition().y + movement.z * sin(angleForX) + movement.x * sin(angleForX + 1.57078145), myCamera->GetPosition().z });
+	
+
+	myCamera->SetPosition({ 
+		myCamera->GetPosition().x + movement.z * cos(angleForX) + movement.x * cos(angleForX + 1.57078145) + finalHeadBobSide * cos(angleForX + 1.57078145), 
+		myCamera->GetPosition().y + movement.z * sin(angleForX) + movement.x * sin(angleForX + 1.57078145) + finalHeadBobSide * sin(angleForX + 1.57078145),
+		myCamera->GetPosition().z + finalHeadBob});
 
 	
 
 	//myCamera->Move(movement);
 
-
-
 	glm::mat4 temp = myCamera->GetView();
-
-	// Rotate our transformation matrix a little bit each frame
-	//myModelTransform = glm::rotate(myModelTransform, deltaTime, glm::vec3(0, 0, 1));
-
-
-	//auto view = CurrentRegistry().view<UpdateBehaviour>();
-	//for (const auto& e : view) {
-	//	auto& func = CurrentRegistry().get<UpdateBehaviour>(e);
-	//	if (func.Function) {
-	//		func.Function(e, deltaTime);
-	//	}
-	//}
-
-	
-
 
 	cameraPos = myCamera->GetPosition();
 	
-	hitBoxManager.updateHitBoxes(glm::vec3(myLanternTransform[3][0], myLanternTransform[3][1], myLanternTransform[3][2]), 0);
+	//hitBoxManager.updateHitBoxes(glm::vec3(myLanternTransform[3][0], myLanternTransform[3][1], myLanternTransform[3][2]), 0);
 	//Will add once the camera follows the correct format
 	
 	//testMat2->Set("a_LightPos", { cameraPos + glm::vec3(-6, -2, 0) + glm::vec3(cos(lanternAngle.x), sin(lanternAngle.y), tan(lanternAngle.z)) });
@@ -928,60 +728,101 @@ void Game::Update(float deltaTime) {
 	//myMesh5 = std::make_shared<Mesh>(lanternVertices.data(), lanternVertices.size(), nullptr, 0);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////mighty morphin' door rangers
-//	myMesh5 = nullptr;
-//
-//	morphObjectManager.updateMorphObject();
-//	lanternVertices = morphObjectManager.getCurrentModel(0);
-//
-//	myMesh5 = std::make_shared<Mesh>(lanternVertices.data(), lanternVertices.size(), nullptr, 0);
+	//	myMesh5 = nullptr;
+	//
+	//	morphObjectManager.updateMorphObject();
+	//	lanternVertices = morphObjectManager.getCurrentModel(0);
+	//
+	//	myMesh5 = std::make_shared<Mesh>(lanternVertices.data(), lanternVertices.size(), nullptr, 0);
 
 	//myMesh4 = nullptr;
 
-	deCasteJauManager.calculatedeCasteJau();
-	morphObjectManager.updateMorphObject();
+	//deCasteJauManager.calculatedeCasteJau();
+	//morphObjectManager.updateMorphObject();
 
 
-	int deCasteObj = 0;
-	int morphObject = 0;
-	int lerpObject = 0;
-	static glm::vec3 start = genTransform[7][3];
-	static bool isLerpActive = false;
-	for (int i = 0; i < amountOfObjects.size(); i++) {
-		if (amountOfObjects[i] == 0) {
-			;
-		}
-		else if (amountOfObjects[i] == 2) {
-			genMesh[i] = nullptr;
-			genObjects[i] = deCasteJauManager.getCurrentCasteJau(deCasteObj);
-			genMesh[i] = std::make_shared<Mesh>(genObjects[i].data(), genObjects[i].size(), nullptr, 0);
-			if (Game::interact(i, myCamera->GetPosition(), isEPressed)) {
-					deCasteJauManager.switchToTrue(deCasteObj);
-			}
-			deCasteObj++;
-		}
-		else if (amountOfObjects[i] == 1) {
-			genMesh[i] = nullptr;
-			genObjects[i] = morphObjectManager.getCurrentModel(morphObject);
-			genMesh[i] = std::make_shared<Mesh>(genObjects[i].data(), genObjects[i].size(), nullptr, 0);
-			if (Game::interact(i, myCamera->GetPosition(), isEPressed)) {
-				morphObjectManager.switchToTrue(deCasteObj);
-			}
-			morphObject++;
-		}
-		else if (amountOfObjects[i] == 3 && isLerpActive == false) {
-			if (Game::interact(i, myCamera->GetPosition(), isEPressed)) {
-				isLerpActive = true;
-			}
-		}
-	}
-
-	if (isLerpActive) {
-		glm::vec3 temp = genTransform[7][3];
-		lerp(start + glm::vec3(1.5f, 0.0f, 0.0f), start, temp, 3);
-		genTransform[7][3].x = temp.x;
-		genTransform[7][3].y = temp.y;
-		genTransform[7][3].z = temp.z;
-	}
+	//int deCasteObj = 0;
+	//int morphObject = 0;
+	//int lerpObject = 0;
+	//static glm::vec3 start = genTransform[7][3];
+	//static bool isLerpActive = false;
+	//for (int i = 0; i < amountOfObjects.size(); i++) {
+	//	if (amountOfObjects[i] == 0) {
+	//		;
+	//	}
+	//	else if (amountOfObjects[i] == 2) {
+	//		genMesh[i] = nullptr;
+	//		genObjects[i] = deCasteJauManager.getCurrentCasteJau(deCasteObj);
+	//		genMesh[i] = std::make_shared<Mesh>(genObjects[i].data(), genObjects[i].size(), nullptr, 0);// , genObjects[i].data(), genObjects[i].size(), nullptr, 0);
+	//		if (Game::interact(i, myCamera->GetPosition(), isEPressed)) {
+	//				deCasteJauManager.switchToTrue(deCasteObj);
+	//		}
+	//		deCasteObj++;
+	//	}
+	//	else if (amountOfObjects[i] == 1) {
+	//		genMesh[i] = nullptr;
+	//		genObjects[i] = morphObjectManager.getCurrentModel(morphObject);
+	//		genMesh[i] = std::make_shared<Mesh>(genObjects[i].data(), genObjects[i].size(), nullptr, 0);// , genObjects[i].data(), genObjects[i].size(), nullptr, 0);
+	//		if (Game::interact(i, myCamera->GetPosition(), isEPressed)) {
+	//			morphObjectManager.switchToTrue(morphObject);
+	//		}
+	//		morphObject++;
+	//	}
+	//	else if (amountOfObjects[i] == 3 && isLerpActive == false) {
+	//		if (Game::interact(i, myCamera->GetPosition(), isEPressed)) {
+	//			isLerpActive = true;
+	//		}
+	//	}
+	//}
+	//
+	//if (isLerpActive) {
+	//	glm::vec3 temp = genTransform[7][3];
+	//	lerp(start + glm::vec3(1.5f, 0.0f, 0.0f), start, temp, 3);
+	//	genTransform[7][3].x = temp.x;
+	//	genTransform[7][3].y = temp.y;
+	//	genTransform[7][3].z = temp.z;
+	//}
+	//
+	//
+	//
+	//static bool bufferP = false;
+	//static int buffer1 = 0;
+	//static int buffer2 = 0;
+	//static float buffer3 = 0;
+	//if (glfwGetKey(myWindow, GLFW_KEY_P) == GLFW_PRESS) {
+	//	if (interactionIsPossible(cameraPos, { genTransform[27][3].x, genTransform[27][3].y, genTransform[27][3].z })) {
+	//		if (!bufferP) {
+	//			if (isPickedUp && isDoneReading == false) {
+	//				isDoneReading = true;
+	//			}
+	//			isPickedUp = true;
+	//		}
+	//	}
+	//	bufferP = true;
+	//}
+	//else {
+	//	bufferP = false;
+	//}
+	//if (isPickedUp && isDoneReading == false) {
+	//	if (buffer1 < 100) {
+	//		genTransform[27] = glm::rotate(genTransform[27], deltaTime, glm::vec3(0.0f, 0.0f, 1.0f));
+	//		buffer1++;
+	//	}
+	//	if (buffer2 < 72) {
+	//		genTransform[27] = glm::rotate(genTransform[27], deltaTime, glm::vec3(0.0f, -1.0f, 0.0f));
+	//		buffer2++;
+	//	}
+	//	if (buffer3 < 180) {
+	//		interactCamera->Projection = glm::ortho(-20.0f + buffer3 / 10, 20.0f - buffer3 / 10, -10.5f + buffer3 / 20, 9.5f - buffer3 / 20, 0.0f, 1000.0f);
+	//		buffer3++;
+	//	}
+	//	int i = 0;
+	//	//for (genObjects[27])
+	//	//if (buffer3 < 72) {
+	//	//	genTransform[27] = glm::rotate(genTransform[27], deltaTime, glm::vec3(1.0f, 0.0f, 0.0f));
+	//	//	buffer3++;
+	//	//}
+	//}
 
 
 	//chairVertices = deCasteJauManager.getCurrentCasteJau(0);
@@ -993,23 +834,14 @@ void Game::Update(float deltaTime) {
 }
 
 void Game::Draw(float deltaTime) {
+	static float time = 0.0;
 	// Clear our screen every frame
 	glClearColor(myClearColor.x, myClearColor.y, myClearColor.z, myClearColor.w);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//myScene.Render(deltaTime);
-
 	//myShader->Bind();
 	//myShader->SetUniform("a_ModelViewProjection", interactCamera->GetViewProjection());
 	//myMesh->Draw();
-	
-
-
-
-
-
-
-
 
 	// We'll grab a reference to the ecs to make things easier   
 	auto& ecs = CurrentRegistry();
@@ -1032,81 +864,103 @@ void Game::Draw(float deltaTime) {
 	Shader::Sptr   boundShader = nullptr;
 	// A view will let us iterate over all of our entities that have the given component types    
 	auto view = ecs.view<MeshRenderer>();
-	static int hello = 0;
-	
-	
-	
+	int hello = 0;
 
 
 	for (const auto& entity : view) {
 		// Get our shader    
-		MeshRenderer& renderer = ecs.get<MeshRenderer>(entity);
+		const MeshRenderer& renderer = ecs.get<MeshRenderer>(entity);
 		// Early bail if mesh is invalid 
 		if (renderer.Mesh == nullptr || renderer.Material == nullptr)
 			continue;
-		if (hello == 0) {
-		//	renderer.Mesh = myMesh5;
-		//	for (int i = 0; i < 6; i++)
-		//		renderer.Mesh = dresser[i];
-		//	for (int i = 0; i < 40; i++)
-		//		renderer.Mesh = door[i];
-		}
-		//	else if (hello == 1) {
-		//		renderer.Mesh = myMesh4;
-		//	}
-		renderer.Mesh = genMesh[hello];
+		
+		//renderer.Mesh = Bake(genObjects[hello]);
+		
 		// If our shader has changed, we need to bind it and update our frame-level uniforms    
 		if (renderer.Material->GetShader() != boundShader) {
-			
 			boundShader = renderer.Material->GetShader();
 			boundShader->Bind();
+			//boundShader->SetUniform("a_CameraPos", interactCamera->GetPosition());
 			boundShader->SetUniform("a_CameraPos", myCamera->GetPosition());
 		}
+		//if (amountOfObjects[hello] == 3) {
+		//	testMat2->Set("inGoalPosition", genMats[hello]);
+		//	
+		//		//genMesh[hello];
+		//}
 		// If our material has changed, we need to apply it to the shader    
+		testMat2->Set("s_Albedo", genMats[hello]);
+		testMat->Set("s_Albedo", genMats[hello]);
+		//if (renderer.Material != mat) {
+			
+			
 		if (renderer.Material != mat) {
 			mat = renderer.Material;
 			mat->Apply();
 		}
+
+
+		//}
 		// We'll need some info about the entities position in the world 
 		const TempTransform& transform = ecs.get_or_assign<TempTransform>(entity);
 		// Our normal matrix is the inverse-transpose of our object's world rotation
 		glm::mat3 normalMatrix = glm::mat3(glm::transpose(glm::inverse(transform.GetWorldTransform())));
 		// Update the MVP using the item's transform  
-	
-		//
-		//if (hello == 0) { //The lantern
-		////	mat->GetShader()->SetUniform("a_ModelViewProjection", myCamera->GetViewProjection() * dresserTransform[6 - hello]);
-		//	mat->GetShader()->SetUniform("a_ModelViewProjection", myCamera->GetViewProjection() /*transform.GetWorldTransform())*/ * myLanternTransform);
-		//
-		//}
-		////else if (hello == 1) {
-		////
-		////	mat->GetShader()->SetUniform("a_ModelViewProjection", myCamera->GetViewProjection() /*transform.GetWorldTransform())*/ * dresserTransform[hello]);
-		////}
-		//else {
-		//	mat->GetShader()->SetUniform("a_ModelViewProjection", myCamera->GetViewProjection() * transform.GetWorldTransform());
-		//}
+		
+		if (amountOfObjects[hello] == 3) {
+			testMat->Set("time", time);
+			mat->GetShader()->SetUniform("a_ModelViewProjection", myCamera->GetViewProjection() * genTransform[hello]);
+			//mat->GetShader()->SetUniform("a_ModelViewProjection", interactCamera->GetViewProjection() * genTransform[hello]);
+			// Update the model matrix to the item's world transform
+			mat->GetShader()->SetUniform("a_Model", transform.GetWorldTransform());
+			// Update the model matrix to the item's world transform 
+			mat->GetShader()->SetUniform("a_NormalMatrix", normalMatrix);
+			// Draw the item   
+			renderer.Mesh->Draw();
+		}
+		else if (amountOfObjects[hello] == 4) {
+			if (isPickedUp && isDoneReading == false) {
+				//mat->GetShader()->SetUniform("a_ModelViewProjection", myCamera->GetViewProjection() * genTransform[hello]);
+				mat->GetShader()->SetUniform("a_ModelViewProjection", interactCamera->GetViewProjection() * genTransform[hello]);
 
 
-		mat->GetShader()->SetUniform("a_ModelViewProjection", myCamera->GetViewProjection() /*transform.GetWorldTransform())*/* genTransform[hello]);
+				// Update the model matrix to the item's world transform
+				mat->GetShader()->SetUniform("a_Model", transform.GetWorldTransform());
+				// Update the model matrix to the item's world transform 
+				mat->GetShader()->SetUniform("a_NormalMatrix", normalMatrix);
+				// Draw the item   
+				renderer.Mesh->Draw();
+				
+			}
+			else if (isDoneReading == false) {
+				mat->GetShader()->SetUniform("a_ModelViewProjection", myCamera->GetViewProjection() * genTransform[hello]);
+				//mat->GetShader()->SetUniform("a_ModelViewProjection", interactCamera->GetViewProjection() * genTransform[hello]);
 
+
+				// Update the model matrix to the item's world transform
+				mat->GetShader()->SetUniform("a_Model", transform.GetWorldTransform());
+				// Update the model matrix to the item's world transform 
+				mat->GetShader()->SetUniform("a_NormalMatrix", normalMatrix);
+				// Draw the item   
+				renderer.Mesh->Draw();
+			}
+		}
+		else {
+			boundShader->SetUniform("a_ModelViewProjection", myCamera->GetViewProjection() * genTransform[hello]);
+			//mat->GetShader()->SetUniform("a_ModelViewProjection", interactCamera->GetViewProjection() * genTransform[hello]);
+
+
+			// Update the model matrix to the item's world transform
+			boundShader->SetUniform("a_Model", transform.GetWorldTransform());
+			// Update the model matrix to the item's world transform 
+			boundShader->SetUniform("a_NormalMatrix", normalMatrix);
+			// Draw the item   
+			renderer.Mesh->Draw();
+		}
+		
 		hello++;
-
-		// Update the model matrix to the item's world transform
-		mat->GetShader()->SetUniform("a_Model", transform.GetWorldTransform());
-		// Update the model matrix to the item's world transform 
-		mat->GetShader()->SetUniform("a_NormalMatrix", normalMatrix);
-		// Draw the item   
-		renderer.Mesh->Draw();
 	}
-
-
-	//ecs.sort<MeshRenderer>([](const MeshRenderer& lhs, const MeshRenderer& rhs) {
-	
-	hello = 0;
-
-
-	
+	time += 0.02;
 }
 
 void Game::DrawGui(float deltaTime) {
@@ -1181,7 +1035,10 @@ void Game::DrawGui(float deltaTime) {
 
 bool Game::interactionIsPossible(glm::vec3 playerPos, glm::vec3 objectPos)
 {
-	if (playerPos.x - objectPos.x < 3 && playerPos.x - objectPos.x > 3) {
+	float distanceX = abs((playerPos.x) - (objectPos.x));
+
+	float distanceY = abs((playerPos.y) - (objectPos.y));
+	if (distanceX < 10 && distanceY < 10) {
 		return true;
 	}
 	return false;

@@ -23,3 +23,5 @@ private:
 	std::vector <float> amountOfTimess;
 
 };
+
+//Fowards kinematic here if we have time

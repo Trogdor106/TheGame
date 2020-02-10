@@ -2,12 +2,6 @@
 
 void deCasteJau::saveDeCasteJauObject(const char* filenameOriginal, const char* filenameOriginal2, const char* filenameTarget, const char* filenameTarget2)
 {
-	/*
-	morphObject temp = { loadOBJ(filenameOriginal), loadOBJ(filenameOriginal) , loadOBJ(filenameTarget) };
-	morphObjectList.push_back(temp);
-	currentInterval.push_back(0);
-	amountOfTimess.push_back(0);
-	*/
 	deCasteJauObject temp = { loadOBJ(filenameOriginal), loadOBJ(filenameOriginal2), loadOBJ(filenameOriginal) , loadOBJ(filenameTarget), loadOBJ(filenameTarget2) };
 	deCastleObjectList.push_back(temp);
 	currentInterval.push_back(0);
@@ -53,25 +47,10 @@ void deCasteJau::calculatedeCasteJau() {
 					deCastleObjectList[j].currentModel[i].Position = tempVertices6;
 					deCastleObjectList[j].currentModel[i].Normal = glm::normalize(tempNeorm6);
 
-					//deCastleObjectList[j].currentModel[i].Position = tempVertices;
-					//deCastleObjectList[j].currentModel[i].Normal = glm::normalize(tempNeorm);
-
-					//MorphObject::lerp(deCastleObjectList[j].currentModel[i].Normal, deCastleObjectList[j].originalModel1[i].Normal, tempNeorm, 0, 10, j);
-					//deCastleObjectList[j].currentModel[i].Position = tempVertices;
-					//deCastleObjectList[j].currentModel[i].Normal = glm::normalize(tempNeorm);
-
-
-					//or (int i = 0; i < mesh->vertices.size(); i++)
-					//
-					//	glm::vec3 v = Math::lerp(m_pMorphTargets[m_pCurrentKeyframe]->vertices[i], m_pMorphTargets[m_pNextKeyframe]->vertices[i], m_pLocalMorphTime);
-					//	glm::vec3 n = Math::lerp(m_pMorphTargets[m_pCurrentKeyframe]->normals[i], m_pMorphTargets[m_pNextKeyframe]->normals[i], m_pLocalMorphTime);
-					//	mesh->vertices[i] = v;
-					//	mesh->normals[i] = glm::normalize(n);
-					//
 				}
 			}
 			amountOfTimess[j] = tempAmountOfTimes;
-			currentInterval[j] += 0.095;
+			currentInterval[j] += 1;
 		}
 	}
 }
