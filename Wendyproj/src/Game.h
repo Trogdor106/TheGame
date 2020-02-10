@@ -99,7 +99,7 @@ private:
 	glm::vec3 cameraPos = glm::vec3(1, 1, 10);
 	glm::vec3 interactPos = glm::vec3(1, 1, 5);
 	Material::Sptr testMat2; //Wut?
-	Material::Sptr testMat; //Exacly
+	//Material::Sptr testMat; //Exacly
 
 	HitBoxes hitBoxManager;
 
@@ -152,8 +152,8 @@ private:
 	int windowPosY = 0;
 
 	//Other
-	MorphObject morphObjectManager;
-	deCasteJau deCasteJauManager;
+	//MorphObject morphObjectManager;
+	//deCasteJau deCasteJauManager;
 
 	float halfOfPI = 1.57079633;
 };

@@ -194,7 +194,7 @@ void Game::LoadContent() {
 	interactCamera->LookAt(glm::vec3(0.0f, 0.0f, 4), glm::vec3(0, 0, 1));
 	interactCamera->Projection = glm::ortho(-22.0f, 22.0f, -10.0f, 10.0f, 0.0f, 1000.0f);
 
-	Texture2D::Sptr albedo = Texture2D::LoadFromFile("f_Door.png");
+	//Texture2D::Sptr albedo = Texture2D::LoadFromFile("f_Door.png");
 	Texture2D::Sptr albedo2 = Texture2D::LoadFromFile("F_fatWall.png");
 
 
@@ -258,14 +258,14 @@ void Game::LoadContent() {
 	//	genMesh.push_back(temp);
 	//}
 
-	testMat = std::make_shared<Material>(phong2);
-
-	testMat->Set("s_Albedo", albedo2);
-	testMat->Set("a_LightPos", { 0, 1, 10 });
-	testMat->Set("a_LightColor", { 1.0f, 1.0f, 0.0f });
-	testMat->Set("a_AmbientColor", { 1.0f, 1.0f, 1.0f });
-	testMat->Set("a_AmbientPower", 0.1f);
-	testMat->Set("a_LightSpecPower", 1.0f);
+	//testMat = std::make_shared<Material>(phong2);
+	//
+	//testMat->Set("s_Albedo", albedo2);
+	//testMat->Set("a_LightPos", { 0, 1, 10 });
+	//testMat->Set("a_LightColor", { 1.0f, 1.0f, 0.0f });
+	//testMat->Set("a_AmbientColor", { 1.0f, 1.0f, 1.0f });
+	//testMat->Set("a_AmbientPower", 0.1f);
+	//testMat->Set("a_LightSpecPower", 1.0f);
 
 	testMat2 = std::make_shared<Material>(phong);
 	testMat2->Set("s_Albedo", albedo2);
@@ -292,15 +292,9 @@ void Game::LoadContent() {
 
 			//Texture2D::Sptr tempText = Texture2D::LoadFromFile(genMats[i]);
 			//testMat2->Set("s_Albedo", tempText);
-			if (amountOfObjects[i] != 3) {
-				genMesh2.Material = testMat2;
-				genMesh2.Mesh = Bake(genObjects[i]);
-			}
-			else {
-				genMesh2.Material = testMat;
-				genMesh2.Mesh = Bake(genObjects[i]);
-				int hello = 0;
-			}
+			genMesh2.Material = testMat2;
+			genMesh2.Mesh = Bake(genObjects[i]);
+			
 
 			switch (i) {
 			case 1: //Door topside of the saferoom
@@ -860,7 +854,7 @@ void Game::Draw(float deltaTime) {
 	Shader::Sptr   boundShader = nullptr;
 	// A view will let us iterate over all of our entities that have the given component types    
 	auto view = ecs.view<MeshRenderer>();
-	int hello = 0;
+	int hello = genObjects.size() - 1;
 
 
 	for (const auto& entity : view) {
@@ -904,7 +898,7 @@ void Game::Draw(float deltaTime) {
 		// Update the MVP using the item's transform  
 		
 		if (amountOfObjects[hello] == 3) {
-			testMat->Set("time", time);
+			//testMat->Set("time", time);
 			mat->GetShader()->SetUniform("a_ModelViewProjection", myCamera->GetViewProjection() * genTransform[hello]);
 			//mat->GetShader()->SetUniform("a_ModelViewProjection", interactCamera->GetViewProjection() * genTransform[hello]);
 			// Update the model matrix to the item's world transform
@@ -918,8 +912,8 @@ void Game::Draw(float deltaTime) {
 			if (isPickedUp && isDoneReading == false) {
 				//mat->GetShader()->SetUniform("a_ModelViewProjection", myCamera->GetViewProjection() * genTransform[hello]);
 				mat->GetShader()->SetUniform("a_ModelViewProjection", interactCamera->GetViewProjection() * genTransform[hello]);
-
-
+		
+		
 				// Update the model matrix to the item's world transform
 				mat->GetShader()->SetUniform("a_Model", transform.GetWorldTransform());
 				// Update the model matrix to the item's world transform 
@@ -931,8 +925,8 @@ void Game::Draw(float deltaTime) {
 			else if (isDoneReading == false) {
 				mat->GetShader()->SetUniform("a_ModelViewProjection", myCamera->GetViewProjection() * genTransform[hello]);
 				//mat->GetShader()->SetUniform("a_ModelViewProjection", interactCamera->GetViewProjection() * genTransform[hello]);
-
-
+		
+		
 				// Update the model matrix to the item's world transform
 				mat->GetShader()->SetUniform("a_Model", transform.GetWorldTransform());
 				// Update the model matrix to the item's world transform 
@@ -954,7 +948,7 @@ void Game::Draw(float deltaTime) {
 			renderer.Mesh->Draw();
 		}
 		
-		hello++;
+		hello--;
 	}
 	time += 0.02;
 }
