@@ -302,10 +302,6 @@ void Game::LoadContent() {
 				int hello = 0;
 			}
 
-
-			glm::mat4 tempMat = glm::mat4(1.0f);
-			genTransform.push_back(tempMat);
-
 			switch (i) {
 			case 1: //Door topside of the saferoom
 				genTransform[i] = glm::translate(genTransform[i], glm::vec3(-31.5f, 15.7f, 0));
@@ -889,15 +885,15 @@ void Game::Draw(float deltaTime) {
 		//		//genMesh[hello];
 		//}
 		// If our material has changed, we need to apply it to the shader    
+			
+			
+		
+		//testMat->Set("s_Albedo", genMats[hello]);
 		testMat2->Set("s_Albedo", genMats[hello]);
-		testMat->Set("s_Albedo", genMats[hello]);
 		//if (renderer.Material != mat) {
-			
-			
-		if (renderer.Material != mat) {
 			mat = renderer.Material;
 			mat->Apply();
-		}
+		//}
 
 
 		//}

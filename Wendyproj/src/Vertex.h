@@ -10,22 +10,23 @@ struct Vertex {
 	glm::vec3 Position;
 	glm::vec4 Color;
 	glm::vec3 Normal;
+	glm::vec2 UV;
 	glm::vec3 Tangent;
 	glm::vec3 BiTangent;
-	glm::vec2 UV;
 
 	Vertex(glm::vec3 pos = glm::vec3(0.0f), glm::vec3 norm = glm::vec3(0.0f), glm::vec2 uv = glm::vec2(0.0f)) :
 		Position(pos),
 		Color(glm::vec4(1.0f)),
 		Normal(norm),
+		UV(uv), 
 		Tangent(glm::vec3(0.0f)),
-		BiTangent(glm::vec3(0.0f)),
-		UV(uv) { }
+		BiTangent(glm::vec3(0.0f)) { }
 };
 
 struct MeshData {
 	std::vector<Vertex>   Vertices;
 	std::vector<uint32_t> Indices;
+	std::vector<glm::vec2> UV;
 	std::string           DebugName;
 };
 

@@ -274,6 +274,7 @@ MeshData ObjLoader::LoadObj(const char* filename, glm::vec4 baseColor) {
 	auto result = Begin();
 	result.Vertices = vertices;
 	result.Indices = indices;
+	result.UV = texUvs;
 	result.DebugName = filename;
 	return result;
 }
