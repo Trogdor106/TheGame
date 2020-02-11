@@ -112,8 +112,8 @@
     <ClInclude Include="src\Mesh.h" />
     <ClInclude Include="src\MeshRenderer.h" />
     <ClInclude Include="src\MorphObject.h" />
-    <ClInclude Include="src\ObjectLoader2.h" />
     <ClInclude Include="src\OBJLoader.h" />
+    <ClInclude Include="src\ObjectLoader2.h" />
     <ClInclude Include="src\Scene.h" />
     <ClInclude Include="src\SceneManager.h" />
     <ClInclude Include="src\Shader.h" />
@@ -130,13 +130,13 @@
     <ClCompile Include="src\Material.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\MorphObject.cpp" />
-    <ClCompile Include="src\ObjectLoader2.cpp" />
     <ClCompile Include="src\OBJLoader.cpp" />
+    <ClCompile Include="src\ObjectLoader2.cpp" />
     <ClCompile Include="src\SceneManager.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\Texture2D.cpp" />
-    <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Vertex.cpp" />
+    <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\external\glfw3\GLFW.vcxproj">

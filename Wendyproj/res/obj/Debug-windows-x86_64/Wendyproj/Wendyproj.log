@@ -1,0 +1,33 @@
+﻿  Game.cpp
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared\minwindef.h(130,1): warning C4005:  'APIENTRY': macro redefinition
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\external\glad\include\glad\glad.h(37): message :  see previous definition of 'APIENTRY'
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Wendyproj\src\Game.cpp(88,25): warning C4244:  'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Wendyproj\src\Game.cpp(95,19): warning C4244:  'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Wendyproj\src\Game.cpp(166,29): warning C4244:  'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Wendyproj\src\Game.cpp(167,38): warning C4244:  'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Wendyproj\src\Game.cpp(177,27): warning C4305:  '+=': truncation from 'double' to 'float'
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Wendyproj\src\Game.cpp(403,33): warning C4244:  'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Wendyproj\src\Game.cpp(403,26): warning C4244:  'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Wendyproj\src\Game.cpp(451,44): warning C4244:  '=': conversion from 'double' to 'T', possible loss of data
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Wendyproj\src\Game.cpp(451,44): warning C4244:         with
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Wendyproj\src\Game.cpp(451,44): warning C4244:         [
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Wendyproj\src\Game.cpp(451,44): warning C4244:             T=float
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Wendyproj\src\Game.cpp(451,44): warning C4244:         ]
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Wendyproj\src\Game.cpp(452,44): warning C4244:  '=': conversion from 'double' to 'T', possible loss of data
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Wendyproj\src\Game.cpp(452,44): warning C4244:         with
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Wendyproj\src\Game.cpp(452,44): warning C4244:         [
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Wendyproj\src\Game.cpp(452,44): warning C4244:             T=float
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Wendyproj\src\Game.cpp(452,44): warning C4244:         ]
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Wendyproj\src\Game.cpp(483,20): warning C4305:  '-=': truncation from 'double' to 'float'
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Wendyproj\src\Game.cpp(485,20): warning C4305:  '=': truncation from 'double' to 'float'
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Wendyproj\src\Game.cpp(489,20): warning C4305:  '+=': truncation from 'double' to 'float'
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Wendyproj\src\Game.cpp(491,19): warning C4305:  '=': truncation from 'double' to 'float'
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Wendyproj\src\Game.cpp(495,20): warning C4305:  '+=': truncation from 'double' to 'float'
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Wendyproj\src\Game.cpp(496,20): warning C4305:  '-=': truncation from 'double' to 'float'
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Wendyproj\src\Game.cpp(499,20): warning C4305:  '-=': truncation from 'double' to 'float'
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Wendyproj\src\Game.cpp(500,20): warning C4305:  '+=': truncation from 'double' to 'float'
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Wendyproj\src\Game.cpp(580,35): warning C4305:  '+=': truncation from 'double' to 'float'
+C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Wendyproj\src\Camera.h(31): warning C4172:  returning address of local variable or temporary
+  Wendyproj.vcxproj -> C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Wendyproj\..\..\bin\Debug-windows-x86_64\Wendyproj\Wendyproj.exe
+  1 File(s) copied
+  1 File(s) copied

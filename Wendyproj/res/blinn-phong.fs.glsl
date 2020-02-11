@@ -23,6 +23,10 @@ uniform float a_LightAttenuation;
 
 uniform sampler2D s_Albedo;
 
+// Toon
+const int levels = 2;
+const float scaleFactor = 1.0/levels;
+
 void main() {
 	
     // Re-normalize our input, so that it is always length 1
@@ -52,6 +56,9 @@ void main() {
     float diffuseFactor = max(dot(norm, toLight), 0);
     // Calculate our diffuse output
     vec3  diffuseOut = diffuseFactor * a_LightColor;
+	
+	//Toon Shading
+	diffuseOut = floor(diffuseOut * levels) * scaleFactor;
 
     // Our ambient is simply the color times the ambient power
     vec3 ambientOut = a_AmbientColor * a_AmbientPower;

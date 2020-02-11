@@ -10,4 +10,3 @@ class ObjLoader {
 public:
 	static MeshData LoadObj(const char* filename, glm::vec4 baseColor);
 };
-

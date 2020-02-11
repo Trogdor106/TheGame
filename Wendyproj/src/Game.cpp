@@ -203,38 +203,38 @@ void Game::LoadContent() {
 	//Replaced with
 	MeshData MeshTemp = ObjLoader::LoadObj("f_Door.obj", glm::vec4(1.0f));
 	
-	
+	//Type 0 is nothing, type 1 is unlocked door, type 2 is locked door, type 3 is drawer, type 4 is a note, type 5 is the oil cask (refueling)
 	///////////////Load objects and textures under here
-	Game::CreateObjects(1, 0, 5);
-	// object 0 is floor 2  
+	Game::CreateObjects(1, 0, 5); // object 0 floor 2
 	//texture 5 is dresser no drawers
-	Game::CreateObjects(11, 2, 2);
-	Game::CreateObjects(8, 2, 2);
-	Game::CreateObjects(11, 2, 2);
-	Game::CreateObjects(11, 2, 2);
-	Game::CreateObjects(8, 2, 2);
-	Game::CreateObjects(16, 0, 5);
-	Game::CreateObjects(15, 3, 4);
-	Game::CreateObjects(15, 0, 4);
-	Game::CreateObjects(15, 0, 4);
-	Game::CreateObjects(19, 0, 7);
-	Game::CreateObjects(28, 0, 6);
-	Game::CreateObjects(28, 0, 6);
-	Game::CreateObjects(28, 0, 6);
-	Game::CreateObjects(28, 0, 6);
-	Game::CreateObjects(28, 0, 6);
-	Game::CreateObjects(28, 0, 6);
-	Game::CreateObjects(29, 0, 6);
-	Game::CreateObjects(5, 0, 6);
-	Game::CreateObjects(4, 0, 6);
-	Game::CreateObjects(3, 0, 6);
-	Game::CreateObjects(27, 0, 6);
-	Game::CreateObjects(7, 0, 6);
-	Game::CreateObjects(21, 0, 6);
-	Game::CreateObjects(20, 0, 6);
-	Game::CreateObjects(19, 0, 6);
-	Game::CreateObjects(8, 1, 2);
-	Game::CreateObjects(34, 4, 8);
+	Game::CreateObjects(11, 1, 2); // object 1 is door topside of saferoom
+	Game::CreateObjects(8, 1, 2); // object 2 is door right side in safe room
+	Game::CreateObjects(11, 1, 2); // object 3 is door bottomside of saferoom
+	Game::CreateObjects(8, 2, 2); // object 4 is top door across of saferoom
+	Game::CreateObjects(8, 1, 2); // object 5 is left bathroom door
+	Game::CreateObjects(16, 0, 5); // object 6 is the dresser in the batrhoom(?)
+	Game::CreateObjects(15, 3, 4); // object 7 is the top drawer for object 6
+	Game::CreateObjects(15, 0, 4); // object 8 is the middle drawer for object 6
+	Game::CreateObjects(15, 0, 4); // object 9 is the bottom drawer for object 6
+	Game::CreateObjects(28, 0, 7); // object 10 is the boarded up window in the safe room (left wall)
+	Game::CreateObjects(25, 0, 6); // object 11 is a second boarded up window
+	Game::CreateObjects(4, 0, 6); // object 12 is a big vase
+	Game::CreateObjects(4, 0, 6); // object 13 is a big vase
+	Game::CreateObjects(29, 0, 6); // object 14 is a full bookshelf
+	Game::CreateObjects(29, 0, 6); // object 15 is a full bookshelf, look at all those vertices
+	Game::CreateObjects(11, 0, 6); // object 16 is the study door
+	Game::CreateObjects(11, 0, 6); // object 17 is the right door of the dining room
+	Game::CreateObjects(11, 0, 6); // object 18 is the left door of the dining room
+	Game::CreateObjects(11, 0, 6); //Object 19 is the door to the pantry
+	Game::CreateObjects(33, 0, 6); //Object 20 is the front door
+	Game::CreateObjects(34, 0, 6); //Object 21 is the safe room staircase
+	Game::CreateObjects(35, 0, 6); //Object 22 is the kitchen staircase
+	Game::CreateObjects(36, 0, 6); //Object 23 is the piano
+	Game::CreateObjects(37, 0, 6); //Object 24 is the 1st floor toilet
+	Game::CreateObjects(41, 0, 6); //Object 25 is the bathroom sink
+	Game::CreateObjects(42, 0, 6); //Object 25 is the mirror above the sink
+	//Game::CreateObjects(8, 1, 2);
+	//Game::CreateObjects(34, 4, 8);
 
 	int hello = 0;
 	Shader::Sptr phong = std::make_shared<Shader>();
@@ -272,7 +272,7 @@ void Game::LoadContent() {
 	testMat2->Set("a_LightPos", { 0, 1, 10 });
 	testMat2->Set("a_LightColor", { 1.0f, 1.0f, 0.0f });
 	testMat2->Set("a_AmbientColor", { 1.0f, 1.0f, 1.0f });
-	testMat2->Set("a_AmbientPower", 0.1f);
+	testMat2->Set("a_AmbientPower", 0.8f);
 	testMat2->Set("a_LightSpecPower", 1.0f);
 
 	SceneManager::RegisterScene("Test2");
@@ -297,118 +297,101 @@ void Game::LoadContent() {
 			
 
 			switch (i) {
-			case 1: //Door topside of the saferoom
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(-31.5f, 15.7f, 0));
+			case 0: //Object 0 The saferoom
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(44.2f, 49.9f, 0.0f));
 				break;
-			case 2:// object 2 is door leftside of saferoom
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(0.0f, -37.0f, 0));
+			case 1: //Object 1 Door right saferoom
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(50.5f, 11.5f, -0.1f));
+				break;
+			case 2:// object 2 is door bottom of saferoom
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(3.85f, -11.1f, -0.1f));
 				genTransform[i] = glm::rotate(genTransform[i], 2 * halfOfPI, glm::vec3(0, 0, 1));
 				break;
-			case 3:// object 2 is door bottomside of saferoom
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(16.5f, 10.9f, 0));
+			case 3:// object 3 door right across saferoom
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(61.6f, 11.5f, -0.1f));
 				break;
-			case 4:// object 4 is locked red door in front of door bottomside of saferoom
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(29.5f, 10.9f, 0));
+			case 4:// object 4 is door top across saferoom
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(12.7f, 49.0f, -0.1));
 				break;
-			case 5:// object 5 is door in behind of door leftside of saferoom
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(0.0f, -49.0f, 0));
+			case 5:// object 5 is door top safe room
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(12.7f, 36.5f, -0.1));
 				genTransform[i] = glm::rotate(genTransform[i], 2 * halfOfPI, glm::vec3(0, 0, 1));
 				break;
-			case 6:// object 6 is the drawer in the room where you find the red key
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(-25.0f, -80.0f, 0));
+			case 6:// object 6 is the dresser in the room where you find the red key
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(96.55f, -9.0f, -110.1f));
 				genTransform[i] = glm::rotate(genTransform[i], 2 * halfOfPI, glm::vec3(0, 0, 1));
 				break;
-			case 7:// object 7 is the drawer things in the room where you find the red key
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(-25.0f, -80.0f, 0));
+			case 7:// object 7 is the top drawer in the room where you find the red key 
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(96.55f, -7.92f, 161.1f));
 				genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
 				break;
-			case 8:// object 8 is the drawer things in the room where you find the red key
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(-25.0f, -80.0f, -0.6));
+			case 8:// object 8 is the middle drawer in the room where you find the red key
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(96.55f, -7.92f, 113.8f));
 				genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
 				break;
-			case 9:// object 9 is the drawer things in the room where you find the red key
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(-25.0f, -80.0f, -1.2));
+			case 9:// object 9 is the bottom drawer in the room where you find the red key
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(96.55f, -7.92f, 111.8f));
 				genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
 				break;
-			case 10:
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(-26.0f, -80.0f, 10));
+			case 10:// object 10 is a long broken window in the safe room
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(-11.85f, 16.5f, 7.5f));
 				break;
-			case 11:// object 10 is the left safe room wall
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(0.0f, 30.0f, 0));
-				//genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+			case 11:// object 11 is a broken window in the stairwell
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(-11.85f, -17.5f, 7.5f));
 				break;
-			case 12:// object 11 is the right safe room wall
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(-20.0f, -36.0f, 0));
-				//    //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+			case 12:// object 12 is a big vase
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(-8.85f, 32.5f, 0.0f));
 				break;
-			case 13:// object 12 is the bottom right hallway wall
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(-41.0f, -48.0f, 0));
-				//    //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+			case 13:// object 13 is a big vase
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(-7.00f, 27.5f, 0.0f));
 				break;
-			case 14:// object 13 is the top right hallway wall
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(42.5f, -48.0f, -20));
-				//    //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+			case 14:// object 14 is the bookshelf with way, way too many faces
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(24.0f, -8.1f, 0.0f));
 				break;
-			case 15:// object 16 is the far right room wall
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(0.0f, -90.0f, 0));
-				//    //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+			case 15:// object 15 is the bookshelf in the study
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(122.0f, -39.0f, 0.0f));
 				break;
-			case 16:// object 16 is the far right room wall
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(60.0f, -48.0f, 9.9));
-				//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+			case 16:// object 16 is the study door
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(164.75f, -9.5f, 0.0f));
 				break;
-			case 17:// object 16 is the far right room wall
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(20.5f, -10.0f, 0));
-				//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+			case 17:// object 17 is the right kitchen door
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(164.75f, 21.05f, 0.0f));
 				break;
 
-			case 18:// object 16 is the far right room wall
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(10.5f, -10.0f, 0));
-				//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+			case 18:// object 18 is the left kitchen door
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(102.0f, 11.5f, 0.0f));
 				break;
 
-			case 19:// object 16 is the far right room wall
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(15.5f, -10.0f, 0));
-				//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+			case 19:// object 19 is the pantry door
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(102.0f, 42.0f, 0.0f));
 				break;
 
-			case 20:// object 16 is the far right room wall
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(15.5f, -20.0f, 0));
-				//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+			case 20:// object 20 is the front door
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(79.75f, 97.5f, 0));
 				break;
 
-			case 21:// object 16 is the far right room wall
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(20.0f, -10.0f, 10));
-				//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+			case 21:// object 21 is the safe room staircase
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(15.85f, -15.85f, 0.0f));
 				break;
 
-			case 22:// object 16 is the far right room wall
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(25.5f, -5.0f, 0));
-				//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+			case 22:// object 22 is the kitchen staircase
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(192.0f, -0.9f, 0.0f));
 				break;
 
-			case 23:// object 16 is the far right room wall
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(10.5f, -5.0f, 0));
-				//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+			case 23:// object 23 is the piano
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(118.0f, -25.0f, 0.0f));
 				break;
 
-			case 24:// object 16 is the far right room wall
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(30.5f, -10.0f, 0));
-				//            //genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
+			case 24:// object 24 is the 1st floor toilet
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(96.55f, -9.0f, -0.1f));
 				break;
-				///////////////////////////////////////////////////////////
 
-			case 25:
-				//	genTransform[i] = glm::translate(genTransform[i], glm::vec3(0.0f, 0.0f, 4));
+			case 25:// object 25 is the bathroom sink
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(90.55f, 24.0f, 0.0f));
 				break;
-			case 26:
-				//	genTransform[i] = glm::translate(genTransform[i], glm::vec3(0.0f, 0.0f, 4));
-				break;
-			case 27:
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(0.0f, 1.0f, 4));
-				break;
-			case 28:
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(0.0f, 0.0f, 4));
+
+			case 26:// object 25 is the mirror above the sink
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(90.55f, 26.0f, 7.0f));
 				break;
 			}
 		}

@@ -52,23 +52,28 @@ protected:
 private:
 
 	const char* filename[100] = { "",
-		//1                //2                //3            //4                    //5                //6                //7
-	  "f_Floor2.obj",	"f_Floor3.obj",	 "f_Bed.obj",	 "f_BigVase.obj",	 "f_SmallVase.obj",		"f_Book.obj",	"f_BookShelf.obj",
+		//1                //2          //3            //4             //5          //6                //7
+  "1stFloor.obj",	"f_Floor3.obj",	 "Bed.obj",	 "BigVase.obj",	 "SmallVase.obj", "Book.obj",	"BookShelf.obj",
 		//8                //9								 //10								 //11
-		"f_Door.obj", "f_Door(Reverse_open_1_3).obj", "f_Door(Reverse_open_2_3).obj", "f_Door(Reverse_open_Max).obj",
-		//12					//13                    //14					   //15                //16                
-		"f_Door(open_1_3).obj", "f_Door(open_2_3).obj", "f_Door(open_Max).obj", "f_Drawer.obj", "f_DresserNoDrawer.obj",
+	  "Door.obj", "f_Door(Reverse_open_1_3).obj", "f_Door(Reverse_open_2_3).obj", "f_Door(Reverse_open_Max).obj",
+		//12					//13					   //14                //15				   //16                
+	"f_Door(open_1_3).obj", "f_Door(open_2_3).obj", "f_Door(open_Max).obj", "LargeDrawer.obj", "Dresser.obj",
 		//17					//18                 //19          //20         //21
-	  "f_Dresser.obj", "f_DresserWithMorror.obj", "f_Key1.obj", "f_Key2.obj", "f_Key3.obj",
-		//22              //23				 //24              //25                //26             //27				//28
-	  "f_Key4.obj", "f_Portrait.obj", "f_SmallFrame.obj", "f_SmallWindow.obj", "f_Stairs.obj", "f_LargeWindow.obj", "f_flatWall.obj" ,
-		//29                    //30                //31                    //32
-	  "f_rotatedWall.obj", "f_rotatedDoor.obj", "f_shortFlatWall.obj", "f_rotatedShortWall.obj", "note.obj", "note.obj" };
+	"Dresser.obj", "f_DresserWithMorror.obj",  "Key1.obj",   "Key2.obj",   "Key3.obj",
+		//22           //23				 //24              //25            //26            //27					//28
+	"f_Key4.obj", "Portrait.obj", "SmallFrame.obj", "SmallWindow.obj", "Stairs.obj", "f_LargeWindow.obj", "WideWindow.obj" ,
+		//29                    //30                //31                    //32					//33
+	"BookShelfFull.obj", "f_rotatedDoor.obj", "f_shortFlatWall.obj", "f_rotatedShortWall.obj", "FrontDoor.obj",
+		//34					//35				//36		//37		  //38				  //39			//40
+	"SafeRoomStairs.obj", "KitchenStairs.obj", "Piano.obj", "Toilet.obj" ,"PaintBucket.obj" , "OilCask.obj", "note.obj",
+		//41	   //42
+	"Sink.obj", "Mirror.obj" 
+	 };
 
 	const char* texturename[100] = { "",
 		//1			//2				//3				//4					//5						//6
 	"f_Bed.png", "f_Door.png", "f_doorFrame.png", "f_Drawer.png", "f_DresserNoDrawer.png", "F_fatWall.png",
-		//7
+		//7			//8
 	"f_Key1.png", "Note.png"
 
 	};
