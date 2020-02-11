@@ -117,6 +117,7 @@ private:
 	glm::mat4 myLanternTransform = glm::mat4(1.0f);
 	glm::mat4 myLanternTransform2 = glm::mat4(1.0f);
 
+	int objectUpdate(int ID);
 	//Normal objects
 	std::vector <glm::mat4> genTransform;
 	//std::vector <Mesh::Sptr> genMesh;
@@ -128,6 +129,7 @@ private:
 	//Texture2D::Sptr Albedo  = Texture2D::LoadFromFile(texturename[0]);
 
 	std::vector <int> amountOfObjects;
+	std::vector <int> objectsToUpdate;
 
 	bool isPickedUp = false;
 	bool isDoneReading = false;

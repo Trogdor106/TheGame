@@ -207,30 +207,30 @@ void Game::LoadContent() {
 	///////////////Load objects and textures under here
 	Game::CreateObjects(1, 0, 5); // object 0 floor 2
 	//texture 5 is dresser no drawers
-	Game::CreateObjects(11, 1, 2); // object 1 is door topside of saferoom
-	Game::CreateObjects(8, 1, 2); // object 2 is door right side in safe room
-	Game::CreateObjects(11, 1, 2); // object 3 is door bottomside of saferoom
-	Game::CreateObjects(8, 2, 2); // object 4 is top door across of saferoom
-	Game::CreateObjects(8, 1, 2); // object 5 is left bathroom door
+	Game::CreateObjects(11, 3, 2); // object 1 is door topside of saferoom
+	Game::CreateObjects(8,  3, 2); // object 2 is door right side in safe room
+	Game::CreateObjects(11, 3, 2); // object 3 is door bottomside of saferoom
+	Game::CreateObjects(8,  3, 2); // object 4 is top door across of saferoom
+	Game::CreateObjects(8,  3, 2); // object 5 is left bathroom door
 	Game::CreateObjects(16, 0, 5); // object 6 is the dresser in the batrhoom(?)
-	Game::CreateObjects(15, 3, 4); // object 7 is the top drawer for object 6
+	Game::CreateObjects(15, 10, 4); // object 7 is the top drawer for object 6
 	Game::CreateObjects(15, 0, 4); // object 8 is the middle drawer for object 6
 	Game::CreateObjects(15, 0, 4); // object 9 is the bottom drawer for object 6
 	Game::CreateObjects(28, 0, 7); // object 10 is the boarded up window in the safe room (left wall)
 	Game::CreateObjects(25, 0, 6); // object 11 is a second boarded up window
-	Game::CreateObjects(4, 0, 6); // object 12 is a big vase
-	Game::CreateObjects(4, 0, 6); // object 13 is a big vase
+	Game::CreateObjects(4,  5, 6); // object 12 is a big vase
+	Game::CreateObjects(4,  0, 6); // object 13 is a big vase
 	Game::CreateObjects(29, 0, 6); // object 14 is a full bookshelf
 	Game::CreateObjects(29, 0, 6); // object 15 is a full bookshelf, look at all those vertices
 	Game::CreateObjects(11, 0, 6); // object 16 is the study door
-	Game::CreateObjects(11, 0, 6); // object 17 is the right door of the dining room
-	Game::CreateObjects(11, 0, 6); // object 18 is the left door of the dining room
-	Game::CreateObjects(11, 0, 6); //Object 19 is the door to the pantry
-	Game::CreateObjects(33, 0, 6); //Object 20 is the front door
+	Game::CreateObjects(11, 3, 6); // object 17 is the right door of the dining room
+	Game::CreateObjects(11, 3, 6); // object 18 is the left door of the dining room
+	Game::CreateObjects(11, 3, 6); //Object 19 is the door to the pantry
+	Game::CreateObjects(33, 4, 6); //Object 20 is the front door
 	Game::CreateObjects(34, 0, 6); //Object 21 is the safe room staircase
 	Game::CreateObjects(35, 0, 6); //Object 22 is the kitchen staircase
 	Game::CreateObjects(36, 0, 6); //Object 23 is the piano
-	Game::CreateObjects(37, 0, 6); //Object 24 is the 1st floor toilet
+	Game::CreateObjects(37, 3, 6); //Object 24 is the 1st floor toilet
 	Game::CreateObjects(41, 0, 6); //Object 25 is the bathroom sink
 	Game::CreateObjects(42, 0, 6); //Object 25 is the mirror above the sink
 	//Game::CreateObjects(8, 1, 2);
@@ -243,29 +243,6 @@ void Game::LoadContent() {
 	Shader::Sptr phong2 = std::make_shared<Shader>();
 	phong2->Load("lighting.vs.glsl", "blinn-phong.fs.glsl");
 
-	//lerpVS->Load("lerp.vs.glsl", "blinn-phong.fs.glsl");
-
-	//for (int i = 0; i < amountOfObjects.size(); i++)
-	//{
-	//	Mesh::Sptr temp;
-	//	if (amountOfObjects[i] == 3)
-	//		temp = std::make_shared<Mesh>(genObjects[i].data(), genObjects[i].size(), nullptr, 0);// , genObjects[2].data(), genObjects[2].size(), nullptr, 0);
-	//	else 
-	//		temp = std::make_shared<Mesh>(genObjects[i].data(), genObjects[i].size(), nullptr, 0);// , genObjects[i].data(), genObjects[i].size(), nullptr, 0);
-	//	//MeshBuilder::Bake(data2);
-	//	//temp =
-	//	Bake(genObjects[0])
-	//	genMesh.push_back(temp);
-	//}
-
-	//testMat = std::make_shared<Material>(phong2);
-	//
-	//testMat->Set("s_Albedo", albedo2);
-	//testMat->Set("a_LightPos", { 0, 1, 10 });
-	//testMat->Set("a_LightColor", { 1.0f, 1.0f, 0.0f });
-	//testMat->Set("a_AmbientColor", { 1.0f, 1.0f, 1.0f });
-	//testMat->Set("a_AmbientPower", 0.1f);
-	//testMat->Set("a_LightSpecPower", 1.0f);
 
 	testMat2 = std::make_shared<Material>(phong);
 	testMat2->Set("s_Albedo", albedo2);
@@ -696,6 +673,44 @@ void Game::Update(float deltaTime) {
 	
 	lanternFuel -= 1; //Just makes the lantern fuel drain
 	
+	static bool isE = false;
+	int hello = 0;
+	if (glfwGetKey(myWindow, GLFW_KEY_E) == GLFW_PRESS) {
+		if (!isE) {
+			isE = true;
+			for (int i = 0; i < genObjects.size(); i++) {
+				if (amountOfObjects[i] == 3) {
+					if (interactionIsPossible(cameraPos, glm::vec3(genTransform[i][3].x, genTransform[i][3].y, genTransform[i][3].z))) {
+						objectsToUpdate.push_back(i);
+						amountOfObjects[i]--;
+					}
+				}
+				else if (amountOfObjects[i] == 5) {
+					if (interactionIsPossible(cameraPos, glm::vec3(genTransform[i][3].x, genTransform[i][3].y, genTransform[i][3].z))) {
+						objectsToUpdate.push_back(i);
+					}
+				}
+				else if (amountOfObjects[i] == 10) {
+					if (interactionIsPossible(cameraPos, glm::vec3(genTransform[i][3].x, genTransform[i][3].y, genTransform[i][3].z))) {
+						objectsToUpdate.push_back(i);
+					}
+				}
+			}
+		}
+	}
+	else {
+		isE = false;
+	}
+
+
+	if (objectsToUpdate.size() != 0) {
+		for (int i = 0; i < objectsToUpdate.size(); i++) {
+			objectUpdate(i);
+		}
+	}
+
+
+
 	//morphObjectManager.updateMorphObject(deltaTime, 0, myLanternTransform);
 	///lanternVertices = morphObjectManager.getCurrentModel(0);
 	//myMesh5 = std::make_shared<Mesh>(lanternVertices.data(), lanternVertices.size(), nullptr, 0);
@@ -1025,4 +1040,46 @@ bool Game::interact(int objectID, glm::vec3 cameraPos, bool isPressed)
 		}
 	}
 	return false;
+}
+
+int Game::objectUpdate(int ID)
+{
+	float time = 0.001;
+
+	switch (amountOfObjects[objectsToUpdate[ID]]) {
+	case 2: //Door opening Really needs tweaking
+		if (genTransform[objectsToUpdate[ID]][0].y >= 0.99) {
+			amountOfObjects[objectsToUpdate[ID]] = 1;
+			return 1;
+		}
+		else {
+			genTransform[objectsToUpdate[ID]] = glm::rotate(genTransform[objectsToUpdate[ID]], time, glm::vec3(0, 0, 0.3));
+			genTransform[objectsToUpdate[ID]] = glm::translate(genTransform[objectsToUpdate[ID]], glm::vec3(-acos(genTransform[objectsToUpdate[ID]][0].x) / 500, -asin(genTransform[objectsToUpdate[ID]][1].y) / 500, 0));
+		}
+		return 0;
+	case 5: //Red Key //Is that a thing?
+		if (genTransform[objectsToUpdate[ID]][3].y <= 100099) {
+			genTransform[objectsToUpdate[ID]] = glm::translate(genTransform[objectsToUpdate[ID]], glm::vec3(1000000000, 10000000000, 1000000000));
+			for (int i = 0; i < amountOfObjects.size(); i++) {
+				if (amountOfObjects[i] == 4) { //Unlock the doors that are associated with this key
+					amountOfObjects[i] = 3;
+				}
+			}
+			return 0;
+		}
+		else {
+			return 1;
+		}
+	case 10: //Drawer //Just guessing because I have no idea where it is
+		static float time = 0;
+		if (time < 10) {
+			genTransform[objectsToUpdate[ID]] = glm::translate(genTransform[objectsToUpdate[ID]], glm::vec3(0.5, 0.0, 0.0));
+		}
+		else {
+			amountOfObjects[objectsToUpdate[ID]] = 1;
+		}
+	}
+
+	return 0;
+
 }
