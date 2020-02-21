@@ -8,14 +8,18 @@
 #include <functional>
 
 #include "GLM/glm.hpp"
+#include <GLM/gtc/matrix_transform.hpp>
 
 #include "Mesh.h"
 #include "Shader.h"
 #include "Camera.h"
-#include "OBJLoader.h"
+#include "ObjectLoader2.h"
 #include "Material.h"
 #include "HitBoxes.h"
 #include "GeneralMath.h"
+#include "SceneManager.h"
+#include "MeshRenderer.h"
+#include "Texture2D.h"
 
 
 class Game {
@@ -49,6 +53,17 @@ protected:
 	bool interactionIsPossible(glm::vec3, glm::vec3);
 
 	bool interact(int objectID, glm::vec3 cameraPos, bool isPressed);
+
+	struct TempTransform {
+		glm::vec3 Position;
+		glm::vec3 EulerRotation;
+		glm::vec3 Scale;
+		glm::mat4 GetWorldTransform() const {
+			return
+				glm::translate(glm::mat4(1.0f), Position) * glm::mat4_cast(glm::quat(glm::radians(EulerRotation))) * glm::scale(glm::mat4(1.0f), Scale);
+		}
+	};
+
 private:
 
 	const char* filename[100] = { "",
