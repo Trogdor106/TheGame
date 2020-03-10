@@ -318,10 +318,10 @@ MeshAndHitBox ObjLoader::LoadObj2(const char* filename, glm::vec4 baseColor)
 			glm::vec3 pos; ss >> pos.x; ss >> pos.y; ss >> pos.z; ss >> garb;
 			positions.push_back(pos);
 			if (firstIteration) {
-				toReturn.bottomLeft = { pos.x, pos.y };
-				toReturn.bottomRight = { pos.x, pos.y };
-				toReturn.topLeft = { pos.x, pos.y };
-				toReturn.topRight = { pos.x, pos.y };
+				toReturn.Bottom = pos.y;
+				toReturn.top = pos.y;
+				toReturn.Left = pos.x;
+				toReturn.Right = pos.x;
 				firstIteration = false;
 			}
 			else {
@@ -335,17 +335,17 @@ MeshAndHitBox ObjLoader::LoadObj2(const char* filename, glm::vec4 baseColor)
 				//  |						  |
 				//  BottomLeft------BottomRight						  
 				//pos							pos
-				if (pos.x < toReturn.bottomLeft[0] && pos.y < toReturn.bottomLeft[1]) {
-					toReturn.bottomLeft = { pos.x, pos.y };
+				if (pos.x < toReturn.Bottom) {
+					toReturn.Bottom = pos.x;
 				}
-				if (pos.x > toReturn.bottomRight[0] && pos.y < toReturn.bottomRight[1]) {
-					toReturn.bottomRight = { pos.x, pos.y };
+				if (pos.x > toReturn.top) {
+					toReturn.top = pos.x;
 				}
-				if (pos.x < toReturn.topLeft[0] && pos.y > toReturn.topLeft[1]) {
-					toReturn.topLeft = { pos.x, pos.y };
+				if (pos.z > toReturn.Right) {
+					toReturn.Right = pos.z;
 				}
-				if (pos.x > toReturn.topRight[0] && pos.y > toReturn.topRight[1]) {
-					toReturn.topRight = { pos.x, pos.y };
+				if (pos.z < toReturn.Left) {
+					toReturn.Left = pos.z;
 				}
 			}
 		}

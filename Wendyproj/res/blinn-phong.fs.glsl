@@ -77,6 +77,16 @@ void main() {
 	// TODO: gamma correction
 	// Write the output   
 	outColor = vec4(result, inColor.a * albedo.a); // * a_ColorMultiplier;
+	
+	vec3 hello = outColor.rgb;
+	float average = (hello.r + hello.b + hello.g)/3.0f;
+	if (average < 0.2) {
+		average = 0.0;
+	}
+	hello.r = average;
+	hello.b = average;
+	hello.g = average;
+	outColor = vec4(hello, inColor.a * albedo.a);
 
 	//0, 0, 1
 	//if ((inNormal.x * 0 + inNormal.y * 1 + inNormal.z * 1) <= 0.1 && (inNormal.x * 0 + inNormal.y * 1 + inNormal.z * 1) >= -0.1) {

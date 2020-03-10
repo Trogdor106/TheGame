@@ -5,10 +5,10 @@
 #include "GLM/glm.hpp"
 
 struct HitBox {
-	std::vector <float> topLeft;
-	std::vector <float> topRight;
-	std::vector <float> bottomLeft;
-	std::vector <float> bottomRight;
+	float top;
+	float Bottom;
+	float Left;
+	float Right;
 	int ID;
 };
 
@@ -33,7 +33,7 @@ public:
 	/*
 	Use this one for rotation of objects (it's not true rotation because of how our hitboxing works so only does every 45 degrees)
 	*/
-	bool isInHitBox(glm::vec3 cameraPos);
+	bool isInHitBox(glm::vec3 cameraPos, glm::vec3 cameraPosGoal);
 
 private:
 	std::vector <HitBox> OGHitBoxHolder; //Keeps the default hitbox

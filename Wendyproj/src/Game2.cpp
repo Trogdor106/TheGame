@@ -5,6 +5,34 @@
 //functions that are the most modified (Should be re-organised properly later by logical groupment like graphics stuff, math stuff or other similar ideas)
 
 
+void Game::LoadSimpleContent()
+{
+	// Create our 4 vertices
+	Vertexmini vertices[4] = {
+		//       Position                   Color
+		//    x      y     z         r    g     b     a
+		{{ -0.5f, -0.5f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }},
+		{{  0.5f, -0.5f, 0.0f }, { 1.0f, 1.0f, 0.0f, 1.0f }},
+		{{ -0.5f,  0.5f, 0.0f }, { 1.0f, 0.0f, 1.0f, 1.0f }},
+		{{  0.5f,  0.5f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f }},
+	};
+
+	// Create our 6 indices
+	uint32_t indices[6] = {
+		0, 1, 2,
+		2, 1, 3
+	};
+
+	// Create a new mesh from the data
+	mySimpleMesh = std::make_shared<Meshmini>(vertices, 4, indices, 6);
+
+	// Create and compile shader
+	simpleShader = std::make_shared<Shader>();
+	simpleShader->LoadPart(ShaderStageType::VertexShader, "passthrough.vs.glsl");
+	simpleShader->LoadPart(ShaderStageType::FragmentShader, "passthrough.fs.glsl");
+	simpleShader->Link();
+}
+
 void Game::LoadContent() {
 	myCamera = std::make_shared<Camera>();
 	myCamera->SetPosition(cameraPos);
@@ -15,6 +43,11 @@ void Game::LoadContent() {
 	interactCamera->SetPosition(glm::vec3(1, 1, 10));
 	interactCamera->LookAt(glm::vec3(0.0f, 0.0f, 4), glm::vec3(0, 0, 1));
 	interactCamera->Projection = glm::ortho(-22.0f, 22.0f, -10.0f, 10.0f, 0.0f, 1000.0f);
+
+	glfwGetWindowSize(myWindow, &windowSizeWidth, &windowSizeHeight);
+	GlfwWindowResizedCallback(myWindow, windowSizeWidth, windowSizeHeight);
+
+
 
 	//Texture2D::Sptr albedo = Texture2D::LoadFromFile("f_Door.png");
 	Texture2D::Sptr albedo2 = Texture2D::LoadFromFile("F_fatWall.png");
@@ -429,7 +462,7 @@ void Game::Update(float deltaTime) {
 
 
 
-	if (!hitBoxManager.isInHitBox({ myCamera->GetPosition().x + movement.z * cos(angleForX) + movement.x * cos(angleForX + 1.57078145) + finalHeadBobSide * cos(angleForX + 1.57078145),
+	if (!hitBoxManager.isInHitBox(myCamera->GetPosition(), { myCamera->GetPosition().x + movement.z * cos(angleForX) + movement.x * cos(angleForX + 1.57078145) + finalHeadBobSide * cos(angleForX + 1.57078145),
 		myCamera->GetPosition().y + movement.z * sin(angleForX) + movement.x * sin(angleForX + 1.57078145) + finalHeadBobSide * sin(angleForX + 1.57078145),
 		myCamera->GetPosition().z + finalHeadBob })) {
 		

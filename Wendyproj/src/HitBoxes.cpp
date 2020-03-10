@@ -1,7 +1,7 @@
 #include "HitBoxes.h"
 
 HitBoxes::HitBoxes() {
-	HitBox temp = { {0.0,0.0}, {0.0,0.0}, {0.0,0.0}, {0.0,0.0}, -1 };
+	HitBox temp = { {0.0}, {0.0}, {0.0}, {0.0}, -1 };
 	hitBoxHolder.push_back(temp);
 	OGHitBoxHolder.push_back(temp);
 }
@@ -79,20 +79,20 @@ void HitBoxes::updateHitBox(int id, glm::mat4 changes)
 {
 	for (int i = 0; i < hitBoxHolder.size(); i++) {
 		if (hitBoxHolder[i].ID == id) {
-			hitBoxHolder[i].bottomLeft[0] = OGHitBoxHolder[i].bottomLeft[0] + changes[3][0];
-			hitBoxHolder[i].bottomLeft[1] = OGHitBoxHolder[i].bottomLeft[1] + changes[3][1];
+			hitBoxHolder[i].Bottom = OGHitBoxHolder[i].Bottom + changes[3][0];
+			hitBoxHolder[i].Bottom = OGHitBoxHolder[i].Bottom + changes[3][1];
 			//hitBoxHolder[i].bottomLeft[2] = OGHitBoxHolder[i].bottomLeft[2] + changes[3][2];
 
-			hitBoxHolder[i].topLeft[0] = OGHitBoxHolder[i].topLeft[0] + changes[3][0];
-			hitBoxHolder[i].topLeft[1] = OGHitBoxHolder[i].topLeft[1] + changes[3][1];
+			hitBoxHolder[i].top = OGHitBoxHolder[i].top + changes[3][0];
+			hitBoxHolder[i].top = OGHitBoxHolder[i].top + changes[3][1];
 			//hitBoxHolder[i].topLeft[2] = OGHitBoxHolder[i].topLeft[2] + changes[3][2];
 
-			hitBoxHolder[i].bottomRight[0] = OGHitBoxHolder[i].bottomRight[0] + changes[3][0];
-			hitBoxHolder[i].bottomRight[1] = OGHitBoxHolder[i].bottomRight[1] + changes[3][1];
+			hitBoxHolder[i].Right = OGHitBoxHolder[i].Right + changes[3][0];
+			hitBoxHolder[i].Right = OGHitBoxHolder[i].Right + changes[3][1];
 			//hitBoxHolder[i].bottomRight[2] = OGHitBoxHolder[i].bottomRight[2] + changes[3][2];
 
-			hitBoxHolder[i].topRight[0] = OGHitBoxHolder[i].topRight[0] + changes[3][0];
-			hitBoxHolder[i].topRight[1] = OGHitBoxHolder[i].topRight[1] + changes[3][1];
+			hitBoxHolder[i].Left = OGHitBoxHolder[i].Left + changes[3][0];
+			hitBoxHolder[i].Left = OGHitBoxHolder[i].Left + changes[3][1];
 			//hitBoxHolder[i].topRight[2] = OGHitBoxHolder[i].topRight[2] + changes[3][2];
 
 		}
@@ -106,47 +106,60 @@ void HitBoxes::updateHitBox(int id, float rotation)
 			//Maybe add actual rotation with angle for angled objects at some point (Not in class since I cannot think about math right now)
 
 			if (rotation == 90) {
-				hitBoxHolder[i].bottomLeft = rotate90(OGHitBoxHolder[i].bottomLeft);
-				hitBoxHolder[i].bottomRight = rotate90(OGHitBoxHolder[i].bottomRight);
-				hitBoxHolder[i].topLeft = rotate90(OGHitBoxHolder[i].topLeft);
-				hitBoxHolder[i].topRight = rotate90(OGHitBoxHolder[i].topRight);
+				hitBoxHolder[i].Left = OGHitBoxHolder[i].Bottom;
+				hitBoxHolder[i].Right = OGHitBoxHolder[i].top;
+				hitBoxHolder[i].top = OGHitBoxHolder[i].Right;
+				hitBoxHolder[i].Bottom = OGHitBoxHolder[i].Left;
 			}
 			else if (rotation == 180) {
-				hitBoxHolder[i].bottomLeft = rotate180(OGHitBoxHolder[i].bottomLeft);
-				hitBoxHolder[i].bottomRight = rotate180(OGHitBoxHolder[i].bottomRight);
-				hitBoxHolder[i].topLeft = rotate180(OGHitBoxHolder[i].topLeft);
-				hitBoxHolder[i].topRight = rotate180(OGHitBoxHolder[i].topRight);
+				hitBoxHolder[i].Left = OGHitBoxHolder[i].Right;
+				hitBoxHolder[i].Right = OGHitBoxHolder[i].Left;
+				hitBoxHolder[i].top = OGHitBoxHolder[i].Bottom;
+				hitBoxHolder[i].Bottom = OGHitBoxHolder[i].top;
 			}
 			else if (rotation == 270) {
-				hitBoxHolder[i].bottomLeft = rotate270(OGHitBoxHolder[i].bottomLeft);
-				hitBoxHolder[i].bottomRight = rotate270(OGHitBoxHolder[i].bottomRight);
-				hitBoxHolder[i].topLeft = rotate270(OGHitBoxHolder[i].topLeft);
-				hitBoxHolder[i].topRight = rotate270(OGHitBoxHolder[i].topRight);
+				hitBoxHolder[i].Left = OGHitBoxHolder[i].top;
+				hitBoxHolder[i].Right = OGHitBoxHolder[i].Bottom;
+				hitBoxHolder[i].top = OGHitBoxHolder[i].Left;
+				hitBoxHolder[i].Bottom = OGHitBoxHolder[i].Right;
 			}
 			else if (rotation == -90) {
-				hitBoxHolder[i].bottomLeft = rotateNeg90(OGHitBoxHolder[i].bottomLeft);
-				hitBoxHolder[i].bottomRight = rotateNeg90(OGHitBoxHolder[i].bottomRight);
-				hitBoxHolder[i].topLeft = rotateNeg90(OGHitBoxHolder[i].topLeft);
-				hitBoxHolder[i].topRight = rotateNeg90(OGHitBoxHolder[i].topRight);
+
+				hitBoxHolder[i].Left = OGHitBoxHolder[i].top;
+				hitBoxHolder[i].Right = OGHitBoxHolder[i].Bottom;
+				hitBoxHolder[i].top = OGHitBoxHolder[i].Left;
+				hitBoxHolder[i].Bottom = OGHitBoxHolder[i].Right;
 			}
 			else if (rotation == -180) {
-				hitBoxHolder[i].bottomLeft = rotateNeg180(OGHitBoxHolder[i].bottomLeft);
-				hitBoxHolder[i].bottomRight = rotateNeg180(OGHitBoxHolder[i].bottomRight);
-				hitBoxHolder[i].topLeft = rotateNeg180(OGHitBoxHolder[i].topLeft);
-				hitBoxHolder[i].topRight = rotateNeg180(OGHitBoxHolder[i].topRight);
+				hitBoxHolder[i].Left = OGHitBoxHolder[i].Right;
+				hitBoxHolder[i].Right = OGHitBoxHolder[i].Left;
+				hitBoxHolder[i].top = OGHitBoxHolder[i].Bottom;
+				hitBoxHolder[i].Bottom = OGHitBoxHolder[i].top;
 			}
 			else if (rotation == -270) {
-				hitBoxHolder[i].bottomLeft = rotateNeg270(OGHitBoxHolder[i].bottomLeft);
-				hitBoxHolder[i].bottomRight = rotateNeg270(OGHitBoxHolder[i].bottomRight);
-				hitBoxHolder[i].topLeft = rotateNeg270(OGHitBoxHolder[i].topLeft);
-				hitBoxHolder[i].topRight = rotateNeg270(OGHitBoxHolder[i].topRight);
+				hitBoxHolder[i].Left = OGHitBoxHolder[i].Bottom;
+				hitBoxHolder[i].Right = OGHitBoxHolder[i].top;
+				hitBoxHolder[i].top = OGHitBoxHolder[i].Right;
+				hitBoxHolder[i].Bottom = OGHitBoxHolder[i].Left;
 			}
 		}
 	}
 }
 
-bool HitBoxes::isInHitBox(glm::vec3 cameraPos)
+bool HitBoxes::isInHitBox(glm::vec3 cameraPos, glm::vec3 cameraPosGoal)
 {
+	//Innifecient to do it like this but it's simpler
+	static int steps = 10;
+	float distancePerStepX = (cameraPosGoal.x - cameraPos.x) / steps;
+	float distancePerStepY = (cameraPosGoal.y - cameraPos.y) / steps;
+	if (distancePerStepX != 0) {
+		int hello = 0;
+	}
+	std::vector <glm::vec2> xY;
+	for (int i = 1; i <= steps; i++) {
+		xY.push_back(glm::vec2((cameraPos.x + distancePerStepX * i), (cameraPos.y + distancePerStepY * i)));
+	}
+
 				// pos							pos
 				//  Top Left-----------TopRight
 				//  |						  |
@@ -157,10 +170,34 @@ bool HitBoxes::isInHitBox(glm::vec3 cameraPos)
 				//  BottomLeft------BottomRight						  
 				//pos							pos
 
+				// if  >BL.x and <TR.x
+				// if  >BL.y and <TR.y
+
+				// if  <BR.x and >TL.x
+				// if  <BR.y and >TL.y
 	for (int i = 0; i < hitBoxHolder.size(); i++) {
-		if (cameraPos.x > hitBoxHolder[i].bottomLeft[0] && cameraPos.y < hitBoxHolder[i].topLeft[1] && cameraPos.x < hitBoxHolder[i].bottomRight[0] && cameraPos.y > hitBoxHolder[i].bottomRight[1]) {
-			return true;
+		//for (int p = 0; p < steps; p++) {
+			//if (xY[p].x > hitBoxHolder[i].bottomLeft[0] && xY[p].x < hitBoxHolder[i].topRight[0]) { 
+			//	if (xY[p].y < hitBoxHolder[i].bottomLeft[1] && xY[p].y > hitBoxHolder[i].topRight[1]) {
+			//		return true;
+			//	}
+			//}
+			//if (xY[p].x >	 hitBoxHolder[i].bottomRight[0] && xY[p].x < hitBoxHolder[i].topLeft[0]) {
+			//	if (xY[p].y < hitBoxHolder[i].bottomRight[1] && xY[p].y > hitBoxHolder[i].topLeft[1]) {
+			//		return true;
+			//	}
+			//}
+
+
+		//}
+		if (cameraPos.y >= hitBoxHolder[i].Bottom && cameraPos.y <= hitBoxHolder[i].top){
+			if (cameraPos.x >= hitBoxHolder[i].Left && cameraPos.x <= hitBoxHolder[i].Right) {
+				return false;
+			}
 		}
+		//if (cameraPos.x > hitBoxHolder[i].bottomLeft[0] && cameraPos.y < hitBoxHolder[i].topLeft[1] && cameraPos.x < hitBoxHolder[i].bottomRight[0] && cameraPos.y > hitBoxHolder[i].bottomRight[1]) {
+		//	return true;
+		//}
 		//else if (cameraPos.x > hitBoxHolder[i].bottomLeft[1] && cameraPos.x < hitBoxHolder[i].topRight[1]) {
 		//	return true;
 		//}

@@ -82,7 +82,9 @@ void Game::Run()
 	//gBufferInit();
 	
 	InitImGui();
+	LoadSimpleContent();
 	LoadContent();
+
 
 	static float prevFrame = glfwGetTime();
 
@@ -90,6 +92,7 @@ void Game::Run()
 	while (!glfwWindowShouldClose(myWindow)) {
 		// Poll for events from windows (clicks, keypressed, closing, all that)
 		glfwPollEvents();
+		alwaysActiveKeys();
 
 		float thisFrame = glfwGetTime();
 		float deltaTime = thisFrame - prevFrame;
@@ -97,6 +100,7 @@ void Game::Run()
 		switch (gameState) {
 		case 0:
 			Update(deltaTime);
+			Draw(deltaTime);
 			break;
 		case 1:
 			pauseScreen(); //Also need start and end screen
@@ -104,7 +108,6 @@ void Game::Run()
 		case 2:
 			break;
 		}
-		Draw(deltaTime);
 		//preRender();
 		//gBuffer();
 
@@ -124,7 +127,7 @@ void Game::Run()
 	LOG_INFO("Shutting down...");
 
 	UnloadContent();
-	UnloadGBuffer();
+	//UnloadGBuffer();
 	ShutdownImGui();
 	Shutdown();
 }
@@ -140,8 +143,9 @@ void Game::Initialize() {
 	glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, true);
 
 	// Create a new GLFW window
-	myWindow = glfwCreateWindow(600, 600, myWindowTitle, nullptr, nullptr);
-
+	myWindow = glfwCreateWindow(windowSizeWidth, windowSizeHeight, myWindowTitle, nullptr, nullptr);
+	glfwMaximizeWindow(myWindow);
+	
 	// Tie our game to our window, so we can access it via callbacks
 	glfwSetWindowUserPointer(myWindow, this);
 
@@ -167,7 +171,9 @@ void Game::Initialize() {
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
-
+	
+	
+	
 }
 
 void Game::Shutdown() {
@@ -179,7 +185,7 @@ glm::vec4 testColor = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
 
 void Game::CreateObjects(int objectNameID, int typeOfObject, int textureNameID, glm::mat4 transformation)
 {
-	if (typeOfObject == 100 /* Put the list of objects you want to be collidable here*/) {
+	if (typeOfObject == 100 /* Put the list of objects you want to be collidable here*/|| typeOfObject == 3) {
 		saveHitAndMesh(ObjLoader::LoadObj2(filename[objectNameID], glm::vec4(1.0f)));
 	}
 	else {
@@ -197,76 +203,80 @@ void Game::saveHitAndMesh(MeshAndHitBox toSave) {
 	hitBoxManager.saveHitBoxes(toSave.hitBox);
 }
 
+void Game::alwaysActiveKeys()
+{
+	if (glfwGetKey(myWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+		gameState = 1;
+	}
+}
+
 void Game::UnloadContent() {
 
 }
 
 
 void Game::InitImGui() {
-	// Creates a new ImGUI context
-	ImGui::CreateContext();
-	// Gets our ImGUI input/output 
-	ImGuiIO& io = ImGui::GetIO();
-	// Enable keyboard navigation
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-	// Allow docking to our window
-	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-	// Allow multiple viewports (so we can drag ImGui off our window)
-	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-	// Allow our viewports to use transparent backbuffers
-	io.ConfigFlags |= ImGuiConfigFlags_TransparentBackbuffers;
-
-	// Set up the ImGui implementation for OpenGL
-	ImGui_ImplGlfw_InitForOpenGL(myWindow, true);
-	ImGui_ImplOpenGL3_Init("#version 410");
-
-	// Dark mode FTW
-	ImGui::StyleColorsDark();
-
-	// Get our imgui style
-	ImGuiStyle& style = ImGui::GetStyle();
-	//style.Alpha = 1.0f;
-	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-		style.WindowRounding = 0.0f;
-		style.Colors[ImGuiCol_WindowBg].w = 0.8f;
-	}
+	//// Creates a new ImGUI context
+	//ImGui::CreateContext();
+	//// Gets our ImGUI input/output 
+	//ImGuiIO& io = ImGui::GetIO();
+	//// Enable keyboard navigation
+	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+	//// Allow docking to our window
+	//io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	//// Allow multiple viewports (so we can drag ImGui off our window)
+	//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+	//// Allow our viewports to use transparent backbuffers
+	//io.ConfigFlags |= ImGuiConfigFlags_TransparentBackbuffers;
+	//
+	//// Set up the ImGui implementation for OpenGL
+	//ImGui_ImplGlfw_InitForOpenGL(myWindow, true);
+	//ImGui_ImplOpenGL3_Init("#version 410");
+	//
+	//// Dark mode FTW
+	//ImGui::StyleColorsDark();
+	//
+	//// Get our imgui style
+	//ImGuiStyle& style = ImGui::GetStyle();
+	////style.Alpha = 1.0f;
+	//if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+	//	style.WindowRounding = 0.0f;
+	//	style.Colors[ImGuiCol_WindowBg].w = 0.8f;
+	//}
 }
-
 void Game::ShutdownImGui() {
-	// Cleanup the ImGui implementation
-	ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplGlfw_Shutdown();
-	// Destroy our ImGui context
-	ImGui::DestroyContext();
+	//// Cleanup the ImGui implementation
+	//ImGui_ImplOpenGL3_Shutdown();
+	//ImGui_ImplGlfw_Shutdown();
+	//// Destroy our ImGui context
+	//ImGui::DestroyContext();
 }
-
 void Game::ImGuiNewFrame() {
-	// Implementation new frame
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplGlfw_NewFrame();
-	// ImGui context new frame
-	ImGui::NewFrame();
+	//// Implementation new frame
+	//ImGui_ImplOpenGL3_NewFrame();
+	//ImGui_ImplGlfw_NewFrame();
+	//// ImGui context new frame
+	//ImGui::NewFrame();
 }
-
 void Game::ImGuiEndFrame() {
-	// Make sure ImGui knows how big our window is
-	ImGuiIO& io = ImGui::GetIO();
-	int width{ 0 }, height{ 0 };
-	glfwGetWindowSize(myWindow, &width, &height);
-	io.DisplaySize = ImVec2(width, height);
+	//// Make sure ImGui knows how big our window is
+	//ImGuiIO& io = ImGui::GetIO();
+	//int width{ 0 }, height{ 0 };
+	//glfwGetWindowSize(myWindow, &width, &height);
+	//io.DisplaySize = ImVec2(width, height);
 
-	// Render all of our ImGui elements
-	ImGui::Render();
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-	// If we have multiple viewports enabled (can drag into a new window)
-	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-		// Update the windows that ImGui is using
-		ImGui::UpdatePlatformWindows();
-		ImGui::RenderPlatformWindowsDefault();
-		// Restore our gl context
-		glfwMakeContextCurrent(myWindow);
-	}
+	//// Render all of our ImGui elements
+	//ImGui::Render();
+	//ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	//
+	//// If we have multiple viewports enabled (can drag into a new window)
+	//if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+	//	// Update the windows that ImGui is using
+	//	ImGui::UpdatePlatformWindows();
+	//	ImGui::RenderPlatformWindowsDefault();
+	//	// Restore our gl context
+	//	glfwMakeContextCurrent(myWindow);
+	//}
 }
 
 
@@ -313,7 +323,7 @@ void Game::Draw(float deltaTime) {
 			continue;
 		
 		//renderer.Mesh = Bake(genObjects[hello]);
-		if (amountOfObjects[object] == 100) {
+		if (amountOfObjects[object] == 100 || amountOfObjects[object] == 3) {
 			hitBoxManager.updateHitBox(object, genTransform[object]);
 		}
 
@@ -399,73 +409,73 @@ void Game::Draw(float deltaTime) {
 }
 
 void Game::DrawGui(float deltaTime) {
-	// Open a new ImGui window
-	static bool testOpen = true;
-	ImGui::Begin("Test", &testOpen, ImVec2(300, 200));
-	// Draw a color editor
-	auto it = SceneManager::Each();
-	for (auto& kvp : it) {
-		if (ImGui::Button(kvp.first.c_str())) {
-			SceneManager::SetCurrentScene(kvp.first);
-		}
-	}
-	
-	
-	ImGui::ColorEdit4("Clear Color", &myClearColor[0]);
-	// Check if a textbox has changed, and update our window title if it has
-	if (ImGui::InputText("Window Title", myWindowTitle, 32)) {
-		glfwSetWindowTitle(myWindow, myWindowTitle);
-	}
-	// Our object's test color
-	ImGui::ColorEdit4("Object Color", &testColor[0]);
-	ImGui::End();
-	
-	// Open a second ImGui window
-	ImGui::Begin("Debug");
-	// Draw a formatted text line
-	ImGui::Text("Time: %f", glfwGetTime());
-	
-	// Start a new ImGui header for our camera settings
-	if (ImGui::CollapsingHeader("Camera Settings")) {
-		// Draw our camera's normal
-		glm::vec3 camNormal = myCamera->GetForward();
-		ImGui::DragFloat3("Normal", &camNormal[0]);
-	
-		// Get the camera's position so we can edit it
-		glm::vec3 position = myCamera->GetPosition();
-		// Draw an editor control for the position, and update camera position
-		if (ImGui::DragFloat3("Position", &position[0])) {
-			myCamera->SetPosition(position);
-		}
-		if (ImGui::Button("Look at center")) {
-			myCamera->LookAt(glm::vec3(0), glm::vec3(0, 0, 1));
-		}
-		// Get the camera pinning value
-		static glm::vec3 camPin;
-	
-		// Get whether or not camera pinning is enabled
-		bool camPlaneEnabled = myCamera->GetPinnedUp().has_value();
-		// Draw a checkbox for camera pinning
-		if (ImGui::Checkbox("Pinning Enabled", &camPlaneEnabled)) {
-			// If we've disabled pinning, cache our pinning vector and remove it
-			if (!camPlaneEnabled) {
-				camPin = myCamera->GetPinnedUp().value();
-				myCamera->SetPinnedUp(std::optional<glm::vec3>());
-			}
-			// Set our camera's pinning vector to our cached value
-			else {
-				myCamera->SetPinnedUp(camPin);
-			}
-		}
-		// If we have enabled pinning
-		if (camPlaneEnabled) {
-			// Draw a slider for our camera pin direction
-			if (ImGui::InputFloat3("Pin Direction", &camPin[0])) {
-				myCamera->SetPinnedUp(camPin);
-			}
-		}
-	}
-	ImGui::End();
+	//// Open a new ImGui window
+	//static bool testOpen = true;
+	//ImGui::Begin("Test", &testOpen, ImVec2(300, 200));
+	//// Draw a color editor
+	//auto it = SceneManager::Each();
+	//for (auto& kvp : it) {
+	//	if (ImGui::Button(kvp.first.c_str())) {
+	//		SceneManager::SetCurrentScene(kvp.first);
+	//	}
+	//}
+	//
+	//
+	//ImGui::ColorEdit4("Clear Color", &myClearColor[0]);
+	//// Check if a textbox has changed, and update our window title if it has
+	//if (ImGui::InputText("Window Title", myWindowTitle, 32)) {
+	//	glfwSetWindowTitle(myWindow, myWindowTitle);
+	//}
+	//// Our object's test color
+	//ImGui::ColorEdit4("Object Color", &testColor[0]);
+	//ImGui::End();
+	//
+	//// Open a second ImGui window
+	//ImGui::Begin("Debug");
+	//// Draw a formatted text line
+	//ImGui::Text("Time: %f", glfwGetTime());
+	//
+	//// Start a new ImGui header for our camera settings
+	//if (ImGui::CollapsingHeader("Camera Settings")) {
+	//	// Draw our camera's normal
+	//	glm::vec3 camNormal = myCamera->GetForward();
+	//	ImGui::DragFloat3("Normal", &camNormal[0]);
+	//
+	//	// Get the camera's position so we can edit it
+	//	glm::vec3 position = myCamera->GetPosition();
+	//	// Draw an editor control for the position, and update camera position
+	//	if (ImGui::DragFloat3("Position", &position[0])) {
+	//		myCamera->SetPosition(position);
+	//	}
+	//	if (ImGui::Button("Look at center")) {
+	//		myCamera->LookAt(glm::vec3(0), glm::vec3(0, 0, 1));
+	//	}
+	//	// Get the camera pinning value
+	//	static glm::vec3 camPin;
+	//
+	//	// Get whether or not camera pinning is enabled
+	//	bool camPlaneEnabled = myCamera->GetPinnedUp().has_value();
+	//	// Draw a checkbox for camera pinning
+	//	if (ImGui::Checkbox("Pinning Enabled", &camPlaneEnabled)) {
+	//		// If we've disabled pinning, cache our pinning vector and remove it
+	//		if (!camPlaneEnabled) {
+	//			camPin = myCamera->GetPinnedUp().value();
+	//			myCamera->SetPinnedUp(std::optional<glm::vec3>());
+	//		}
+	//		// Set our camera's pinning vector to our cached value
+	//		else {
+	//			myCamera->SetPinnedUp(camPin);
+	//		}
+	//	}
+	//	// If we have enabled pinning
+	//	if (camPlaneEnabled) {
+	//		// Draw a slider for our camera pin direction
+	//		if (ImGui::InputFloat3("Pin Direction", &camPin[0])) {
+	//			myCamera->SetPinnedUp(camPin);
+	//		}
+	//	}
+	//}
+	//ImGui::End();
 }
 
 bool Game::interactionIsPossible(glm::vec3 playerPos, glm::vec3 objectPos)
@@ -481,9 +491,13 @@ bool Game::interactionIsPossible(glm::vec3 playerPos, glm::vec3 objectPos)
 
 void Game::pauseScreen()
 {
-	if (firstLoop == 1) {
-		;//pause!!!! HA! I control the world
-	}
+	glClearColor(myClearColor.x, myClearColor.y, myClearColor.z, myClearColor.w);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+
+	
+	simpleShader->Bind();
+	mySimpleMesh->Drawmini();
 }
 
 void Game::gBufferInit()
@@ -528,7 +542,6 @@ void Game::gBufferInit()
 	}
 
 }
-
 
 void Game::preRender()
 {

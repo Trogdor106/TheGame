@@ -23,6 +23,9 @@
 #include "Texture2D.h"
 #include "florp/graphics/BufferLayout.h"
 #include "FrameBuffer.h"
+#include "simpleMeshAndVertexFor.h"
+
+void GlfwWindowResizedCallback(GLFWwindow* window, int width, int height);
 
 class Game {
 public:
@@ -36,6 +39,7 @@ protected:
 	void Initialize();
 	void Shutdown();
 
+	void LoadSimpleContent();
 	void LoadContent();
 	void UnloadContent();
 
@@ -59,6 +63,7 @@ protected:
 	void gBuffer();
 	void preRender();
 	void saveHitAndMesh(MeshAndHitBox toSave);
+	void alwaysActiveKeys();
 
 	void UnloadGBuffer();
 	struct TempTransform {
@@ -132,8 +137,6 @@ private:
 	//Shader::Sptr myNormalShader;
 	// A test
 
-
-
 	//float lerp(float p1, float p2, float want, glm::mat4 objTransform, int index);
 
 	glm::vec3 cameraViewAngle = glm::vec3(0, 0, 1);
@@ -155,8 +158,10 @@ private:
 
 	
 	//
+	Shader::Sptr simpleShader;
+	Meshmini_sptr   mySimpleMesh;
 	
-	
+
 	
 	//Normal objects
 	std::vector <glm::mat4> genTransform;
@@ -188,8 +193,8 @@ private:
 	double mousePosY = 0;
 	double mousePrevPosX = 0;
 	double mousePrevPosY = 0;
-	int windowSizeWidth = 0;
-	int windowSizeHeight = 0;
+	int windowSizeWidth = 600;
+	int windowSizeHeight = 600;
 	int windowPosX = 0;
 	int windowPosY = 0;
 

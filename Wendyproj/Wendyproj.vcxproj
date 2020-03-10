@@ -121,6 +121,7 @@
     <ClInclude Include="src\SceneManager.h" />
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\ShaderData.h" />
+    <ClInclude Include="src\simpleMeshAndVertexFor.h" />
     <ClInclude Include="src\Texture2D.h" />
     <ClInclude Include="src\TextureEnums.h" />
     <ClInclude Include="src\Vertex.h" />
@@ -140,6 +141,7 @@
     <ClCompile Include="src\ObjectLoader2.cpp" />
     <ClCompile Include="src\SceneManager.cpp" />
     <ClCompile Include="src\Shader.cpp" />
+    <ClCompile Include="src\simpleMeshAndVertexFor.cpp" />
     <ClCompile Include="src\Texture2D.cpp" />
     <ClCompile Include="src\Vertex.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -169,6 +171,12 @@
     <ProjectReference Include="..\..\modules\toolkit\toolkit.vcxproj">
       <Project>{AB7025F0-1750-A48B-2068-2F628CC60AED}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\passthrough.fs.glsl" />
+    <None Include="res\passthrough.vs.glsl" />
+    <None Include="res\Shaders\passthrough.fs.glsl" />
+    <None Include="res\Shaders\passthrough.vs.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
