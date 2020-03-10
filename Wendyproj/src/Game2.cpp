@@ -10,7 +10,7 @@ void Game::LoadContent() {
 	myCamera->SetPosition(cameraPos);
 	myCamera->LookAt(cameraViewTarget, cameraViewAngle);
 	myCamera->Projection = glm::perspective(glm::radians(60.0f), 1.0f, 0.01f, 1000.0f);
-
+	
 	interactCamera = std::make_shared<Camera>();
 	interactCamera->SetPosition(glm::vec3(1, 1, 10));
 	interactCamera->LookAt(glm::vec3(0.0f, 0.0f, 4), glm::vec3(0, 0, 1));
@@ -19,60 +19,87 @@ void Game::LoadContent() {
 	//Texture2D::Sptr albedo = Texture2D::LoadFromFile("f_Door.png");
 	Texture2D::Sptr albedo2 = Texture2D::LoadFromFile("F_fatWall.png");
 
-
+	
 
 	//std::vector <Vertex> temp;
 	//Replaced with
 	MeshData MeshTemp = ObjLoader::LoadObj("f_Door.obj", glm::vec4(1.0f));
 
+
+
 	//Type 0 is nothing, type 1 is unlocked door, type 2 is locked door, type 3 is drawer, type 4 is a note, type 5 is the oil cask (refueling)
 	///////////////Load objects and textures under here
-	Game::CreateObjects(1, 0, 5); // object 0 floor 2
-	//texture 5 is dresser no drawers
-	Game::CreateObjects(11, 3, 2); // object 1 is door topside of saferoom
-	Game::CreateObjects(8, 3, 2); // object 2 is door right side in safe room
-	Game::CreateObjects(11, 3, 2); // object 3 is door bottomside of saferoom
-	Game::CreateObjects(8, 3, 2); // object 4 is top door across of saferoom
-	Game::CreateObjects(8, 3, 2); // object 5 is left bathroom door
+	Game::CreateObjects(1, 0, 14); // object 0 floor 1
+	Game::CreateObjects(11, 3, 13); // object 1 is door topside of saferoom
+	Game::CreateObjects(8, 3, 12); // object 2 is door right side in safe room
+	Game::CreateObjects(11, 3, 13); // object 3 is left bathroom door
+	Game::CreateObjects(8, 3, 12); // object 4 is top door across of saferoom
+	Game::CreateObjects(11, 3, 13); // object 5 is ?
 	Game::CreateObjects(16, 0, 5); // object 6 is the dresser in the batrhoom(?)
 	Game::CreateObjects(15, 10, 4); // object 7 is the top drawer for object 6
 	Game::CreateObjects(15, 0, 4); // object 8 is the middle drawer for object 6
 	Game::CreateObjects(15, 0, 4); // object 9 is the bottom drawer for object 6
 	Game::CreateObjects(28, 0, 7); // object 10 is the boarded up window in the safe room (left wall)
-	Game::CreateObjects(25, 0, 6); // object 11 is a second boarded up window
-	Game::CreateObjects(4, 5, 6); // object 12 is a big vase
-	Game::CreateObjects(4, 0, 6); // object 13 is a big vase
-	Game::CreateObjects(29, 0, 6); // object 14 is a full bookshelf
-	Game::CreateObjects(29, 0, 6); // object 15 is a full bookshelf, look at all those vertices
-	Game::CreateObjects(11, 0, 6); // object 16 is the study door
-	Game::CreateObjects(11, 3, 6); // object 17 is the right door of the dining room
-	Game::CreateObjects(11, 3, 6); // object 18 is the left door of the dining room
-	Game::CreateObjects(11, 3, 6); //Object 19 is the door to the pantry
-	Game::CreateObjects(33, 4, 6); //Object 20 is the front door
-	Game::CreateObjects(34, 0, 6); //Object 21 is the safe room staircase
-	Game::CreateObjects(35, 0, 6); //Object 22 is the kitchen staircase
-	Game::CreateObjects(36, 0, 6); //Object 23 is the piano
-	Game::CreateObjects(37, 3, 6); //Object 24 is the 1st floor toilet
-	Game::CreateObjects(41, 0, 6); //Object 25 is the bathroom sink
-	Game::CreateObjects(42, 0, 6); //Object 25 is the mirror above the sink
-	//Game::CreateObjects(8, 1, 2);
-	//Game::CreateObjects(34, 4, 8);
+	Game::CreateObjects(47, 0, 21); // object 11 is a second boarded up window
+	Game::CreateObjects(4, 5, 18); // object 12 is a big vase
+	Game::CreateObjects(4, 0, 18); // object 13 is a big vase
+	Game::CreateObjects(29, 0, 19); // object 14 is a full bookshelf
+	Game::CreateObjects(29, 0, 19); //Object 15 is a full bookshelf, look at all those vertices
+	Game::CreateObjects(11, 0, 13); //Object 16 is the study door
+	Game::CreateObjects(11, 3, 13); //Object 17 is the right door of the dining room
+	Game::CreateObjects(11, 3, 13); //Object 18 is the left door of the dining room
+	Game::CreateObjects(11, 3, 13); //Object 19 is the door to the pantry
+	Game::CreateObjects(33, 4, 22); //Object 20 is the front door
+	Game::CreateObjects(34, 0, 20); //Object 21 is the safe room staircase
+	Game::CreateObjects(35, 0, 20); //Object 22 is the kitchen staircase
+	Game::CreateObjects(36, 0, 16); //Object 23 is the piano
+	Game::CreateObjects(37, 0, 23); //Object 24 is the 1st floor toilet
+	Game::CreateObjects(41, 0, 17); //Object 25 is the bathroom sink
+	Game::CreateObjects(42, 0, 6); //Object 26 is the mirror above the sink
+	Game::CreateObjects(11, 3, 13); //Object 27 is the door to the basement
+	Game::CreateObjects(39, 0, 7); //Object 28 is the oil cask
+	Game::CreateObjects(43, 0, 24); //Object 29 is the fireplace
+	Game::CreateObjects(44, 0, 10); //Object 30 is the kitchen table
+	Game::CreateObjects(45, 0, 11); //Object 31 is the kitchen cupboards
+	Game::CreateObjects(2, 0, 5); //Object 32 is the second floor
+	Game::CreateObjects(3, 0, 5); //Object 33 is the second floor bed
+	Game::CreateObjects(19, 0, 26); //Object 34 is the bathroom key
+	Game::CreateObjects(20, 0, 26); //Object 35 is the study key
+	Game::CreateObjects(46, 0, 15); //Object 36 is the left window in the top hallway
+	Game::CreateObjects(46, 0, 15); //Object 37 is the right window in the top hallway
+	Game::CreateObjects(28, 0, 15); //Object 38 is the right window in the right hallway
+	Game::CreateObjects(25, 0, 21); //Object 39 is the window in the kitchen stairwell
+	Game::CreateObjects(47, 0, 21); //Object 40 is the fireplace window
+	Game::CreateObjects(23, 0, 27); //Object 41 is the portrait across from the first hallway window
+	Game::CreateObjects(23, 0, 28); //Object 42 is the portrait across from the first hallway window
+	Game::CreateObjects(48, 0, 25); //Object 42 is the portrait across from the first hallway window
 
-	int hello = 0;
+	//int hello = 0;
 	Shader::Sptr phong = std::make_shared<Shader>();
 	phong->Load("lighting.vs.glsl", "blinn-phong.fs.glsl");
 
-	Shader::Sptr phong2 = std::make_shared<Shader>();
-	phong2->Load("lighting.vs.glsl", "blinn-phong.fs.glsl");
+	//Shader::Sptr phong2 = std::make_shared<Shader>();
+	//phong2->Load("lighting.vs.glsl", "blinn-phong.fs.glsl");
 
-
+	//vec3  Pos;
+	//vec3  Color;
+	//float Attenuation;
+	
 	testMat2 = std::make_shared<Material>(phong);
 	testMat2->Set("s_Albedo", albedo2);
-	testMat2->Set("a_LightPos", { 0, 1, 10 });
-	testMat2->Set("a_LightColor", { 1.0f, 1.0f, 0.0f });
+	//testMat2->Set("a_LightPos", { 0, 1, 10 });
+	testMat2->Set("a_LightPos", { 1.0f, 1.0f, 0.0f });
+	testMat2->Set("a_LightColor", { 1.0f, 0.0f, 1.0f });  
+	testMat2->Set("a_LightAttenuation", 1.0f / 100.0f);
+	//testMat2->Set("a_Lights[1].Pos", { 1.0f, 1.0f, 0.0f });
+	//testMat2->Set("a_Lights[1].Color", { 1.0f, 1.0f, 1.0f });
+	//testMat2->Set("a_Lights[1].Attenuation", 1.0f);
+
+	//testMat2->Set("a_LightColor", { 1.0f, 1.0f, 0.0f });
 	testMat2->Set("a_AmbientColor", { 1.0f, 1.0f, 1.0f });
-	testMat2->Set("a_AmbientPower", 0.8f);
+	testMat2->Set("a_AmbientPower", 0.2f);
 	testMat2->Set("a_LightSpecPower", 1.0f);
+	testMat2->Set("a_EnabledLights", 2);
 
 	SceneManager::RegisterScene("Test2");
 	SceneManager::SetCurrentScene("Test2");
@@ -82,6 +109,14 @@ void Game::LoadContent() {
 		auto& ecs2 = GetRegistry("Test2");
 
 		std::vector <entt::entity> genEntt;
+
+		//for (int ix = 0; ix < 6; ix++) {
+		//	entt::entity entity = ecs2.create();
+		//	PointLight& light = ecs2.assign<PointLight&>(entity);
+		//	light.Color = glm::vec3(glm::sin(-ix * ix) + 1.0f, glm::cos(-ix) + 1.0f, glm::sin((-ix) + glm::pi<float>()) + 1.0f) / 2.0f * 0.7f;
+		//	light.Attenuation = 1.0f / 40.0f;
+		//	ecs2.assign<TempTransform>(entity).Position = glm::vec3(glm::cos(ix) * 20.0f, 2.0f, glm::sin(ix) * 20.0f);
+		//}
 
 		for (int i = 0; i < amountOfObjects.size(); i++) {
 			entt::entity temp = ecs2.create();
@@ -96,14 +131,14 @@ void Game::LoadContent() {
 
 
 			switch (i) {
-			case 0: //Object 0 The saferoom
+			case 0: //Object 0 The first floor
 				genTransform[i] = glm::translate(genTransform[i], glm::vec3(44.2f, 49.9f, 0.0f));
 				break;
 			case 1: //Object 1 Door right saferoom
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(50.5f, 11.5f, -0.1f));
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(50.5f, 11.5f, -110.1f));
 				break;
 			case 2:// object 2 is door bottom of saferoom
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(3.85f, -11.1f, -0.1f));
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(3.85f, -11.1f, -110.1f));
 				genTransform[i] = glm::rotate(genTransform[i], 2 * halfOfPI, glm::vec3(0, 0, 1));
 				break;
 			case 3:// object 3 door right across saferoom
@@ -113,8 +148,7 @@ void Game::LoadContent() {
 				genTransform[i] = glm::translate(genTransform[i], glm::vec3(12.7f, 49.0f, -0.1));
 				break;
 			case 5:// object 5 is door top safe room
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(12.7f, 36.5f, -0.1));
-				genTransform[i] = glm::rotate(genTransform[i], 2 * halfOfPI, glm::vec3(0, 0, 1));
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(12.7f, 36.5f, -110.1));
 				break;
 			case 6:// object 6 is the dresser in the room where you find the red key
 				genTransform[i] = glm::translate(genTransform[i], glm::vec3(96.55f, -9.0f, -110.1f));
@@ -133,22 +167,22 @@ void Game::LoadContent() {
 				genTransform[i] = glm::rotate(genTransform[i], -halfOfPI, glm::vec3(0, 0, 1));
 				break;
 			case 10:// object 10 is a long broken window in the safe room
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(-11.85f, 16.5f, 7.5f));
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(-11.85f, 16.5f, 117.5f));
 				break;
 			case 11:// object 11 is a broken window in the stairwell
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(-11.85f, -17.5f, 7.5f));
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(-10.0f, -17.5f, 6.5f));
 				break;
-			case 12:// object 12 is a big vase
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(-8.85f, 32.5f, 0.0f));
+			case 12:// object 12 is a big vase in the safe room
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(-5.85f, 1.75f, 0.0f));
 				break;
-			case 13:// object 13 is a big vase
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(-7.00f, 27.5f, 0.0f));
+			case 13:// object 13 is a big vase in the safe room
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(-4.00f, -3.25f, 0.0f));
 				break;
 			case 14:// object 14 is the bookshelf with way, way too many faces
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(24.0f, -8.1f, 0.0f));
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(24.0f, -6.55f, 0.0f));
 				break;
 			case 15:// object 15 is the bookshelf in the study
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(122.0f, -39.0f, 0.0f));
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(122.0f, -38.8f, 0.0f));
 				break;
 			case 16:// object 16 is the study door
 				genTransform[i] = glm::translate(genTransform[i], glm::vec3(164.75f, -9.5f, 0.0f));
@@ -178,7 +212,7 @@ void Game::LoadContent() {
 				break;
 
 			case 23:// object 23 is the piano
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(118.0f, -25.0f, 0.0f));
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(121.0f, -11.0f, 0.0f));
 				break;
 
 			case 24:// object 24 is the 1st floor toilet
@@ -189,34 +223,83 @@ void Game::LoadContent() {
 				genTransform[i] = glm::translate(genTransform[i], glm::vec3(90.55f, 24.0f, 0.0f));
 				break;
 
-			case 26:// object 25 is the mirror above the sink
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(90.55f, 26.0f, 7.0f));
+			case 26:// object 26 is the mirror above the sink
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(90.55f, 26.0f, 700.0f));
+				break;
+
+			case 27:// object 27 is the basement door
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(27.55f, 68.0f, 0.0f));
+				break;
+
+			case 28:// object 28 is the oil cask
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(49.0f, 29.0f, 1.0f));
+				break;
+
+			case 29:// object 29 is the fireplace
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(-8.0f, 20.0f, -0.0f));
+				break;
+
+			case 30:// object 30 is the kitchen table
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(135.0f, 45.0f, 0.0f));
+				break;
+
+			case 31:// object 31 is the kitchen cupboards
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(161.5f, 56.0f, 0.0f));
+				break;
+
+			case 32:// object 32 is the 2nd floor
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(44.2f, 49.9f, -32.0f));
+				break;
+
+			case 33:// object 33 is the 2nd floor bed
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(-4.0f, 19.0f, 48.0f));
+				break;
+
+			case 34:// object 34 is the bathroom key
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(90.55f, 24.0f, 0.0f));
+				break;
+
+			case 35:// object 35 is the piano key
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(118.0f, -25.0f, 0.0f));
+				break;
+
+			case 36:// object 36 is the left window in the top hallway
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(105.0f, 94.5f, 8.0f));
+				break;
+
+			case 37:// object 37 is the right window in the top hallway
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(137.0f, 94.5f, 8.0f));
+				break;
+
+			case 38:// object 38 is the window in the right hallway
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(198.26f, 60.0f, 8.0f));
+				break;
+
+			case 39:// object 39 is the window in the kitchen stairwell
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(198.26f, 12.0f, 6.0f));
+				break;
+
+			case 40:// object 40 is the window on the fireplace wall
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(-10.0f, 0.0f, 9.0f));
+				break;
+
+			case 41:// object 41 is the portrait across from left window in the top hallway
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(97.5f, 79.35f, 14.5f));
+				break;
+
+			case 42:// object 42 is the portrait past the first one
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(117.5f, 79.35f, 14.5f));
+				break;
+
+			case 43:// object 43 is the ceiling
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(44.2f, 49.9f, -6.0f));
 				break;
 			}
 		}
 	}
-
-
-	//for (int i = 0; i < genObjects.size(); i++) {
-	//	if (amountOfObjects[i] == 0) {
-	//		hitBoxManager.saveHitBoxes(genObjects[i], 0);
-	//		hitBoxManager.updateHitBoxes(genTransform[i][3], i);
-	//	}
-	//	else if (amountOfObjects[i] == 1) {
-	//		hitBoxManager.saveHitBoxes(genObjects[i], 1);
-	//		hitBoxManager.updateHitBoxes(genTransform[i][3], i);
-	//	}
-	//	else {
-	//		hitBoxManager.saveHitBoxes(genObjects[i], 2);
-	//		hitBoxManager.updateHitBoxes(genTransform[i][3], i);
-	//	}
-	//}
-	/////////////////////////////////////////////////////////////////////////HitBoxes
 }
 
 void Game::Update(float deltaTime) {
-	backupDeltatime = deltaTime;
-
 
 
 	glm::vec3 movement = glm::vec3(0.0f);
@@ -346,11 +429,17 @@ void Game::Update(float deltaTime) {
 
 
 
-	myCamera->SetPosition({
+	if (!hitBoxManager.isInHitBox({ myCamera->GetPosition().x + movement.z * cos(angleForX) + movement.x * cos(angleForX + 1.57078145) + finalHeadBobSide * cos(angleForX + 1.57078145),
+		myCamera->GetPosition().y + movement.z * sin(angleForX) + movement.x * sin(angleForX + 1.57078145) + finalHeadBobSide * sin(angleForX + 1.57078145),
+		myCamera->GetPosition().z + finalHeadBob })) {
+		
+		myCamera->SetPosition({
 		myCamera->GetPosition().x + movement.z * cos(angleForX) + movement.x * cos(angleForX + 1.57078145) + finalHeadBobSide * cos(angleForX + 1.57078145),
 		myCamera->GetPosition().y + movement.z * sin(angleForX) + movement.x * sin(angleForX + 1.57078145) + finalHeadBobSide * sin(angleForX + 1.57078145),
 		myCamera->GetPosition().z + finalHeadBob });
 
+	}
+	
 
 
 	//myCamera->Move(movement);
@@ -377,11 +466,11 @@ void Game::Update(float deltaTime) {
 
 
 	//myLanternTransform = glm::translate(myLanternTransform, glm::vec3(cameraPos + glm::vec3(-6, -2, 0)));
-	float extraDist = 10;
+	float extraDist = 2;
 	float offSet = 0.5;
 
-	testMat2->Set("a_LightPos", { (myCamera->GetPosition().x + cos(-angleForX) + extraDist * cos(angleForX - offSet)), //+ offSet * cos(angleForX), 
-									  (myCamera->GetPosition().y + sin(-angleForY) + extraDist * sin(-angleForY - offSet)), //+ offSet * sin(-angleForY),
+	testMat2->Set("a_LightPos", { (myCamera->GetPosition().x + cos(-angleForX) + extraDist * cos(angleForX - offSet)) - 40.0f, //+ offSet * cos(angleForX), 
+									  (myCamera->GetPosition().y + sin(-angleForY) + extraDist * sin(-angleForY - offSet)) - 40.0f, //+ offSet * sin(-angleForY),
 									  myCamera->GetPosition().z + (angleForZ > -1 ? (angleForZ < 1 ? tan(angleForZ) : 1) : -1) });
 
 	if (glfwGetKey(myWindow, GLFW_KEY_R) == GLFW_PRESS) {

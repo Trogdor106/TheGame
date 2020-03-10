@@ -1,5 +1,6 @@
 #pragma once
 
+#include "FrameState.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -20,7 +21,8 @@
 #include "SceneManager.h"
 #include "MeshRenderer.h"
 #include "Texture2D.h"
-
+#include "florp/graphics/BufferLayout.h"
+#include "FrameBuffer.h"
 
 class Game {
 public:
@@ -52,8 +54,13 @@ protected:
 	// Interaction
 	bool interactionIsPossible(glm::vec3, glm::vec3);
 
-	bool interact(int objectID, glm::vec3 cameraPos, bool isPressed);
+	void pauseScreen();
+	void gBufferInit();
+	void gBuffer();
+	void preRender();
+	void saveHitAndMesh(MeshAndHitBox toSave);
 
+	void UnloadGBuffer();
 	struct TempTransform {
 		glm::vec3 Position;
 		glm::vec3 EulerRotation;
@@ -63,14 +70,23 @@ protected:
 				glm::translate(glm::mat4(1.0f), Position) * glm::mat4_cast(glm::quat(glm::radians(EulerRotation))) * glm::scale(glm::mat4(1.0f), Scale);
 		}
 	};
-
+	struct UpdateBehaviour {
+		std::function<void(entt::entity e, float dt)> Function;
+	};
+	struct PointLight {
+		
+		glm::vec3 Color;
+		float     Attenuation;
+	};
 private:
+	int gameState = 0;
+	int firstLoop = 0;
 
 	const char* filename[100] = { "",
 		//1                //2          //3            //4             //5          //6                //7
-  "1stFloor.obj",	"f_Floor3.obj",	 "Bed.obj",	 "BigVase.obj",	 "SmallVase.obj", "Book.obj",	"BookShelf.obj",
+	"1stFloor.obj",	"2ndFloor.obj",	 "Bed.obj",	 "BigVaseUV.obj",	 "SmallVase.obj", "Book.obj",	"BookShelf.obj",
 		//8                //9								 //10								 //11
-	  "Door.obj", "f_Door(Reverse_open_1_3).obj", "f_Door(Reverse_open_2_3).obj", "f_Door(Reverse_open_Max).obj",
+	  "Door.obj", "f_Door(Reverse_open_1_3).obj", "f_Door(Reverse_open_2_3).obj", "DoorOpen.obj",
 		//12					//13					   //14                //15				   //16                
 	"f_Door(open_1_3).obj", "f_Door(open_2_3).obj", "f_Door(open_Max).obj", "LargeDrawer.obj", "Dresser.obj",
 		//17					//18                 //19          //20         //21
@@ -80,19 +96,25 @@ private:
 		//29                    //30                //31                    //32					//33
 	"BookShelfFull.obj", "f_rotatedDoor.obj", "f_shortFlatWall.obj", "f_rotatedShortWall.obj", "FrontDoor.obj",
 		//34					//35				//36		//37		  //38				  //39			//40
-	"SafeRoomStairs.obj", "KitchenStairs.obj", "Piano.obj", "Toilet.obj" ,"PaintBucket.obj" , "OilCask.obj", "note.obj",
-		//41	   //42
-	"Sink.obj", "Mirror.obj" 
-	 };
-
-	const char* texturename[100] = { "",
-		//1			//2				//3				//4					//5						//6
-	"f_Bed.png", "f_Door.png", "f_doorFrame.png", "f_Drawer.png", "f_DresserNoDrawer.png", "F_fatWall.png",
-		//7			//8
-	"f_Key1.png", "Note.png"
-
+	"SafeRoomStairs.obj", "KitchenStairs.obj", "Piano.obj", "Toilet.obj" ,"PaintBucket.obj" , "NewCask.obj", "note.obj",
+		//41	     //42			  //43				//44			  //45				//46						//47
+	"sink UV.obj", "Mirror.obj", "Fireplace.obj", "KitchenTable.obj", "Cupboards.obj", "HallwayWindow.obj", "FireplaceSmallWindow.obj",
+		//48
+	"Ceiling.obj"
 	};
 
+	const char* texturename[100] = { "",
+		//1			//2				//3				//4					//5						//6				//7
+	"f_Bed.png", "f_Door.png", "f_doorFrame.png", "f_Drawer.png", "f_DresserNoDrawer.png", "F_fatWall.png", "NewCask.png",
+		//8			//9				//10			  //11			 //12			//13		   //14				//15
+	"f_Key1.png", "Note.png", "KitchenTable.png", "Cupboards.png", "Door.png", "DoorOpen.png", "1stFloor.png", "WideWindow.png",
+		//16		//17		//18			  //19					//20				//21			  //22
+	"Piano.png", "Sink.png", "BigVase.png", "BookShelfFull.png", "KitchenStairs.png", "SmallWindow.png", "FrontDoor.png",
+		//23		   //24			 //25			 //26		  //27			  //28
+	"Toilet.png", "Fireplace.png", "Ceiling.png", "Key1.png", "Portrait.png", "Portrait2.png"
+	};
+
+	int objectUpdate(int ID);
 
 	// Stores the main window that the game is running in
 	GLFWwindow* myWindow;
@@ -105,9 +127,10 @@ private:
 	Camera::Sptr interactCamera;
 
 	// A shared pointer to our shader
-	Shader::Sptr myShader;
+	//Shader::Sptr myShader;
 	// Shader for viewing normal maps
-	Shader::Sptr myNormalShader;
+	//Shader::Sptr myNormalShader;
+	// A test
 
 
 
@@ -123,8 +146,6 @@ private:
 
 	HitBoxes hitBoxManager;
 
-	float backupDeltatime;
-
 	//Lantern stuff prob want to seperate into another file later
 	float lanternFuel = 1.0f;
 	float lightShyninessModifyer = 1.0f;
@@ -132,16 +153,15 @@ private:
 	glm::mat4 myLanternTransform = glm::mat4(1.0f);
 	glm::mat4 myLanternTransform2 = glm::mat4(1.0f);
 
-	int objectUpdate(int ID);
+	
+	//
+	
+	
+	
 	//Normal objects
 	std::vector <glm::mat4> genTransform;
-	//std::vector <Mesh::Sptr> genMesh;
 	std::vector <MeshData> genObjects;
 	std::vector <Texture2D::Sptr> genMats;
-	//std::vector <Material::Sptr> genMats;
-	//std::vector <int> genAlbedo;
-
-	//Texture2D::Sptr Albedo  = Texture2D::LoadFromFile(texturename[0]);
 
 	std::vector <int> amountOfObjects;
 	std::vector <int> objectsToUpdate;
@@ -173,9 +193,13 @@ private:
 	int windowPosX = 0;
 	int windowPosY = 0;
 
-	//Other
-	//MorphObject morphObjectManager;
-	//deCasteJau deCasteJauManager;
 
 	float halfOfPI = 1.57079633;
+
+
+
+	Shader::Sptr gBufferShader;
+	Mesh::Sptr myFullscreenQuad;
+	FrameBuffer::Sptr myAccumulationBuffer;
+	
 };

@@ -32,7 +32,7 @@ void main() {
     // Re-normalize our input, so that it is always length 1
     vec3 norm = normalize(inNormal);
     // Determine the direction from the position to the light
-    vec3 toLight = a_LightPos - inWorldPos;
+    vec3 toLight = (a_LightPos - inWorldPos);
     // Determine the distance to the light (used for attenuation later)
     float distToLight = length(toLight);
     // Normalize our toLight vector
@@ -58,7 +58,7 @@ void main() {
     vec3  diffuseOut = diffuseFactor * a_LightColor;
 	
 	//Toon Shading
-	diffuseOut = floor(diffuseOut * levels) * scaleFactor;
+	//diffuseOut = floor(diffuseOut * levels) * scaleFactor;
 
     // Our ambient is simply the color times the ambient power
     vec3 ambientOut = a_AmbientColor * a_AmbientPower;

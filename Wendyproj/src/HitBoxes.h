@@ -2,33 +2,40 @@
 #include <iostream>
 #include <vector>
 #include "Mesh.h"
+#include "GLM/glm.hpp"
 
-
+struct HitBox {
+	std::vector <float> topLeft;
+	std::vector <float> topRight;
+	std::vector <float> bottomLeft;
+	std::vector <float> bottomRight;
+	int ID;
+};
 
 class HitBoxes {
 public:
 	typedef std::shared_ptr<HitBoxes> Sptr;
 	HitBoxes();
-	void saveHitBoxes(std::vector <Vertex> objectData, int type);
-	bool testHitBoxes(glm::vec3& cameraPos, int ObjectID);
-	void updateHitBoxes(glm::vec3 transformation, int ObjectID);
-	bool isInRangeToInteract(glm::vec3& cameraPos, int ObjectID);
-private:
-	struct maxAndMin {
-		float MaxX;
-		float MinX;
-		float MaxY;
-		float MinY;
-		float MaxZ;
-		float MinZ;
-	};
+	std::vector <float> rotate90(std::vector<float> toChange);
+	std::vector <float> rotate180(std::vector<float> toChange);
+	std::vector <float> rotate270(std::vector<float> toChange);
+	std::vector <float> rotateNeg90(std::vector<float> toChange);
+	std::vector <float> rotateNeg180(std::vector<float> toChange);
+	std::vector <float> rotateNeg270(std::vector<float> toChange);
 
-	std::vector <maxAndMin> permHitBoxHolder; //the max min holder (OG as to not be rewritten)
-	std::vector <maxAndMin> modHitBoxHolder; //the max min holder (What get's passed (this takes the modifications))
-	std::vector <int> typeOfObject; //Used to know if the object is just an object or if it's an interactable object
-	
-	int objectID;
-	int intForX = 0;
-	int intForY = 1;
-	int intForZ = 2;
+	void saveHitBoxes(HitBox boxToSave);
+	void deleteHitBox(int id);
+	void updateHitBox(int id, glm::mat4 changes);
+	/*
+	Use this one for translations only, not that we do rotations properly anyway
+	*/
+	void updateHitBox(int id, float rotation);
+	/*
+	Use this one for rotation of objects (it's not true rotation because of how our hitboxing works so only does every 45 degrees)
+	*/
+	bool isInHitBox(glm::vec3 cameraPos);
+
+private:
+	std::vector <HitBox> OGHitBoxHolder; //Keeps the default hitbox
+	std::vector <HitBox> hitBoxHolder; //The transformed into the world space hitBox
 };

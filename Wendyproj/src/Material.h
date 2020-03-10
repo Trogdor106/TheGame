@@ -1,5 +1,6 @@
 #pragma once
-#include <GLM/glm.hpp> 
+//#include <GLM/glm.hpp> 
+#include <glad/glad.h>
 #include <unordered_map>
 #include <memory>
 #include "Shader.h"
@@ -29,6 +30,9 @@ public:
 	void Set(const std::string& name, const float& value) {
 		myFloats[name] = value;
 	}
+	void Set(const std::string& name, const glm::ivec2& value) {
+		myIvec2[name] = value;
+	}
 	void Set2(const std::string& name, const glm::mat4& value) {
 		myMat4s[name] = value;
 	}
@@ -50,6 +54,7 @@ protected:
 	std::unordered_map<std::string, glm::vec4> myVec4s;
 	std::unordered_map<std::string, glm::vec3> myVec3s;
 	std::unordered_map<std::string, glm::vec2> myVec2s;
+	std::unordered_map<std::string, glm::ivec2> myIvec2;
 	std::unordered_map<std::string, float> myFloats;
 	// New in tutorial 08    
 	std::unordered_map<std::string, Texture2D::Sptr> myTextures;

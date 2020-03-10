@@ -1,97 +1,169 @@
 #include "HitBoxes.h"
 
-HitBoxes::HitBoxes() :objectID(0), permHitBoxHolder(0)
-{}
-
-void HitBoxes::saveHitBoxes(std::vector<Vertex> objectData, int type) {
-	maxAndMin hitBoxHolder;
-	
-	hitBoxHolder.MaxX = 0;
-	hitBoxHolder.MinX = 0;
-	hitBoxHolder.MaxY = 0;
-	hitBoxHolder.MinY = 0;
-	hitBoxHolder.MaxZ = 0;
-	hitBoxHolder.MinZ = 0;
-	for (int i = 0; i < objectData.size(); i++) {
-		float Hello = hitBoxHolder.MinX;
-		if (objectData[i].Position[intForX] < hitBoxHolder.MinX) {
-			hitBoxHolder.MinX = objectData[i].Position[intForX];
-		}
-		else if (objectData[i].Position[intForX] > hitBoxHolder.MaxX) {
-			hitBoxHolder.MaxX = objectData[i].Position[intForX];
-		}
-		if (objectData[i].Position[intForY] < hitBoxHolder.MinY) {
-			hitBoxHolder.MinY = objectData[i].Position[intForY];
-		}
-		else if (objectData[i].Position[intForY] > hitBoxHolder.MaxY) {
-			hitBoxHolder.MaxY = objectData[i].Position[intForY];
-		}
-		if (objectData[i].Position[intForZ] < hitBoxHolder.MinZ) {
-			hitBoxHolder.MinZ = objectData[i].Position[intForZ];
-		}
-		else if (objectData[i].Position[intForZ] > hitBoxHolder.MaxZ) {
-			hitBoxHolder.MaxZ = objectData[i].Position[intForZ];
-		}
-	}
-	permHitBoxHolder.push_back(hitBoxHolder);
-	modHitBoxHolder.push_back(hitBoxHolder);
-	objectID++;
-	typeOfObject.push_back(type);
+HitBoxes::HitBoxes() {
+	HitBox temp = { {0.0,0.0}, {0.0,0.0}, {0.0,0.0}, {0.0,0.0}, -1 };
+	hitBoxHolder.push_back(temp);
+	OGHitBoxHolder.push_back(temp);
 }
 
-bool HitBoxes::testHitBoxes(glm::vec3 &cameraPos, int ObjectID) {
-	if (cameraPos.z > modHitBoxHolder[ObjectID].MinZ && cameraPos.z < modHitBoxHolder[ObjectID].MaxZ) {
-		float diffX = 0;
-		float diffY = 0;
+std::vector<float> HitBoxes::rotate90(std::vector<float> toChange)
+{
+	float temp = toChange[0]; // 0 is x
+	toChange[0] = -toChange[1];
+	toChange[1] = temp;
+	return toChange;
+}
 
-		if (cameraPos.x > modHitBoxHolder[ObjectID].MinX && cameraPos.x < modHitBoxHolder[ObjectID].MaxX) {
-		
-			diffX = abs(cameraPos.x - modHitBoxHolder[ObjectID].MinX) < abs(cameraPos.x - modHitBoxHolder[ObjectID].MaxX) ?
-					abs(cameraPos.x - modHitBoxHolder[ObjectID].MinX) : abs(cameraPos.x - modHitBoxHolder[ObjectID].MaxX);
+std::vector<float> HitBoxes::rotate180(std::vector<float> toChange)
+{
+	toChange[0] = -toChange[0];
+	toChange[1] = -toChange[1];
+	return toChange;
+}
+
+std::vector<float> HitBoxes::rotate270(std::vector<float> toChange)
+{
+	float temp = -toChange[0]; // 0 is x
+	toChange[0] = toChange[1];
+	toChange[1] = temp;
+	return toChange;
+}
+
+std::vector<float> HitBoxes::rotateNeg90(std::vector<float> toChange)
+{
+	float temp = -toChange[0]; // 0 is x
+	toChange[0] = toChange[1];
+	toChange[1] = temp;
+	return toChange;
+}
+
+std::vector<float> HitBoxes::rotateNeg180(std::vector<float> toChange)
+{
+	toChange[0] = -toChange[0];
+	toChange[1] = -toChange[1];
+	return toChange;
+}
+
+std::vector<float> HitBoxes::rotateNeg270(std::vector<float> toChange)
+{
+	float temp = toChange[0]; // 0 is x
+	toChange[0] = -toChange[1];
+	toChange[1] = temp;
+	return toChange;
+}
+
+void HitBoxes::saveHitBoxes(HitBox boxToSave)
+{
+	//hitBoxHolder.size();
+	if (hitBoxHolder[0].ID == -1) {
+		hitBoxHolder[0] = boxToSave;
+		OGHitBoxHolder[0] = boxToSave;
+	}
+	else {
+		hitBoxHolder.push_back(boxToSave);
+		OGHitBoxHolder.push_back(boxToSave);
+	}
+}
+
+void HitBoxes::deleteHitBox(int id)
+{
+	for (int i = 0; i < hitBoxHolder.size(); i++) {
+		if (hitBoxHolder[i].ID == id) {
+			hitBoxHolder.erase(hitBoxHolder.begin() + i);
+			OGHitBoxHolder.erase(OGHitBoxHolder.begin() + i);
 		}
-		
-		if (cameraPos.y > modHitBoxHolder[ObjectID].MinY&& cameraPos.y < modHitBoxHolder[ObjectID].MaxY) {
-			diffY = abs(cameraPos.y - modHitBoxHolder[ObjectID].MinY) < abs(cameraPos.y - modHitBoxHolder[ObjectID].MaxY) ?
-				abs(cameraPos.y - modHitBoxHolder[ObjectID].MinY) : abs(cameraPos.y - modHitBoxHolder[ObjectID].MaxY);
+	}
+}
+
+void HitBoxes::updateHitBox(int id, glm::mat4 changes)
+{
+	for (int i = 0; i < hitBoxHolder.size(); i++) {
+		if (hitBoxHolder[i].ID == id) {
+			hitBoxHolder[i].bottomLeft[0] = OGHitBoxHolder[i].bottomLeft[0] + changes[3][0];
+			hitBoxHolder[i].bottomLeft[1] = OGHitBoxHolder[i].bottomLeft[1] + changes[3][1];
+			//hitBoxHolder[i].bottomLeft[2] = OGHitBoxHolder[i].bottomLeft[2] + changes[3][2];
+
+			hitBoxHolder[i].topLeft[0] = OGHitBoxHolder[i].topLeft[0] + changes[3][0];
+			hitBoxHolder[i].topLeft[1] = OGHitBoxHolder[i].topLeft[1] + changes[3][1];
+			//hitBoxHolder[i].topLeft[2] = OGHitBoxHolder[i].topLeft[2] + changes[3][2];
+
+			hitBoxHolder[i].bottomRight[0] = OGHitBoxHolder[i].bottomRight[0] + changes[3][0];
+			hitBoxHolder[i].bottomRight[1] = OGHitBoxHolder[i].bottomRight[1] + changes[3][1];
+			//hitBoxHolder[i].bottomRight[2] = OGHitBoxHolder[i].bottomRight[2] + changes[3][2];
+
+			hitBoxHolder[i].topRight[0] = OGHitBoxHolder[i].topRight[0] + changes[3][0];
+			hitBoxHolder[i].topRight[1] = OGHitBoxHolder[i].topRight[1] + changes[3][1];
+			//hitBoxHolder[i].topRight[2] = OGHitBoxHolder[i].topRight[2] + changes[3][2];
+
 		}
-		//if (diffX != 0 || diffY != 0) {
-		if (diffX != 0 && diffY != 0) {
-			if (diffX < diffY) {
-				cameraPos.x = abs(cameraPos.x - modHitBoxHolder[ObjectID].MinX) < abs(cameraPos.x - modHitBoxHolder[ObjectID].MaxX) ?
-					modHitBoxHolder[ObjectID].MinX : modHitBoxHolder[ObjectID].MaxX;
+	}
+}
+
+void HitBoxes::updateHitBox(int id, float rotation)
+{
+	for (int i = 0; i < hitBoxHolder.size(); i++) {
+		if (hitBoxHolder[i].ID == id) {
+			//Maybe add actual rotation with angle for angled objects at some point (Not in class since I cannot think about math right now)
+
+			if (rotation == 90) {
+				hitBoxHolder[i].bottomLeft = rotate90(OGHitBoxHolder[i].bottomLeft);
+				hitBoxHolder[i].bottomRight = rotate90(OGHitBoxHolder[i].bottomRight);
+				hitBoxHolder[i].topLeft = rotate90(OGHitBoxHolder[i].topLeft);
+				hitBoxHolder[i].topRight = rotate90(OGHitBoxHolder[i].topRight);
 			}
-			else {
-				cameraPos.y = abs(cameraPos.y - modHitBoxHolder[ObjectID].MinY) < abs(cameraPos.y - modHitBoxHolder[ObjectID].MaxY) ?
-					modHitBoxHolder[ObjectID].MinY : modHitBoxHolder[ObjectID].MaxY;
+			else if (rotation == 180) {
+				hitBoxHolder[i].bottomLeft = rotate180(OGHitBoxHolder[i].bottomLeft);
+				hitBoxHolder[i].bottomRight = rotate180(OGHitBoxHolder[i].bottomRight);
+				hitBoxHolder[i].topLeft = rotate180(OGHitBoxHolder[i].topLeft);
+				hitBoxHolder[i].topRight = rotate180(OGHitBoxHolder[i].topRight);
 			}
-		return true;
+			else if (rotation == 270) {
+				hitBoxHolder[i].bottomLeft = rotate270(OGHitBoxHolder[i].bottomLeft);
+				hitBoxHolder[i].bottomRight = rotate270(OGHitBoxHolder[i].bottomRight);
+				hitBoxHolder[i].topLeft = rotate270(OGHitBoxHolder[i].topLeft);
+				hitBoxHolder[i].topRight = rotate270(OGHitBoxHolder[i].topRight);
+			}
+			else if (rotation == -90) {
+				hitBoxHolder[i].bottomLeft = rotateNeg90(OGHitBoxHolder[i].bottomLeft);
+				hitBoxHolder[i].bottomRight = rotateNeg90(OGHitBoxHolder[i].bottomRight);
+				hitBoxHolder[i].topLeft = rotateNeg90(OGHitBoxHolder[i].topLeft);
+				hitBoxHolder[i].topRight = rotateNeg90(OGHitBoxHolder[i].topRight);
+			}
+			else if (rotation == -180) {
+				hitBoxHolder[i].bottomLeft = rotateNeg180(OGHitBoxHolder[i].bottomLeft);
+				hitBoxHolder[i].bottomRight = rotateNeg180(OGHitBoxHolder[i].bottomRight);
+				hitBoxHolder[i].topLeft = rotateNeg180(OGHitBoxHolder[i].topLeft);
+				hitBoxHolder[i].topRight = rotateNeg180(OGHitBoxHolder[i].topRight);
+			}
+			else if (rotation == -270) {
+				hitBoxHolder[i].bottomLeft = rotateNeg270(OGHitBoxHolder[i].bottomLeft);
+				hitBoxHolder[i].bottomRight = rotateNeg270(OGHitBoxHolder[i].bottomRight);
+				hitBoxHolder[i].topLeft = rotateNeg270(OGHitBoxHolder[i].topLeft);
+				hitBoxHolder[i].topRight = rotateNeg270(OGHitBoxHolder[i].topRight);
+			}
 		}
+	}
+}
+
+bool HitBoxes::isInHitBox(glm::vec3 cameraPos)
+{
+				// pos							pos
+				//  Top Left-----------TopRight
+				//  |						  |
+				//  |						  |
+				//  |						  |
+				//  |						  |
+				//  |						  |
+				//  BottomLeft------BottomRight						  
+				//pos							pos
+
+	for (int i = 0; i < hitBoxHolder.size(); i++) {
+		if (cameraPos.x > hitBoxHolder[i].bottomLeft[0] && cameraPos.y < hitBoxHolder[i].topLeft[1] && cameraPos.x < hitBoxHolder[i].bottomRight[0] && cameraPos.y > hitBoxHolder[i].bottomRight[1]) {
+			return true;
+		}
+		//else if (cameraPos.x > hitBoxHolder[i].bottomLeft[1] && cameraPos.x < hitBoxHolder[i].topRight[1]) {
+		//	return true;
+		//}
 	}
 	return false;
-}
-
-void HitBoxes::updateHitBoxes(glm::vec3 transformation, int ObjectID) {
-	modHitBoxHolder[ObjectID].MaxX = permHitBoxHolder[ObjectID].MaxX + transformation.x;
-	modHitBoxHolder[ObjectID].MinX = permHitBoxHolder[ObjectID].MinX + transformation.x;
-	modHitBoxHolder[ObjectID].MaxY = permHitBoxHolder[ObjectID].MaxY + transformation.y;
-	modHitBoxHolder[ObjectID].MinY = permHitBoxHolder[ObjectID].MinY + transformation.y;
-	modHitBoxHolder[ObjectID].MaxZ = permHitBoxHolder[ObjectID].MaxZ + transformation.z;
-	modHitBoxHolder[ObjectID].MinZ = permHitBoxHolder[ObjectID].MinZ + transformation.z;
-}
-
-bool HitBoxes::isInRangeToInteract(glm::vec3& cameraPos, int ObjectID)
-{
-	bool isRange = false;
-	if (typeOfObject[ObjectID] != 0) {
-		if (cameraPos.z > (modHitBoxHolder[ObjectID].MinZ - 10) && cameraPos.z < (modHitBoxHolder[ObjectID].MaxZ + 10)) {
-
-			float distanceX = abs((cameraPos.x) - (((modHitBoxHolder[ObjectID].MaxX + modHitBoxHolder[ObjectID].MinX) / 2)));
-
-			float distanceY = abs((cameraPos.y) - (((modHitBoxHolder[ObjectID].MaxY + modHitBoxHolder[ObjectID].MinY) / 2)));
-			if (distanceX < 10 && distanceY < 10) {
-				return true;
-			}
-		}
-	}
-	return isRange;
 }

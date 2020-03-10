@@ -1,15 +1,11 @@
 #pragma once
 #include "Game.h"
 
+
 #define IMGUI_IMPL_OPENGL_LOADER_GLAD
 #include "imgui.h"
 #include "imgui_impl_opengl3.cpp"
 #include "imgui_impl_glfw.cpp"
-
-
-
-
-
 
 /*
 	Handles debug messages from OpenGL
@@ -42,9 +38,7 @@ void lerp(glm::vec3& goal, glm::vec3& startPoint, glm::vec3& currentPos, float d
 	}
 }
 
-struct UpdateBehaviour {
-	std::function<void(entt::entity e, float dt)> Function;
-};
+
 
 
 
@@ -84,8 +78,10 @@ Game::~Game() { }
 void Game::Run()
 {
 	Initialize();
-	InitImGui();
 
+	//gBufferInit();
+	
+	InitImGui();
 	LoadContent();
 
 	static float prevFrame = glfwGetTime();
@@ -98,8 +94,21 @@ void Game::Run()
 		float thisFrame = glfwGetTime();
 		float deltaTime = thisFrame - prevFrame;
 
-		Update(deltaTime);
+		switch (gameState) {
+		case 0:
+			Update(deltaTime);
+			break;
+		case 1:
+			pauseScreen(); //Also need start and end screen
+			break;
+		case 2:
+			break;
+		}
 		Draw(deltaTime);
+		//preRender();
+		//gBuffer();
+
+
 
 		ImGuiNewFrame();
 		DrawGui(deltaTime);
@@ -115,7 +124,7 @@ void Game::Run()
 	LOG_INFO("Shutting down...");
 
 	UnloadContent();
-
+	UnloadGBuffer();
 	ShutdownImGui();
 	Shutdown();
 }
@@ -156,7 +165,7 @@ void Game::Initialize() {
 	glEnable(GL_DEBUG_OUTPUT);
 	glDebugMessageCallback(GlDebugMessage, this);
 
-	//glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 
 }
@@ -170,10 +179,22 @@ glm::vec4 testColor = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
 
 void Game::CreateObjects(int objectNameID, int typeOfObject, int textureNameID, glm::mat4 transformation)
 {
-	genObjects.push_back(ObjLoader::LoadObj(filename[objectNameID], glm::vec4(1.0f)));
+	if (typeOfObject == 100 /* Put the list of objects you want to be collidable here*/) {
+		saveHitAndMesh(ObjLoader::LoadObj2(filename[objectNameID], glm::vec4(1.0f)));
+	}
+	else {
+		genObjects.push_back(ObjLoader::LoadObj(filename[objectNameID], glm::vec4(1.0f)));
+	}
 	amountOfObjects.push_back(typeOfObject);  
 	genMats.push_back(Texture2D::LoadFromFile(texturename[textureNameID]));
 	genTransform.push_back(transformation);
+
+}
+
+void Game::saveHitAndMesh(MeshAndHitBox toSave) {
+	toSave.hitBox.ID = amountOfObjects.size();
+	genObjects.push_back(toSave.mesh);
+	hitBoxManager.saveHitBoxes(toSave.hitBox);
 }
 
 void Game::UnloadContent() {
@@ -281,7 +302,7 @@ void Game::Draw(float deltaTime) {
 	Shader::Sptr   boundShader = nullptr;
 	// A view will let us iterate over all of our entities that have the given component types    
 	auto view = ecs.view<MeshRenderer>();
-	int hello = genObjects.size() - 1;
+	int object = genObjects.size() - 1;
 
 
 	for (const auto& entity : view) {
@@ -292,7 +313,10 @@ void Game::Draw(float deltaTime) {
 			continue;
 		
 		//renderer.Mesh = Bake(genObjects[hello]);
-		
+		if (amountOfObjects[object] == 100) {
+			hitBoxManager.updateHitBox(object, genTransform[object]);
+		}
+
 		// If our shader has changed, we need to bind it and update our frame-level uniforms    
 		if (renderer.Material->GetShader() != boundShader) {
 			boundShader = renderer.Material->GetShader();
@@ -300,17 +324,11 @@ void Game::Draw(float deltaTime) {
 			//boundShader->SetUniform("a_CameraPos", interactCamera->GetPosition());
 			boundShader->SetUniform("a_CameraPos", myCamera->GetPosition());
 		}
-		//if (amountOfObjects[hello] == 3) {
-		//	testMat2->Set("inGoalPosition", genMats[hello]);
-		//	
-		//		//genMesh[hello];
-		//}
-		// If our material has changed, we need to apply it to the shader    
-			
+		
 			
 		
 		//testMat->Set("s_Albedo", genMats[hello]);
-		testMat2->Set("s_Albedo", genMats[hello]);
+		testMat2->Set("s_Albedo", genMats[object]);
 		//if (renderer.Material != mat) {
 			mat = renderer.Material;
 			mat->Apply();
@@ -324,9 +342,9 @@ void Game::Draw(float deltaTime) {
 		glm::mat3 normalMatrix = glm::mat3(glm::transpose(glm::inverse(transform.GetWorldTransform())));
 		// Update the MVP using the item's transform  
 		
-		if (amountOfObjects[hello] == 3) {
+		if (amountOfObjects[object] == 3) {
 			//testMat->Set("time", time);
-			mat->GetShader()->SetUniform("a_ModelViewProjection", myCamera->GetViewProjection() * genTransform[hello]);
+			mat->GetShader()->SetUniform("a_ModelViewProjection", myCamera->GetViewProjection() * genTransform[object]);
 			//mat->GetShader()->SetUniform("a_ModelViewProjection", interactCamera->GetViewProjection() * genTransform[hello]);
 			// Update the model matrix to the item's world transform
 			mat->GetShader()->SetUniform("a_Model", transform.GetWorldTransform());
@@ -335,10 +353,10 @@ void Game::Draw(float deltaTime) {
 			// Draw the item   
 			renderer.Mesh->Draw();
 		}
-		else if (amountOfObjects[hello] == 4) {
+		else if (amountOfObjects[object] == 4) {
 			if (isPickedUp && isDoneReading == false) {
 				//mat->GetShader()->SetUniform("a_ModelViewProjection", myCamera->GetViewProjection() * genTransform[hello]);
-				mat->GetShader()->SetUniform("a_ModelViewProjection", interactCamera->GetViewProjection() * genTransform[hello]);
+				mat->GetShader()->SetUniform("a_ModelViewProjection", interactCamera->GetViewProjection() * genTransform[object]);
 		
 		
 				// Update the model matrix to the item's world transform
@@ -350,10 +368,10 @@ void Game::Draw(float deltaTime) {
 				
 			}
 			else if (isDoneReading == false) {
-				mat->GetShader()->SetUniform("a_ModelViewProjection", myCamera->GetViewProjection() * genTransform[hello]);
+				mat->GetShader()->SetUniform("a_ModelViewProjection", myCamera->GetViewProjection() * genTransform[object]);
 				//mat->GetShader()->SetUniform("a_ModelViewProjection", interactCamera->GetViewProjection() * genTransform[hello]);
-		
-		
+				
+				
 				// Update the model matrix to the item's world transform
 				mat->GetShader()->SetUniform("a_Model", transform.GetWorldTransform());
 				// Update the model matrix to the item's world transform 
@@ -363,7 +381,7 @@ void Game::Draw(float deltaTime) {
 			}
 		}
 		else {
-			boundShader->SetUniform("a_ModelViewProjection", myCamera->GetViewProjection() * genTransform[hello]);
+			boundShader->SetUniform("a_ModelViewProjection", myCamera->GetViewProjection() * genTransform[object]);
 			//mat->GetShader()->SetUniform("a_ModelViewProjection", interactCamera->GetViewProjection() * genTransform[hello]);
 
 
@@ -375,7 +393,7 @@ void Game::Draw(float deltaTime) {
 			renderer.Mesh->Draw();
 		}
 		
-		hello--;
+		object--;
 	}
 	time += 0.02;
 }
@@ -461,14 +479,238 @@ bool Game::interactionIsPossible(glm::vec3 playerPos, glm::vec3 objectPos)
 	return false;
 }
 
-bool Game::interact(int objectID, glm::vec3 cameraPos, bool isPressed)
+void Game::pauseScreen()
 {
-	if (isPressed) {
-		if ((hitBoxManager.isInRangeToInteract(cameraPos, objectID))) {
-			return true;
-		}
+	if (firstLoop == 1) {
+		;//pause!!!! HA! I control the world
 	}
-	return false;
+}
+
+void Game::gBufferInit()
+{
+	glfwGetWindowSize(myWindow, &windowSizeWidth, &windowSizeHeight);
+	//Create shader and initialise some values (Not all)
+	gBufferShader = std::make_shared<Shader>();
+	//gBufferShader->Load("post.vs.glsl", "post.fs.glsl");
+	gBufferShader->LoadPart(ShaderStageType::VertexShader, "post.vs.glsl");
+	gBufferShader->LoadPart(ShaderStageType::FragmentShader, "post.fs.glsl");
+	gBufferShader->Link();
+
+	RenderBufferDesc mainColor = RenderBufferDesc();
+	mainColor.ShaderReadable = true;
+	mainColor.Attachment = RenderTargetAttachment::Color0;
+	mainColor.Format = RenderTargetType::ColorRgb16F;
+	
+	// We'll use one buffer to accumulate all the lighting
+	myAccumulationBuffer = std::make_shared<FrameBuffer>(windowSizeWidth, windowSizeHeight);
+	myAccumulationBuffer->AddAttachment(mainColor);
+	myAccumulationBuffer->Validate();
+	myAccumulationBuffer->SetDebugName("Intermediate");
+
+	// Create our fullscreen quad (just like in PostLayer)
+	{
+		float vert[] = {
+			-1.0f, -1.0f,  0.0f, 0.0f,
+			 1.0f, -1.0f,  1.0f, 0.0f,
+			-1.0f,  1.0f,  0.0f, 1.0f,
+			 1.0f,  1.0f,  1.0f, 1.0f
+		};
+		uint32_t indices[] = {
+			0, 1, 2,
+			1, 3, 2
+		};
+		BufferLayout layout = {
+			{ "inPosition", ShaderDataType::Float2 },
+			{ "inUV",       ShaderDataType::Float2 }
+		};
+	
+		myFullscreenQuad = std::make_shared<Mesh>(vert, 4, layout, indices, 6);
+	}
+
+}
+
+
+void Game::preRender()
+{
+	auto& ecs = CurrentRegistry();
+	
+	// We'll only handle stuff if we actually have a shadow casting light in the scene
+	auto view = ecs.view<PointLight>();
+	if (view.size() > 0) {
+		// We'll make sure depth testing and culling are enabled
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_FRONT); // enable front face culling
+	
+		// Iterate over all the shadow casting lights
+		Shader::Sptr shader = nullptr;
+		shader = gBufferShader;
+		ecs.view<PointLight>().each([&](auto entity, PointLight& light) {
+			// Get the light's transform
+			const TempTransform& lightTransform = ecs.get<TempTransform>(entity);
+			// Use the shader, and tell it what our output resolution is
+			shader->Use();
+			//shader->SetUniform("a_OutputResolution", (glm::vec2)light.Attenuation);
+	
+			// Bind, viewport, and clear
+			myAccumulationBuffer->Bind();
+			glViewport(0, 0, myAccumulationBuffer->GetWidth(), myAccumulationBuffer->GetHeight());
+			glClear(GL_DEPTH_BUFFER_BIT);
+	
+			// Determine the position and matrices for the light
+			//glm::vec3 position = lightTransform.GetLocalPosition();
+			//glm::mat4 viewMatrix = glm::inverse(lightTransform.GetWorldTransform());
+			//glm::mat4 viewProjection = * viewMatrix;
+	
+			// We're going to iterate over every renderable component
+			auto view = ecs.view<MeshRenderer>();
+	
+			for (const auto& entity : view) {
+				// Get our shader
+				const MeshRenderer& renderer = ecs.get<MeshRenderer>(entity);
+	
+				// Early bail if mesh is invalid (or if if does not cast a shadow)
+				if (renderer.Mesh == nullptr || renderer.Material == nullptr)
+					continue;
+	
+				// We'll need some info about the entities position in the world
+				const TempTransform& transform = ecs.get_or_assign<TempTransform>(entity);
+	
+				// Update the MVP using the item's transform
+				shader->SetUniform(
+					"a_ModelViewProjection",
+					transform.GetWorldTransform());
+	
+				// Draw the item
+				renderer.Mesh->Draw();
+			}
+	
+			// Unbind so that we can use the texture later
+			myAccumulationBuffer->UnBind();
+			});
+	
+		glCullFace(GL_BACK); // enable back face culling
+	}
+}
+
+void Game::gBuffer()
+{
+	// We grab the application singleton to get the size of the screen
+	//florp::app::Application* app = florp::app::Application::Get();
+	auto& ecs = CurrentRegistry();
+
+	// We'll get the back buffer from the frame state
+	
+	//Always crashes here, Don't know why
+
+	const AppFrameState& state = ecs.ctx<AppFrameState>();// = ecs.<>(); 
+	FrameBuffer::Sptr mainBuffer = ecs.ctx<AppFrameState>().Current.Output;
+
+	// We can extract our near and far plane by reversing the projection calculation
+	float m22 = state.Current.Projection[2][2];
+	float m32 = state.Current.Projection[3][2];
+	float nearPlane = (2.0f * m32) / (2.0f * m22 - 2.0f);
+	float farPlane = ((m22 - 1.0f) * nearPlane) / (m22 + 1.0);
+
+	// We set up all the camera state once, since we use the same shader for compositing all shadow-casting lights
+	gBufferShader->Use();
+	gBufferShader->SetUniform("a_View", state.Current.View);
+	glm::mat4 viewInv = glm::inverse(state.Current.View);
+	gBufferShader->SetUniform("a_ViewInv", viewInv);
+	gBufferShader->SetUniform("a_CameraPos", glm::vec3(viewInv * glm::vec4(0, 0, 0, 1)));
+	gBufferShader->SetUniform("a_ProjectionInv", glm::inverse(state.Current.Projection));
+	gBufferShader->SetUniform("a_ViewProjectionInv", glm::inverse(state.Current.ViewProjection));
+	gBufferShader->SetUniform("a_NearPlane", nearPlane);
+	gBufferShader->SetUniform("a_FarPlane", farPlane);
+	gBufferShader->SetUniform("a_Bias", 0.000001f);
+	gBufferShader->SetUniform("a_MatShininess", 1.0f); // This should be from the GBuffer
+
+	// Bind our GBuffer textures (note that we skipped 2, since that's the slot for the shadow sampler)
+	mainBuffer->Bind(0, RenderTargetAttachment::Color0);
+	mainBuffer->Bind(1, RenderTargetAttachment::Depth);
+	mainBuffer->Bind(3, RenderTargetAttachment::Color1); // The normal buffer
+
+	// Iterate over all the ShadowLights in the scene
+	auto view = CurrentRegistry().view<PointLight>();
+	if (view.size() > 0) {
+		view.each([&](auto entity, PointLight& light) {
+			const TempTransform & transform = ecs.get_or_assign<TempTransform>(entity);
+			glm::vec3 pos = glm::vec3(transform.GetWorldTransform() * glm::vec4(0.0, 0.0, 0.0, 1.0));
+
+
+			//Upload data to shaders
+			//gBufferShader->SetUniform("a_LightPos", pos);
+			gBufferShader->SetUniform("a_LightColor", light.Color);
+			gBufferShader->SetUniform("a_LightAttenuation", light.Attenuation);
+
+			myFullscreenQuad->Draw();
+			
+		});
+	}
+
+	//gBufferShader->Bind();
+	//glBindBuffer(fbo, GL_BUFFER);
+	//glClearColor(0.0, 0.0, 0.0, 1.0);
+	//glClear(GL_COLOR_BUFFER_BIT);
+	//
+	//glDisable(GL_DEPTH_TEST);
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_ONE, GL_ONE);
+	//
+	////do post processing
+	//
+	//
+	//
+	//
+	//glBindBuffer(0, GL_BUFFER);
+	//glDisable(GL_BLEND);
+
+
+	//glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+	//// draw (without glutSwapBuffers)
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//glClearColor(0.0, 0.0, 0.0, 1.0);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//
+	//glUseProgram(program_postproc);
+	//glBindTexture(GL_TEXTURE_2D, fbo_texture);
+	//glUniform1i(uniform_fbo_texture, /*GL_TEXTURE*/0);
+	//glEnableVertexAttribArray(attribute_v_coord_postproc);
+	//
+	//glBindBuffer(GL_ARRAY_BUFFER, vbo_fbo_vertices);
+	//glVertexAttribPointer(
+	//	attribute_v_coord_postproc,  // attribute
+	//	2,                  // number of elements per vertex, here (x,y)
+	//	GL_FLOAT,           // the type of each element
+	//	GL_FALSE,           // take our values as-is
+	//	0,                  // no extra data between each position
+	//	0                   // offset of first element
+	//);
+	//glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	//glDisableVertexAttribArray(attribute_v_coord_postproc);
+	//
+	//glUseProgram(program_postproc);
+	////GLfloat move = glfwGetTime();  // 3/4 of a wave cycle per second
+	////GLint loc = glGetUniformLocation(myShaderHandle, name);
+	////GLint loc = glGetUniformLocation(program_postproc, "offset");
+	////glUniform1f(loc, move);
+	////gBufferShader->Bind();
+	////gBufferShader->SetUniform("xImage", 0);
+	////gBufferShader->SetUniform("xScreenRes", glm::ivec2(windowSizeWidth, windowSizeHeight));
+	////myFullscreenQuad->Draw();
+
+
+}
+
+void Game::UnloadGBuffer()
+{
+	//glDeleteRenderbuffers(1, &rbo_depth);
+	//glDeleteTextures(1, &fbo_texture);
+	//glDeleteFramebuffers(1, &fbo);
+	//glDeleteBuffers(1, &vbo_fbo_vertices);
+	//glDeleteProgram(program_postproc);
+
+
 }
 
 int Game::objectUpdate(int ID)

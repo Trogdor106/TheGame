@@ -30,6 +30,17 @@ struct MeshData {
 	std::string           DebugName;
 };
 
+
+
+
+//BufferLayout
+
+
+/// <summary>
+/// Represents a single element in a buffer or vertex declaration
+/// </summary>
+
+
 ENUM(VertexUsage, uint32_t,
 	User,
 	Position,
@@ -75,11 +86,12 @@ struct BufferElement {
 	 * Compares this buffer element to another for inequality
 	 * @returns False if this element is exactly equal to the other, otherwise true
 	 */
-	inline bool operator !=(const BufferElement& other) const {
-		return !(*this == other);
-	}
+	inline bool operator !=(const BufferElement& other) const { return !(*this == other); }
 };
 
+/*
+ * Used to calculate hash codes for buffer elements
+ */
 struct BufferElementHash {
 	/*
 	 * Computes a hash for the given buffer element
@@ -89,6 +101,10 @@ struct BufferElementHash {
 	std::size_t operator()(const BufferElement& value) const;
 };
 
+/*
+ * Represents the layout of a buffer. This stores all of the attributes that define a single
+ * object within the buffer
+ */
 class BufferLayout {
 public:
 	BufferLayout() = default;
@@ -149,7 +165,6 @@ protected:
 
 	inline bool DeepCompare(const BufferLayout& other) const;
 };
-
 
 
 

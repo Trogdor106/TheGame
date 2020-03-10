@@ -1,5 +1,15 @@
 #include "Vertex.h"
 
+
+bool BufferElement::operator==(const BufferElement& other) const {
+	return
+		Name == other.Name &&
+		Type == other.Type &&
+		SizeInBytes == other.SizeInBytes &&
+		Offset == other.Offset &&
+		IsNormalized == other.IsNormalized;
+}
+
 std::size_t BufferElementHash::operator()(const BufferElement& value) const {
 	size_t hash = std::hash<std::string>()(value.Name);
 	hash ^= (std::hash<ShaderDataType>()(value.Type)) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
@@ -8,6 +18,29 @@ std::size_t BufferElementHash::operator()(const BufferElement& value) const {
 	hash ^= (std::hash<bool>()(value.IsNormalized)) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
 	hash ^= (std::hash<uint32_t>()(value.ArraySize)) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
 	return  hash;
+}
+
+bool BufferLayout::GetElementByUsage(VertexUsage usage, BufferElement& result, int index) const
+{
+	int ix = 0;
+	for (auto& elem : myElements) {
+		if (elem.Usage == usage) {
+			if (ix == index) {
+				result = elem;
+				return true;
+			}
+			else
+				ix++;
+		}
+	}
+	return false;
+}
+
+bool BufferLayout::operator==(const BufferLayout& other) const {
+	return myHash == other.myHash ?
+		// Compare
+		DeepCompare(other)
+		: false;
 }
 
 void BufferLayout::__Calculate() {
@@ -30,4 +63,14 @@ void BufferLayout::__Calculate() {
 		// Hashing function
 		myHash ^= (BufferElementHash()(myElements[ix])) + 0x9e3779b9 + (myHash << 6) + (myHash >> 2);
 	}
+}
+
+bool BufferLayout::DeepCompare(const BufferLayout& other) const {
+	if (myElements.size() != other.myElements.size())
+		return false;
+	for (int ix = 0; ix < myElements.size(); ix++) {
+		if (myElements[ix] != other.myElements[ix])
+			return false;
+	}
+	return true;
 }
