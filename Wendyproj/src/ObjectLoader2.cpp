@@ -335,17 +335,17 @@ MeshAndHitBox ObjLoader::LoadObj2(const char* filename, glm::vec4 baseColor)
 				//  |						  |
 				//  BottomLeft------BottomRight						  
 				//pos							pos
-				if (pos.x < toReturn.Bottom) {
-					toReturn.Bottom = pos.x;
+				if (pos.y < toReturn.Bottom) {
+					toReturn.Bottom = pos.y;
 				}
-				if (pos.x > toReturn.top) {
-					toReturn.top = pos.x;
+				if (pos.y > toReturn.top) {
+					toReturn.top = pos.y;
 				}
-				if (pos.z > toReturn.Right) {
-					toReturn.Right = pos.z;
+				if (pos.x > toReturn.Right) {
+					toReturn.Right = pos.x;
 				}
-				if (pos.z < toReturn.Left) {
-					toReturn.Left = pos.z;
+				if (pos.x < toReturn.Left) {
+					toReturn.Left = pos.x;
 				}
 			}
 		}

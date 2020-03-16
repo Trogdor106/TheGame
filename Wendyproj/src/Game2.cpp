@@ -28,8 +28,8 @@ void Game::LoadSimpleContent()
 
 	// Create and compile shader
 	simpleShader = std::make_shared<Shader>();
-	simpleShader->LoadPart(ShaderStageType::VertexShader, "passthrough.vs.glsl");
-	simpleShader->LoadPart(ShaderStageType::FragmentShader, "passthrough.fs.glsl");
+	simpleShader->LoadPart(ShaderStageType::VertexShader, "Shaders/passthrough.vs.glsl");
+	simpleShader->LoadPart(ShaderStageType::FragmentShader, "Shaders/passthrough.fs.glsl");
 	simpleShader->Link();
 }
 
@@ -50,20 +50,22 @@ void Game::LoadContent() {
 
 
 	//Texture2D::Sptr albedo = Texture2D::LoadFromFile("f_Door.png");
-	Texture2D::Sptr albedo2 = Texture2D::LoadFromFile("F_fatWall.png");
+	Texture2D::Sptr albedo2 = Texture2D::LoadFromFile("textures/F_fatWall.png");
 
 	
 
 	//std::vector <Vertex> temp;
 	//Replaced with
-	MeshData MeshTemp = ObjLoader::LoadObj("f_Door.obj", glm::vec4(1.0f));
+	MeshData MeshTemp = ObjLoader::LoadObj("objects/f_Door.obj", glm::vec4(1.0f));
 
+	
+	lanternFuelFullPowerBuffer = 1000; //How long before the light starts to go away
 
-
+	objectIDToHaveHitBox = { 3 }; //Put the list of objects you want to have hitboxes in here
 	//Type 0 is nothing, type 1 is unlocked door, type 2 is locked door, type 3 is drawer, type 4 is a note, type 5 is the oil cask (refueling)
 	///////////////Load objects and textures under here
 	Game::CreateObjects(1, 0, 14); // object 0 floor 1
-	Game::CreateObjects(11, 3, 13); // object 1 is door topside of saferoom
+	Game::CreateObjects(11, 3, 13, 1); // object 1 is door topside of saferoom
 	Game::CreateObjects(8, 3, 12); // object 2 is door right side in safe room
 	Game::CreateObjects(11, 3, 13); // object 3 is left bathroom door
 	Game::CreateObjects(8, 3, 12); // object 4 is top door across of saferoom
@@ -78,13 +80,13 @@ void Game::LoadContent() {
 	Game::CreateObjects(4, 0, 18); // object 13 is a big vase
 	Game::CreateObjects(29, 0, 19); // object 14 is a full bookshelf
 	Game::CreateObjects(29, 0, 19); //Object 15 is a full bookshelf, look at all those vertices
-	Game::CreateObjects(11, 0, 13); //Object 16 is the study door
+	Game::CreateObjects(11, 3, 13); //Object 16 is the study door
 	Game::CreateObjects(11, 3, 13); //Object 17 is the right door of the dining room
 	Game::CreateObjects(11, 3, 13); //Object 18 is the left door of the dining room
 	Game::CreateObjects(11, 3, 13); //Object 19 is the door to the pantry
 	Game::CreateObjects(33, 4, 22); //Object 20 is the front door
-	Game::CreateObjects(34, 0, 20); //Object 21 is the safe room staircase
-	Game::CreateObjects(35, 0, 20); //Object 22 is the kitchen staircase
+	Game::CreateObjects(34, 20, 20); //Object 21 is the safe room staircase
+	Game::CreateObjects(35, 22, 20); //Object 22 is the kitchen staircase
 	Game::CreateObjects(36, 0, 16); //Object 23 is the piano
 	Game::CreateObjects(37, 0, 23); //Object 24 is the 1st floor toilet
 	Game::CreateObjects(41, 0, 17); //Object 25 is the bathroom sink
@@ -109,7 +111,7 @@ void Game::LoadContent() {
 
 	//int hello = 0;
 	Shader::Sptr phong = std::make_shared<Shader>();
-	phong->Load("lighting.vs.glsl", "blinn-phong.fs.glsl");
+	phong->Load("Shaders/lighting.vs.glsl", "Shaders/blinn-phong.fs.glsl");
 
 	//Shader::Sptr phong2 = std::make_shared<Shader>();
 	//phong2->Load("lighting.vs.glsl", "blinn-phong.fs.glsl");
@@ -130,7 +132,7 @@ void Game::LoadContent() {
 
 	//testMat2->Set("a_LightColor", { 1.0f, 1.0f, 0.0f });
 	testMat2->Set("a_AmbientColor", { 1.0f, 1.0f, 1.0f });
-	testMat2->Set("a_AmbientPower", 0.2f);
+	testMat2->Set("a_AmbientPower", 1.2f);
 	testMat2->Set("a_LightSpecPower", 1.0f);
 	testMat2->Set("a_EnabledLights", 2);
 
@@ -168,10 +170,10 @@ void Game::LoadContent() {
 				genTransform[i] = glm::translate(genTransform[i], glm::vec3(44.2f, 49.9f, 0.0f));
 				break;
 			case 1: //Object 1 Door right saferoom
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(50.5f, 11.5f, -110.1f));
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(50.5f, 11.5f, 0.0f));
 				break;
 			case 2:// object 2 is door bottom of saferoom
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(3.85f, -11.1f, -110.1f));
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(3.85f, -11.1f, 0.0f));
 				genTransform[i] = glm::rotate(genTransform[i], 2 * halfOfPI, glm::vec3(0, 0, 1));
 				break;
 			case 3:// object 3 door right across saferoom
@@ -181,7 +183,7 @@ void Game::LoadContent() {
 				genTransform[i] = glm::translate(genTransform[i], glm::vec3(12.7f, 49.0f, -0.1));
 				break;
 			case 5:// object 5 is door top safe room
-				genTransform[i] = glm::translate(genTransform[i], glm::vec3(12.7f, 36.5f, -110.1));
+				genTransform[i] = glm::translate(genTransform[i], glm::vec3(12.7f, 36.5f, -0.1));
 				break;
 			case 6:// object 6 is the dresser in the room where you find the red key
 				genTransform[i] = glm::translate(genTransform[i], glm::vec3(96.55f, -9.0f, -110.1f));
@@ -333,7 +335,7 @@ void Game::LoadContent() {
 }
 
 void Game::Update(float deltaTime) {
-
+	hitBoxManager.saveFloor(currentFloor); 
 
 	glm::vec3 movement = glm::vec3(0.0f);
 	glm::vec3 rotation = glm::vec3(0.0f);
@@ -343,6 +345,7 @@ void Game::Update(float deltaTime) {
 
 	static bool isMouse = false;
 	static bool isM = false;
+
 
 	//glfwSetCursorPosCallback
 	//glfwGetCursorPos
@@ -407,10 +410,6 @@ void Game::Update(float deltaTime) {
 		movement.y += speed * deltaTime;
 	if (glfwGetKey(myWindow, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
 		movement.y -= speed * deltaTime;
-
-	if (glfwGetKey(myWindow, GLFW_KEY_ESCAPE)) {
-		exit(1);
-	}
 
 	if (glfwGetKey(myWindow, GLFW_KEY_DOWN) == GLFW_PRESS) {
 		angleForZ -= 0.01;
@@ -481,23 +480,6 @@ void Game::Update(float deltaTime) {
 
 	cameraPos = myCamera->GetPosition();
 
-	//hitBoxManager.updateHitBoxes(glm::vec3(myLanternTransform[3][0], myLanternTransform[3][1], myLanternTransform[3][2]), 0);
-	//Will add once the camera follows the correct format
-
-	//testMat2->Set("a_LightPos", { cameraPos + glm::vec3(-6, -2, 0) + glm::vec3(cos(lanternAngle.x), sin(lanternAngle.y), tan(lanternAngle.z)) });
-
-	//HitBoxing, will be a for loop going through objects once we have things in place
-	//for (int i = 0; i < genObjects.size(); i++)
-	//{
-	//	if (i == 0)
-	//		;
-	//
-	//	else if (hitBoxManager.testHitBoxes(cameraPos, 0)) {
-	//		myCamera->SetPosition(cameraPos);
-	//	}
-	//}
-
-
 	//myLanternTransform = glm::translate(myLanternTransform, glm::vec3(cameraPos + glm::vec3(-6, -2, 0)));
 	float extraDist = 2;
 	float offSet = 0.5;
@@ -507,13 +489,15 @@ void Game::Update(float deltaTime) {
 									  myCamera->GetPosition().z + (angleForZ > -1 ? (angleForZ < 1 ? tan(angleForZ) : 1) : -1) });
 
 	if (glfwGetKey(myWindow, GLFW_KEY_R) == GLFW_PRESS) {
-		lanternFuel = 2000; //How long will the lantern last
+		lanternFuel = LANTERNFUELDEFAULT; //How long will the lantern last
 		lightAttenuationModifyer = 1.0f;
 		lightShyninessModifyer = 1.0f;
 	}
 
 
-	if (lanternFuel > 1000) {
+	//Lantern degrade numbers here
+	if (lanternFuel > lanternFuelFullPowerBuffer) {
+		deathTimer = DEATHTIMERMAX;
 		testMat2->Set("a_LightColor", { 1.0f, 1.0f, 1.0f });
 
 		//Brightness Smaller the more shinny the surface is and the better it will show light
@@ -533,30 +517,79 @@ void Game::Update(float deltaTime) {
 	}
 	else {
 		testMat2->Set("a_LightColor", { 0.0f, 0.0f, 0.0f });
+		if (!(cameraPos.x > -11.7 && cameraPos.x < 52.5 && cameraPos.y > -8.15 && cameraPos.y < 35.2 && currentFloor == 0)) { //Safe room location
+			deathTimer--;
+		}
+		else if ((cameraPos.x > -11.7 && cameraPos.x < 52.5 && cameraPos.y > -8.15 && cameraPos.y < 35.2 && currentFloor == 0)) { //Safe room location
+			deathTimer = DEATHTIMERMAX;
+		}
+	}
+
+
+	if (deathTimer == 0) {
+		//When shading is working add a death screen and delay before respawn here
+
+		currentFloor = 0;
+		myCamera->SetPosition({ 1, 1, 10 });
 	}
 
 	lanternFuel -= 1; //Just makes the lantern fuel drain
 
 	static bool isE = false;
-	int hello = 0;
 	if (glfwGetKey(myWindow, GLFW_KEY_E) == GLFW_PRESS) {
-		if (!isE) {
+		if (!isE) { //Interactables work like this -> if e was pressed and the object to interact with is in range, add it to the list of object that need to update
+					//Add any special things to the objects (like doors get converted to an ID of 2 instead of 3 because after opening it will no longer be interactable)
+					//Interact buffer is there to make sure only one object is interacted at a time (prevents trying to open a drawer and then the key is picked up)
 			isE = true;
 			for (int i = 0; i < genObjects.size(); i++) {
-				if (amountOfObjects[i] == 3) {
-					if (interactionIsPossible(cameraPos, glm::vec3(genTransform[i][3].x, genTransform[i][3].y, genTransform[i][3].z))) {
-						objectsToUpdate.push_back(i);
-						amountOfObjects[i]--;
+				if (objFloor[i] == currentFloor) { //Only interact with what is on your floor
+					if (amountOfObjects[i] == 3 && interactBuffer == true) { //3 is for Doors
+						if (interactionIsPossible(cameraPos, glm::vec3(genTransform[i][3].x, genTransform[i][3].y, genTransform[i][3].z))) {
+							objectsToUpdate.push_back(i);
+							amountOfObjects[i]--;
+							interactBuffer = false;
+						}
 					}
-				}
-				else if (amountOfObjects[i] == 5) {
-					if (interactionIsPossible(cameraPos, glm::vec3(genTransform[i][3].x, genTransform[i][3].y, genTransform[i][3].z))) {
-						objectsToUpdate.push_back(i);
+					else if (amountOfObjects[i] == 10 && interactBuffer == true) { //10 is for Drawer
+						if (interactionIsPossible(cameraPos, glm::vec3(genTransform[i][3].x, genTransform[i][3].y, genTransform[i][3].z))) {
+							objectsToUpdate.push_back(i);
+							amountOfObjects[i]--;
+							interactBuffer = false;
+						}
 					}
-				}
-				else if (amountOfObjects[i] == 10) {
-					if (interactionIsPossible(cameraPos, glm::vec3(genTransform[i][3].x, genTransform[i][3].y, genTransform[i][3].z))) {
-						objectsToUpdate.push_back(i);
+					else if (amountOfObjects[i] == 5 && interactBuffer == true) { //5 is for keys
+						if (interactionIsPossible(cameraPos, glm::vec3(genTransform[i][3].x, genTransform[i][3].y, genTransform[i][3].z))) {
+							objectsToUpdate.push_back(i);
+							interactBuffer = false;
+						}
+					}
+					else if (amountOfObjects[i] == 19 && interactBuffer == true) { //20 is for stairs going down
+						if (interactionIsPossible(cameraPos, glm::vec3(genTransform[i][3].x + 7, genTransform[i][3].y, genTransform[i][3].z))) {
+							objectsToUpdate.push_back(i);
+							amountOfObjects[i]++; //It's 20 because here it's getting incremented by one
+							interactBuffer = false;
+						}
+					}
+					else if (amountOfObjects[i] == 20 && interactBuffer == true) { //19 is for stairs going up
+						if (interactionIsPossible(cameraPos, glm::vec3(genTransform[i][3].x - 7, genTransform[i][3].y, genTransform[i][3].z))) {
+							objectsToUpdate.push_back(i);
+							amountOfObjects[i]--; //It's 19 because here it's getting incremented by one
+							interactBuffer = false;
+						}
+					} //192.0f, -0.9f, 0.0f
+					else if (amountOfObjects[i] == 21 && interactBuffer == true) { //22 is for stairs going down
+						if (interactionIsPossible(cameraPos, glm::vec3(genTransform[i][3].x, genTransform[i][3].y + 20, genTransform[i][3].z))) {
+							objectsToUpdate.push_back(i);
+							amountOfObjects[i]++; //It's 22 because here it's getting incremented by one
+							interactBuffer = false;
+						}
+					}
+					else if (amountOfObjects[i] == 22 && interactBuffer == true) { //21 is for stairs going up
+						if (interactionIsPossible(cameraPos, glm::vec3(genTransform[i][3].x, genTransform[i][3].y + 20, genTransform[i][3].z))) {
+							objectsToUpdate.push_back(i);
+							amountOfObjects[i]--; //It's 21 because here it's getting incremented by one
+							interactBuffer = false;
+						}
 					}
 				}
 			}
@@ -567,14 +600,90 @@ void Game::Update(float deltaTime) {
 	}
 
 
-	if (objectsToUpdate.size() != 0) {
+	if (objectsToUpdate.size() != 0) { //Now it calls the update for objects that need that special attention ;)
 		for (int i = 0; i < objectsToUpdate.size(); i++) {
 			objectUpdate(i);
 		}
 	}
+	if (interactBuffer == false) { //Keep this one last because yes
+		if (objectsToUpdate.size() == 0) {
+			interactBuffer = true;
+		}
+	}
+
+}
+
+int Game::objectUpdate(int ID) //Why did I put this as an int?
+{
+
+	float time = 0.001;
+
+	switch (amountOfObjects[objectsToUpdate[ID]]) {
+	case 1: //When the door is done opening
+		objectsToUpdate.clear();//We want to clear whenever the update is done to free up space for the next object
+		break;
+	case 2: //Door opening Really needs tweaking LIKE REALLY NEEDS FIXING!!!!
+		if (genTransform[objectsToUpdate[ID]][0].y >= 0.99) {
+			amountOfObjects[objectsToUpdate[ID]] = 1;
+			return 1;
+		}
+		else {
+			genTransform[objectsToUpdate[ID]] = glm::rotate(genTransform[objectsToUpdate[ID]], time, glm::vec3(0, 0, 0.3));
+			genTransform[objectsToUpdate[ID]] = glm::translate(genTransform[objectsToUpdate[ID]], glm::vec3(-acos(genTransform[objectsToUpdate[ID]][0].x) / 500, -asin(genTransform[objectsToUpdate[ID]][1].y) / 500, 0));
+		}
+		return 0;
+	case 5: //Red Key //Is that a thing?
+		if (genTransform[objectsToUpdate[ID]][3].y <= 100099) {
+			genTransform[objectsToUpdate[ID]] = glm::translate(genTransform[objectsToUpdate[ID]], glm::vec3(1000000000, 10000000000, 1000000000));
+			for (int i = 0; i < amountOfObjects.size(); i++) {
+				if (amountOfObjects[i] == 4) { //Unlock the doors that are associated with this key
+					amountOfObjects[i] = 3;
+				}
+			}
+
+			return 0;
+		}
+		else {
+			objectsToUpdate.clear();
+			return 1;
+		}
+	case 10: //Drawer //Just guessing because I have no idea where it is
+		if (time < 10) {
+			genTransform[objectsToUpdate[ID]] = glm::translate(genTransform[objectsToUpdate[ID]], glm::vec3(0.5, 0.0, 0.0));
+		}
+		else {
+			amountOfObjects[objectsToUpdate[ID]] = 1;
+			objectsToUpdate.clear();
+		}
+		break;
+	case 20:
+		objFloor[objectsToUpdate[ID]] = 0;
+		myCamera->SetPosition({ 3.21, -7.373, myCamera->GetPosition().z - 50}); //Do the stuff here idiot.
+		currentFloor--;
+		objectsToUpdate.clear();
+		break;
+	case 19:
+		objFloor[objectsToUpdate[ID]] = 1;
+		myCamera->SetPosition( { 33.0, -17.0, myCamera->GetPosition().z + 50 }); //Do the stuff here idiot. 33 -17
+		currentFloor++;
+		objectsToUpdate.clear();
+		break;
+	case 22:
+		objFloor[objectsToUpdate[ID]] = 0;
+		myCamera->SetPosition({ myCamera->GetPosition().x, myCamera->GetPosition().y, myCamera->GetPosition().z - 50 }); //Do the stuff here idiot.
+		currentFloor--;
+		objectsToUpdate.clear();
+		break;
+	case 21:
+		objFloor[objectsToUpdate[ID]] = 1;
+		myCamera->SetPosition({ myCamera->GetPosition().x, myCamera->GetPosition().y, myCamera->GetPosition().z + 50 }); //Do the stuff here idiot. 33 -17
+		currentFloor++;
+		objectsToUpdate.clear();
+		break;
+
+	}
 
 
-
-
+	return 0;
 
 }

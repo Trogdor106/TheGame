@@ -24,6 +24,7 @@
 #include "florp/graphics/BufferLayout.h"
 #include "FrameBuffer.h"
 #include "simpleMeshAndVertexFor.h"
+#include "AudioEngine.h"
 
 void GlfwWindowResizedCallback(GLFWwindow* window, int width, int height);
 
@@ -44,7 +45,7 @@ protected:
 	void UnloadContent();
 
 	//struct objCreate = filename, interactable, texture, transformations
-	void CreateObjects(int objectNameID, int typeOfObject, int textureNameID, glm::mat4 transformation = glm::mat4(1.0f));
+	void CreateObjects(int objectNameID, int typeOfObject, int textureNameID, int floor = 0, glm::mat4 transformation = glm::mat4(1.0f));
 	void InitImGui();
 	void ShutdownImGui();
 
@@ -62,7 +63,7 @@ protected:
 	void gBufferInit();
 	void gBuffer();
 	void preRender();
-	void saveHitAndMesh(MeshAndHitBox toSave);
+	void saveHitAndMesh(MeshAndHitBox toSave, int floor);
 	void alwaysActiveKeys();
 
 	void UnloadGBuffer();
@@ -83,43 +84,70 @@ protected:
 		glm::vec3 Color;
 		float     Attenuation;
 	};
+
+	void loadMusic();
+	void updateMusic();
+	void playSound();
+	void shutDownSound();
+	void createSoundParam(std::string name, int timerLength, glm::vec3 position, int toPlay = 0);
+
 private:
 	int gameState = 0;
+	int currentFloor = 0;
+
+
 	int firstLoop = 0;
 
+
 	const char* filename[100] = { "",
-		//1                //2          //3            //4             //5          //6                //7
-	"1stFloor.obj",	"2ndFloor.obj",	 "Bed.obj",	 "BigVaseUV.obj",	 "SmallVase.obj", "Book.obj",	"BookShelf.obj",
-		//8                //9								 //10								 //11
-	  "Door.obj", "f_Door(Reverse_open_1_3).obj", "f_Door(Reverse_open_2_3).obj", "DoorOpen.obj",
-		//12					//13					   //14                //15				   //16                
-	"f_Door(open_1_3).obj", "f_Door(open_2_3).obj", "f_Door(open_Max).obj", "LargeDrawer.obj", "Dresser.obj",
-		//17					//18                 //19          //20         //21
-	"Dresser.obj", "f_DresserWithMorror.obj",  "Key1.obj",   "Key2.obj",   "Key3.obj",
-		//22           //23				 //24              //25            //26            //27					//28
-	"f_Key4.obj", "Portrait.obj", "SmallFrame.obj", "SmallWindow.obj", "Stairs.obj", "f_LargeWindow.obj", "WideWindow.obj" ,
-		//29                    //30                //31                    //32					//33
-	"BookShelfFull.obj", "f_rotatedDoor.obj", "f_shortFlatWall.obj", "f_rotatedShortWall.obj", "FrontDoor.obj",
-		//34					//35				//36		//37		  //38				  //39			//40
-	"SafeRoomStairs.obj", "KitchenStairs.obj", "Piano.obj", "Toilet.obj" ,"PaintBucket.obj" , "NewCask.obj", "note.obj",
-		//41	     //42			  //43				//44			  //45				//46						//47
-	"sink UV.obj", "Mirror.obj", "Fireplace.obj", "KitchenTable.obj", "Cupboards.obj", "HallwayWindow.obj", "FireplaceSmallWindow.obj",
-		//48
-	"Ceiling.obj"
+		//1							 //2					//3						 //4						//5						 //6               
+	"Objects/1stFloor.obj",	"Objects/2ndFloor.obj",	 "Objects/Bed.obj",	 "Objects/BigVaseUV.obj",	 "Objects/SmallVase.obj", "Objects/Book.obj",
+				//7
+		"Objects/BookShelf.obj",
+		//8						    //9								 //10										 //11
+	  "Objects/Door.obj", "Objects/f_Door(Reverse_open_1_3).obj", "Objects/f_Door(Reverse_open_2_3).obj", "Objects/DoorOpen.obj",
+		//12								//13							  //14								//15				   //16                
+	"Objects/f_Door(open_1_3).obj", "Objects/f_Door(open_2_3).obj", "Objects/f_Door(open_Max).obj", "Objects/LargeDrawer.obj", "Objects/Dresser.obj",
+		//17							//18						   //19					 //20				 //21
+	"Objects/Dresser.obj", "Objects/f_DresserWithMorror.obj",  "Objects/Key1.obj",   "Objects/Key2.obj",   "Objects/Key3.obj",
+		//22					    //23					 //24					 //25							//26          
+	"Objects/f_Key4.obj", "Objects/Portrait.obj", "Objects/SmallFrame.obj", "Objects/SmallWindow.obj", "Objects/Stairs.obj",
+					//27					//28
+		"Objects/f_LargeWindow.obj", "Objects/WideWindow.obj" ,
+				//29					  //30							//31									 //32					//33
+	"Objects/BookShelfFull.obj", "Objects/f_rotatedDoor.obj", "Objects/f_shortFlatWall.obj", "Objects/f_rotatedShortWall.obj", "Objects/FrontDoor.obj",
+				//34							//35					//36				//37				 //38							//39			
+	"Objects/SafeRoomStairs.obj", "Objects/KitchenStairs.obj", "Objects/Piano.obj", "Objects/Toilet.obj" ,"Objects/PaintBucket.obj" , "Objects/NewCask.obj", 
+				//40
+		"Objects/note.obj",
+			//41					  //42				  //43							//44					 //45					//46					
+	"Objects/sink UV.obj", "Objects/Mirror.obj", "Objects/Fireplace.obj", "Objects/KitchenTable.obj", "Objects/Cupboards.obj", "Objects/HallwayWindow.obj", 
+						//47
+		"Objects/FireplaceSmallWindow.obj",
+			//48
+	"Objects/Ceiling.obj"
 	};
 
 	const char* texturename[100] = { "",
-		//1			//2				//3				//4					//5						//6				//7
-	"f_Bed.png", "f_Door.png", "f_doorFrame.png", "f_Drawer.png", "f_DresserNoDrawer.png", "F_fatWall.png", "NewCask.png",
-		//8			//9				//10			  //11			 //12			//13		   //14				//15
-	"f_Key1.png", "Note.png", "KitchenTable.png", "Cupboards.png", "Door.png", "DoorOpen.png", "1stFloor.png", "WideWindow.png",
-		//16		//17		//18			  //19					//20				//21			  //22
-	"Piano.png", "Sink.png", "BigVase.png", "BookShelfFull.png", "KitchenStairs.png", "SmallWindow.png", "FrontDoor.png",
-		//23		   //24			 //25			 //26		  //27			  //28
-	"Toilet.png", "Fireplace.png", "Ceiling.png", "Key1.png", "Portrait.png", "Portrait2.png"
+			//1						//2					//3							//4							//5								//6				
+	"textures/f_Bed.png", "textures/f_Door.png", "textures/f_doorFrame.png", "textures/f_Drawer.png", "textures/f_DresserNoDrawer.png", "textures/F_fatWall.png",
+		//7
+	"textures/NewCask.png",
+			//8						//9					//10						 //11					 //12					//13		   
+	"textures/f_Key1.png", "textures/Note.png", "textures/KitchenTable.png", "textures/Cupboards.png", "textures/Door.png", "textures/DoorOpen.png",
+			//14					//15
+	"textures/1stFloor.png", "textures/WideWindow.png",
+			//16				//17					//18					  //19							//20					
+	"textures/Piano.png", "textures/Sink.png", "textures/BigVase.png", "textures/BookShelfFull.png", "textures/KitchenStairs.png",
+			//21						  //22
+	"textures/SmallWindow.png", "textures/FrontDoor.png",
+			//23				   //24						 //25					 //26				  //27					  //28
+	"textures/Toilet.png", "textures/Fireplace.png", "textures/Ceiling.png", "textures/Key1.png", "textures/Portrait.png", "textures/Portrait2.png"
 	};
 
 	int objectUpdate(int ID);
+	std::vector <int> objectIDToHaveHitBox;
+
 
 	// Stores the main window that the game is running in
 	GLFWwindow* myWindow;
@@ -151,14 +179,27 @@ private:
 
 	//Lantern stuff prob want to seperate into another file later
 	float lanternFuel = 1.0f;
+	const float LANTERNFUELDEFAULT = 2000;
+	int lanternFuelFullPowerBuffer = 1000;
+	int deathTimer = 100;
+	const int DEATHTIMERMAX = 100;
+
 	float lightShyninessModifyer = 1.0f;
 	float lightAttenuationModifyer = 1.0f;
 	glm::mat4 myLanternTransform = glm::mat4(1.0f);
 	glm::mat4 myLanternTransform2 = glm::mat4(1.0f);
 
+
+	//std::vector <AudioEngine> audioEngineManager;
+	std::vector <int> soundsToPlay;
+	std::vector <int> timerForSoundsdefault;
+	std::vector <int> timerForSounds;
+	std::vector <std::string> soundsName;
+	std::vector <glm::vec3> soundPosition;
+
 	
 	//
-	Shader::Sptr simpleShader;
+	Shader::Sptr	simpleShader;
 	Meshmini_sptr   mySimpleMesh;
 	
 
@@ -170,10 +211,11 @@ private:
 
 	std::vector <int> amountOfObjects;
 	std::vector <int> objectsToUpdate;
+	std::vector <int> objFloor;
 
 	bool isPickedUp = false;
 	bool isDoneReading = false;
-
+	bool interactBuffer = true;
 
 	//int amountOfObjects = 0;
 	//int amountOfMorphObjects = 0;
