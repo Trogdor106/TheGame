@@ -1,9 +1,0 @@
-﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(452,5): warning MSB8028: The intermediate directory (..\..\obj\Debug-windows-x86_64\Tutorial 02\) contains files shared from another project (Midterm.vcxproj).  This can lead to incorrect clean and rebuild behavior.
-  Game.cpp
-C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Tutorial 02\src\Game.cpp(438,33): warning C4244:  'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Tutorial 02\src\Game.cpp(438,26): warning C4244:  'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Tutorial 02\src\Game.cpp(457,25): warning C4244:  'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Tutorial 02\src\Game.cpp(470,19): warning C4244:  'initializing': conversion from 'double' to 'float', possible loss of data
-  Tutorial 02.vcxproj -> C:\Users\thaid\OneDrive\Documents\Year 2\Computer Graphics\infr-1350u-framework-public\projects\Tutorial 02\..\..\bin\Debug-windows-x86_64\Tutorial 02\Tutorial 02.exe
-  1 File(s) copied
-  4 File(s) copied
