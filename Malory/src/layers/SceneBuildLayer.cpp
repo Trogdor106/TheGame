@@ -207,6 +207,8 @@ void SceneBuilder::Initialize()
 
 	//Create objects, put them in the scene and attach a behavior down below
 
+	int lockedDoorID = 0;
+	int lockedKeyID = 0;
 
 	for (int i = 0; i < 1 /*materialToUse.size()*/; i++) {
 		entt::entity entity = scene->CreateEntity();
@@ -214,80 +216,136 @@ void SceneBuilder::Initialize()
 		renderable.Mesh = MeshBuilder::Bake(meshHolder[meshToUse[i]]);
 		renderable.Material = materialHolder[materialToUse[i]];
 		Transform& t = scene->Registry().get<Transform>(entity);
-		t.SetPosition(initPositions[i]);
-		t.SetEulerAngles(initAngles[i]);
+		t.SetPosition(glm::vec3(genTransform[i][3][0], genTransform[i][3][1], genTransform[i][3][2]));//   initPositions[i]);
+		t.SetEulerAngles(glm::vec3(genTransform[i][0][0], genTransform[i][1][1], genTransform[i][2][2]));
 		//Add what ever behaviour in here (so hitboxing and interaction)
+
+		tempHit = { 0,0,0,0,0,0 };
+		for (int y = 0; y < meshHolder[meshToUse[i]].Vertices.size(); y++) {
+			if (y==0) {
+				tempHit.Bottom =	meshHolder[meshToUse[i]].Vertices[y].Position.y;//.y;
+				tempHit.top =		meshHolder[meshToUse[i]].Vertices[y].Position.y;//.y;
+				tempHit.Left =		meshHolder[meshToUse[i]].Vertices[y].Position.x;//.x;
+				tempHit.Right =		meshHolder[meshToUse[i]].Vertices[y].Position.x;//.x;
+			}
+			else {
+			
+				// pos							pos
+				//  Top Left-----------TopRight
+				//  |						  |
+				//  |						  |
+				//  |						  |
+				//  |						  |
+				//  |						  |
+				//  BottomLeft------BottomRight						  
+				//pos							pos
+				if (meshHolder[meshToUse[i]].Vertices[y].Position.y < tempHit.Bottom) {
+					tempHit.Bottom = meshHolder[meshToUse[i]].Vertices[y].Position.y;
+				}
+				if (meshHolder[meshToUse[i]].Vertices[y].Position.y > tempHit.top) {
+					tempHit.top = meshHolder[meshToUse[i]].Vertices[y].Position.y;
+				}
+				if (meshHolder[meshToUse[i]].Vertices[y].Position.x > tempHit.Right) {
+					tempHit.Right = meshHolder[meshToUse[i]].Vertices[y].Position.x;
+				}
+				if (meshHolder[meshToUse[i]].Vertices[y].Position.x < tempHit.Left) {
+					tempHit.Left = meshHolder[meshToUse[i]].Vertices[y].Position.x;
+				}
+			}
+		}
+		tempHit.ID = i;
+		tempHit.floor = floorToUse[i];
+		HitBoxes::GetInstance().saveHitBoxes(tempHit, floorToUse[i]);
+		HitBoxes::GetInstance().updateHitBox(i, genTransform[i]);
+		
+		if (meshToUse[i] == 3) //Normal door (change the number if it's not 3 that you want)
+			scene->AddBehaviour<doorOpening>(entity, floorToUse[i]);
+		else if (meshToUse[i] == 6) { //Locked door (change the number if it's not 6 that you want(hint: it's not))
+			scene->AddBehaviour<lockedDoor>(entity, floorToUse[i], lockedDoorID);
+			lockedDoorID++;
+		}
+		else if (meshToUse[i] == 5) { //Locked door (change the number if it's not 3 that you want)
+			scene->AddBehaviour<key>(entity, floorToUse[i], lockedKeyID);
+			lockedKeyID++;
+		}
+		else if (meshToUse[i] == 20) { //stairs near spawn
+			scene->AddBehaviour<stairs1>(entity, floorToUse[i]);
+		}
+		else if (meshToUse[i] == 21) { //stairs near kitchen
+			scene->AddBehaviour<stairs2>(entity, floorToUse[i]);
+		}
+
 	}
 
 
 	// We'll use a constant to tell us how many monkeys to use
-	const int numMonkeys = 3;
-	const float step = glm::two_pi<float>() / numMonkeys; // Determine the angle between monkeys in radians
-
-	// We'll create a ring of monkeys
-	for (int ix = 0; ix < numMonkeys; ix++) {
-		entt::entity test = scene->CreateEntity();
-		RenderableComponent& renderable = scene->Registry().assign<RenderableComponent>(test);
-		renderable.Mesh = MeshBuilder::Bake(data);
-		renderable.Material = testmotion;
-		Transform& t = scene->Registry().get<Transform>(test);
-		t.SetPosition(glm::vec3(glm::cos(step * ix) * 5.0f, 0.0f, glm::sin(step * ix) * 5.0f));
-		t.SetEulerAngles(glm::vec3(-90.0f, glm::degrees(-step * ix), 0.0f));
-		scene->AddBehaviour<Hit>(test, t.GetWorldPosition());
-		scene->AddBehaviour<Car>(test, t.GetWorldPosition());
-	}
-
-	// We'll create a ring of point lights behind each monkey
-	for (int ix = 0; ix < numMonkeys; ix++) {
-		// We'll attach an indicator cube to all the lights, and align it with the light's facing
-		entt::entity entity = scene->CreateEntity();
-		PointLightComponent& light = scene->Registry().assign<PointLightComponent>(entity);
-		light.Color = glm::vec3(
-			glm::sin(-ix * step) + 1.0f,
-			glm::cos(-ix * step) + 1.0f,
-			glm::sin((-ix * step) + glm::pi<float>()) + 1.0f) / 2.0f * 0.1f;
-		light.Attenuation = 1.0f / 10.0f;
-		Transform& t = scene->Registry().get<Transform>(entity);
-		t.SetPosition(glm::vec3(glm::cos(step * ix) * 20.0f, 2.0f, glm::sin(step * ix) * 20.0f));
-		scene->AddBehaviour<LightFlickerBehaviour>(entity, 2.0f, 0.6f, 1.2f);
-		scene->AddBehaviour<Car>(entity, t.GetWorldPosition());
-
-
-	}
-
-	// The central monkey
-	{
-		entt::entity test = scene->CreateEntity();
-		RenderableComponent& renderable = scene->Registry().assign<RenderableComponent>(test);
-		renderable.Mesh = MeshBuilder::Bake(data);
-		renderable.Material = monkeyMat;
-		Transform& t = scene->Registry().get<Transform>(test);
-		// Make our monkeys spin around the center
-		scene->AddBehaviour<RotateBehaviour>(test, glm::vec3(45.0f, 45.0f, 45.0f));
-		scene->AddBehaviour<InputBehaviour>(test, t.GetWorldPosition());
-		scene->AddBehaviour<Hit>(test, glm::vec3(0, 0, 0));
-	}
-
-
-
-	// The box with the polka pattern
-	{
-		MeshData indicatorCube = MeshBuilder::Begin();
-		MeshBuilder::AddAlignedCube(indicatorCube, glm::vec3(0.0f, 0, 0.0), glm::vec3(2.0f, 2.0f, 2.0f));
-		Mesh::Sptr indicatorMesh = MeshBuilder::Bake(indicatorCube);
-
-		entt::entity test = scene->CreateEntity();
-		RenderableComponent& renderable = scene->Registry().assign<RenderableComponent>(test);
-		renderable.Mesh = indicatorMesh;
-		renderable.Material = mat2;
-		Transform& t = scene->Registry().get<Transform>(test);
-		t.SetPosition({ 20.0f, 0.0f, 0.0f });
-	}
+	//const int numMonkeys = 3;
+	//const float step = glm::two_pi<float>() / numMonkeys; // Determine the angle between monkeys in radians
+	//
+	//// We'll create a ring of monkeys
+	//for (int ix = 0; ix < numMonkeys; ix++) {
+	//	entt::entity test = scene->CreateEntity();
+	//	RenderableComponent& renderable = scene->Registry().assign<RenderableComponent>(test);
+	//	renderable.Mesh = MeshBuilder::Bake(data);
+	//	renderable.Material = testmotion;
+	//	Transform& t = scene->Registry().get<Transform>(test);
+	//	t.SetPosition(glm::vec3(glm::cos(step * ix) * 5.0f, 0.0f, glm::sin(step * ix) * 5.0f));
+	//	t.SetEulerAngles(glm::vec3(-90.0f, glm::degrees(-step * ix), 0.0f));
+	//	scene->AddBehaviour<Hit>(test, t.GetWorldPosition());
+	//	scene->AddBehaviour<Car>(test, t.GetWorldPosition());
+	//}
+	//
+	//// We'll create a ring of point lights behind each monkey
+	//for (int ix = 0; ix < numMonkeys; ix++) {
+	//	// We'll attach an indicator cube to all the lights, and align it with the light's facing
+	//	entt::entity entity = scene->CreateEntity();
+	//	PointLightComponent& light = scene->Registry().assign<PointLightComponent>(entity);
+	//	light.Color = glm::vec3(
+	//		glm::sin(-ix * step) + 1.0f,
+	//		glm::cos(-ix * step) + 1.0f,
+	//		glm::sin((-ix * step) + glm::pi<float>()) + 1.0f) / 2.0f * 0.1f;
+	//	light.Attenuation = 1.0f / 10.0f;
+	//	Transform& t = scene->Registry().get<Transform>(entity);
+	//	t.SetPosition(glm::vec3(glm::cos(step * ix) * 20.0f, 2.0f, glm::sin(step * ix) * 20.0f));
+	//	scene->AddBehaviour<LightFlickerBehaviour>(entity, 2.0f, 0.6f, 1.2f);
+	//	scene->AddBehaviour<Car>(entity, t.GetWorldPosition());
+	//
+	//
+	//}
+	//
+	//// The central monkey
+	//{
+	//	entt::entity test = scene->CreateEntity();
+	//	RenderableComponent& renderable = scene->Registry().assign<RenderableComponent>(test);
+	//	renderable.Mesh = MeshBuilder::Bake(data);
+	//	renderable.Material = monkeyMat;
+	//	Transform& t = scene->Registry().get<Transform>(test);
+	//	// Make our monkeys spin around the center
+	//	scene->AddBehaviour<RotateBehaviour>(test, glm::vec3(45.0f, 45.0f, 45.0f));
+	//	scene->AddBehaviour<InputBehaviour>(test, t.GetWorldPosition());
+	//	scene->AddBehaviour<Hit>(test, glm::vec3(0, 0, 0));
+	//}
+	//
+	//
+	//
+	//// The box with the polka pattern
+	//{
+	//	MeshData indicatorCube = MeshBuilder::Begin();
+	//	MeshBuilder::AddAlignedCube(indicatorCube, glm::vec3(0.0f, 0, 0.0), glm::vec3(2.0f, 2.0f, 2.0f));
+	//	Mesh::Sptr indicatorMesh = MeshBuilder::Bake(indicatorCube);
+	//
+	//	entt::entity test = scene->CreateEntity();
+	//	RenderableComponent& renderable = scene->Registry().assign<RenderableComponent>(test);
+	//	renderable.Mesh = indicatorMesh;
+	//	renderable.Material = mat2;
+	//	Transform& t = scene->Registry().get<Transform>(test);
+	//	t.SetPosition({ 20.0f, 0.0f, 0.0f });
+	//}
 
 	// We'll use a tiny cube to cast a shadow from our camera, and to indicate where the light sources are
-	MeshData indicatorCube = MeshBuilder::Begin();
-	MeshBuilder::AddAlignedCube(indicatorCube, glm::vec3(0.0f, 0, 0.0), glm::vec3(0.1f, 0.1f, 0.1f));
-	Mesh::Sptr indicatorMesh = MeshBuilder::Bake(indicatorCube);
+	//MeshData indicatorCube = MeshBuilder::Begin();
+	//MeshBuilder::AddAlignedCube(indicatorCube, glm::vec3(0.0f, 0, 0.0), glm::vec3(0.1f, 0.1f, 0.1f));
+	//Mesh::Sptr indicatorMesh = MeshBuilder::Bake(indicatorCube);
 
 	// Creates our main camera
 	{
@@ -344,26 +402,26 @@ void SceneBuilder::Initialize()
 		//scene->AddBehaviour<Car>(camera, glm::vec3(0.5f));
 
 		// We'll attach a cube to the camera so that it casts shadows
-		RenderableComponent& renderable = scene->Registry().assign<RenderableComponent>(camera);
-		renderable.Mesh = indicatorMesh;
-		renderable.Material = marbleMat;
+		//RenderableComponent& renderable = scene->Registry().assign<RenderableComponent>(camera);
+		//renderable.Mesh = indicatorMesh;
+		//renderable.Material = marbleMat;
 
 	}
 
 	// We'll create a projector to cast our smile on the floor
-	entt::entity lightEnt = entt::null;
-	auto& light = CreateShadowCaster(scene, &lightEnt, glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), 25.0f);
-	light.Color = glm::vec3(1.0f, 1.0f, 1.0f) * 0.1f;
-	light.Attenuation = 1.0f / 15.0f;
-	light.ProjectorImage = Texture2D::LoadFromFile("light_projection.png", false, false, true);
-	scene->AddBehaviour<LightFlickerBehaviour>(lightEnt, 10.0f);
+	//entt::entity lightEnt = entt::null;
+	//auto& light = CreateShadowCaster(scene, &lightEnt, glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), 25.0f);
+	//light.Color = glm::vec3(1.0f, 1.0f, 1.0f) * 0.1f;
+	//light.Attenuation = 1.0f / 15.0f;
+	//light.ProjectorImage = Texture2D::LoadFromFile("light_projection.png", false, false, true);
+	//scene->AddBehaviour<LightFlickerBehaviour>(lightEnt, 10.0f);
 
 	// We'll create a ring of shadow casting lights, one for each monkey
-	for (int ix = 0; ix < numMonkeys; ix++) {
+	for (int ix = 0; ix < 3; ix++) {
 		entt::entity lightEnt = entt::null;
 		auto& light = CreateShadowCaster(
 			scene, &lightEnt,
-			glm::vec3(glm::cos(step * ix) * 9.0f, 3.5f, glm::sin(step * ix) * 9.0f), // Each light will be behind the monkey
+			glm::vec3(glm::cos(90 * ix) * 9.0f, 3.5f, glm::sin(90 * ix) * 9.0f), // Each light will be behind the monkey
 			glm::vec3(0.0f),                                                         // Look at the center
 			glm::vec3(0.0f, 1.0f, 0.0f),                                             // Y is up
 			25.0f,                                                                   // The far plane is 25 units away
@@ -374,27 +432,27 @@ void SceneBuilder::Initialize()
 		scene->AddBehaviour<LightFlickerBehaviour>(lightEnt, 5.0f, 0.5f, 1.0f);
 
 		// We'll attach an indicator cube to all the lights, and align it with the light's facing
-		entt::entity entity = scene->CreateEntity();
-		RenderableComponent& renderable = scene->Registry().assign<RenderableComponent>(entity);
-		renderable.Mesh = indicatorMesh;
-		renderable.Material = marbleMat;
-		Transform& t = scene->Registry().get<Transform>(entity);
-		t.SetPosition(glm::vec3(glm::cos(step * ix) * 9.0f, 2.0f, glm::sin(step * ix) * 9.0f));
+		//entt::entity entity = scene->CreateEntity();
+		//RenderableComponent& renderable = scene->Registry().assign<RenderableComponent>(entity);
+		//renderable.Mesh = indicatorMesh;
+		//renderable.Material = marbleMat;
+		//Transform& t = scene->Registry().get<Transform>(entity);
+		//t.SetPosition(glm::vec3(glm::cos(90 * ix) * 9.0f, 2.0f, glm::sin(90 * ix) * 9.0f));
 	}
 
 	// Our floor plane
-	{
-		// Building the mesh
-		MeshData data = MeshBuilder::Begin();
-		MeshBuilder::AddAlignedCube(data, glm::vec3(0.0f, -1.0f, 0.0), glm::vec3(100.0f, 0.1f, 100.0f));
-		Mesh::Sptr mesh = MeshBuilder::Bake(data);
-
-		// Creating the entity and attaching the renderable 
-		entt::entity entity = scene->CreateEntity();
-		RenderableComponent& renderable = scene->Registry().assign<RenderableComponent>(entity);
-		renderable.Mesh = MeshBuilder::Bake(data);
-		renderable.Material = marbleMat;
-	}
+	//{
+	//	// Building the mesh
+	//	MeshData data = MeshBuilder::Begin();
+	//	MeshBuilder::AddAlignedCube(data, glm::vec3(0.0f, -1.0f, 0.0), glm::vec3(100.0f, 0.1f, 100.0f));
+	//	Mesh::Sptr mesh = MeshBuilder::Bake(data);
+	//
+	//	// Creating the entity and attaching the renderable 
+	//	entt::entity entity = scene->CreateEntity();
+	//	RenderableComponent& renderable = scene->Registry().assign<RenderableComponent>(entity);
+	//	renderable.Mesh = MeshBuilder::Bake(data);
+	//	renderable.Material = marbleMat;
+	//}
 }
 
 
@@ -482,17 +540,173 @@ void SceneBuilder::meshLoader()
 		"Objects/Ceiling.obj"
 	};
 
-	initPositions = {
-		glm::vec3(44.2f, 49.9f, 0.0f), //Object 0 The first floor
-		glm::vec3(50.5f, 11.5f, 0.0f), //Object 1 Door right saferoom
-		glm::vec3(3.85f, -11.1f, 0.0f),// object 2 is door bottom of saferoom
-		glm::vec3(61.6f, 11.5f, -0.1f) // object 3 door right across saferoom
-	};
+	glm::mat4 temp = glm::mat4(1.0f);
 
-	for (int i = 0; i < initPositions.size(); i++) {
-		initAngles.push_back(glm::vec3(0.0));
-		if (i == 2) { //Put any objects with rotations in an else if list
-			initAngles[i] = glm::vec3(PI);
+	for (int i = 0; i < 50; i++) {
+		switch (i) {
+		case 0: //Object 0 The first floor
+			genTransform.push_back(glm::translate(temp, glm::vec3(44.2f, 49.9f, 0.0f)));
+			break;
+		case 1: //Object 1 Door right saferoom
+			genTransform.push_back(glm::translate(temp, glm::vec3(50.5f, 11.5f, 0.0f)));
+			break;
+		case 2:// object 2 is door bottom of saferoom
+			genTransform.push_back(glm::translate(temp, glm::vec3(3.85f, -11.1f, 0.0f)));
+			genTransform.push_back(glm::rotate(temp, PI, glm::vec3(0, 0, 1)));
+			break;
+		case 3:// object 3 door right across saferoom
+			genTransform.push_back(glm::translate(temp, glm::vec3(61.6f, 11.5f, -0.1f)));
+			break;
+		case 4:// object 4 is door top across saferoom
+			genTransform.push_back(glm::translate(temp, glm::vec3(12.7f, 49.0f, -0.1)));
+			break;
+		case 5:// object 5 is door top safe room
+			genTransform.push_back(glm::translate(temp, glm::vec3(12.7f, 36.5f, -0.1)));
+			break;
+		case 6:// object 6 is the dresser in the room where you find the red key
+			genTransform.push_back(glm::translate(temp, glm::vec3(96.55f, -9.0f, -110.1f)));
+			genTransform.push_back(glm::rotate(temp, PI, glm::vec3(0, 0, 1)));
+			break;
+		case 7:// object 7 is the top drawer in the room where you find the red key 
+			genTransform.push_back(glm::translate(temp, glm::vec3(96.55f, -7.92f, 161.1f)));
+			genTransform.push_back(glm::rotate(temp, -PI / 2, glm::vec3(0, 0, 1)));
+			break;
+		case 8:// object 8 is the middle drawer in the room where you find the red key
+			genTransform.push_back(glm::translate(temp, glm::vec3(96.55f, -7.92f, 113.8f)));
+			genTransform.push_back(glm::rotate(temp, -PI / 2, glm::vec3(0, 0, 1)));
+			break;
+		case 9:// object 9 is the bottom drawer in the room where you find the red key
+			genTransform.push_back(glm::translate(temp, glm::vec3(96.55f, -7.92f, 111.8f)));
+			genTransform.push_back(glm::rotate(temp, -PI / 2, glm::vec3(0, 0, 1)));
+			break;
+		case 10:// object 10 is a long broken window in the safe room
+			genTransform.push_back(glm::translate(temp, glm::vec3(-11.85f, 16.5f, 117.5f)));
+			break;
+		case 11:// object 11 is a broken window in the stairwell
+			genTransform.push_back(glm::translate(temp, glm::vec3(-10.0f, -17.5f, 6.5f)));
+			break;
+		case 12:// object 12 is a big vase in the safe room
+			genTransform.push_back(glm::translate(temp, glm::vec3(-5.85f, 1.75f, 0.0f)));
+			break;
+		case 13:// object 13 is a big vase in the safe room
+			genTransform.push_back(glm::translate(temp, glm::vec3(-4.00f, -3.25f, 0.0f)));
+			break;
+		case 14:// object 14 is the bookshelf with way, way too many faces
+			genTransform.push_back(glm::translate(temp, glm::vec3(24.0f, -6.55f, 0.0f)));
+			break;
+		case 15:// object 15 is the bookshelf in the study
+			genTransform.push_back(glm::translate(temp, glm::vec3(122.0f, -38.8f, 0.0f)));
+			break;
+		case 16:// object 16 is the study door
+			genTransform.push_back(glm::translate(temp, glm::vec3(164.75f, -9.5f, 0.0f)));
+			break;
+		case 17:// object 17 is the right kitchen door
+			genTransform.push_back(glm::translate(temp, glm::vec3(164.75f, 21.05f, 0.0f)));
+			break;
+
+		case 18:// object 18 is the left kitchen door
+			genTransform.push_back(glm::translate(temp, glm::vec3(102.0f, 11.5f, 0.0f)));
+			break;
+
+		case 19:// object 19 is the pantry door
+			genTransform.push_back(glm::translate(temp, glm::vec3(102.0f, 42.0f, 0.0f)));
+			break;
+
+		case 20:// object 20 is the front door
+			genTransform.push_back(glm::translate(temp, glm::vec3(79.75f, 97.5f, 0)));
+			break;
+
+		case 21:// object 21 is the safe room staircase
+			genTransform.push_back(glm::translate(temp, glm::vec3(15.85f, -15.85f, 0.0f)));
+			break;
+
+		case 22:// object 22 is the kitchen staircase
+			genTransform.push_back(glm::translate(temp, glm::vec3(192.0f, -0.9f, 0.0f)));
+			break;
+
+		case 23:// object 23 is the piano
+			genTransform.push_back(glm::translate(temp, glm::vec3(121.0f, -11.0f, 0.0f)));
+			break;
+
+		case 24:// object 24 is the 1st floor toilet
+			genTransform.push_back(glm::translate(temp, glm::vec3(96.55f, -9.0f, -0.1f)));
+			break;
+
+		case 25:// object 25 is the bathroom sink
+			genTransform.push_back(glm::translate(temp, glm::vec3(90.55f, 24.0f, 0.0f)));
+			break;
+
+		case 26:// object 26 is the mirror above the sink
+			genTransform.push_back(glm::translate(temp, glm::vec3(90.55f, 26.0f, 700.0f)));
+			break;
+
+		case 27:// object 27 is the basement door
+			genTransform.push_back(glm::translate(temp, glm::vec3(27.55f, 68.0f, 0.0f)));
+			break;
+
+		case 28:// object 28 is the oil cask
+			genTransform.push_back(glm::translate(temp, glm::vec3(49.0f, 29.0f, 1.0f)));
+			break;
+
+		case 29:// object 29 is the fireplace
+			genTransform.push_back(glm::translate(temp, glm::vec3(-8.0f, 20.0f, -0.0f)));
+			break;
+
+		case 30:// object 30 is the kitchen table
+			genTransform.push_back(glm::translate(temp, glm::vec3(135.0f, 45.0f, 0.0f)));
+			break;
+
+		case 31:// object 31 is the kitchen cupboards
+			genTransform.push_back(glm::translate(temp, glm::vec3(161.5f, 56.0f, 0.0f)));
+			break;
+
+		case 32:// object 32 is the 2nd floor
+			genTransform.push_back(glm::translate(temp, glm::vec3(44.2f, 49.9f, -32.0f)));
+			break;
+
+		case 33:// object 33 is the 2nd floor bed
+			genTransform.push_back(glm::translate(temp, glm::vec3(-4.0f, 19.0f, 48.0f)));
+			break;
+
+		case 34:// object 34 is the bathroom key
+			genTransform.push_back(glm::translate(temp, glm::vec3(90.55f, 24.0f, 0.0f)));
+			break;
+
+		case 35:// object 35 is the piano key
+			genTransform.push_back(glm::translate(temp, glm::vec3(118.0f, -25.0f, 0.0f)));
+			break;
+
+		case 36:// object 36 is the left window in the top hallway
+			genTransform.push_back(glm::translate(temp, glm::vec3(105.0f, 94.5f, 8.0f)));
+			break;
+
+		case 37:// object 37 is the right window in the top hallway
+			genTransform.push_back(glm::translate(temp, glm::vec3(137.0f, 94.5f, 8.0f)));
+			break;
+
+		case 38:// object 38 is the window in the right hallway
+			genTransform.push_back(glm::translate(temp, glm::vec3(198.26f, 60.0f, 8.0f)));
+			break;
+
+		case 39:// object 39 is the window in the kitchen stairwell
+			genTransform.push_back(glm::translate(temp, glm::vec3(198.26f, 12.0f, 6.0f)));
+			break;
+
+		case 40:// object 40 is the window on the fireplace wall
+			genTransform.push_back(glm::translate(temp, glm::vec3(-10.0f, 0.0f, 9.0f)));
+			break;
+
+		case 41:// object 41 is the portrait across from left window in the top hallway
+			genTransform.push_back(glm::translate(temp, glm::vec3(97.5f, 79.35f, 14.5f)));
+			break;
+
+		case 42:// object 42 is the portrait past the first one
+			genTransform.push_back(glm::translate(temp, glm::vec3(117.5f, 79.35f, 14.5f)));
+			break;
+
+		case 43:// object 43 is the ceiling
+			genTransform.push_back(glm::translate(temp, glm::vec3(44.2f, 49.9f, -6.0f)));
+			break;
 		}
 	}
 
@@ -504,6 +718,7 @@ void SceneBuilder::meshLoader()
 	}
 
 	meshToUse = { 0, 0, 0, 0 }; //Put the id of the mesh you will want to use with the object that will show up in the list
+	floorToUse = { -1, 0, 0, 0 }; //Put the floor that the mesh is on
 
 
 	int hello = 0;

@@ -15,6 +15,7 @@
 #include "LightFlickerBehaviour.h"
 #include "Instrumentation.h"
 #include "Texture3D.h"
+#include "HitBoxes.h"
 
 class SceneBuilder : public florp::app::ApplicationLayer {
 public:
@@ -30,7 +31,9 @@ private:
 	std::vector <float> materialToUse;
 	std::vector <florp::graphics::MeshData> meshHolder;
 	std::vector <float> meshToUse;
+	std::vector <float> floorToUse;
 
-	std::vector <glm::vec3> initPositions;
-	std::vector <glm::vec3> initAngles;
+	std::vector <glm::mat4> genTransform;
+
+	HitBox tempHit;
 };

@@ -36,6 +36,7 @@
     <ClInclude Include="src\layers\SceneBuildLayer.h">
       <Filter>layers</Filter>
     </ClInclude>
+    <ClInclude Include="src\HitBoxes.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\AudioEngine.cpp" />
@@ -64,5 +65,6 @@
       <Filter>layers</Filter>
     </ClCompile>
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\HitBoxes.cpp" />
   </ItemGroup>
 </Project>
