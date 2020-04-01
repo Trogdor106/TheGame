@@ -15,3 +15,11 @@ private:
 	float myTimingOffset;
 	float myMin, myMax;
 };
+
+class safeRoomLight : public florp::game::IBehaviour {
+public:
+	safeRoomLight() {};
+
+	void OnLoad(entt::entity entity) override;
+	void Update(entt::entity entity) override;
+};

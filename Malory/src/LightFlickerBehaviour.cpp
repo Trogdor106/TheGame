@@ -42,3 +42,34 @@ void LightFlickerBehaviour::Update(entt::entity entity) {
 		light.Attenuation = attenuation;
 	}
 }
+
+void safeRoomLight::OnLoad(entt::entity entity)
+{
+	auto& ecs = CurrentRegistry();
+	if (ecs.has<PointLightComponent>(entity)) {
+		PointLightComponent& light = ecs.get<PointLightComponent>(entity);
+		light.Attenuation = 0.1;
+	}
+	else if (ecs.has<ShadowLight>(entity)) {
+		ShadowLight& light = ecs.get<ShadowLight>(entity);
+		light.Attenuation = 0.1;
+	}
+	else {
+		LOG_ASSERT(false, "You must attach a point light or shadow light component");
+	}
+}
+
+void safeRoomLight::Update(entt::entity entity)
+{
+	auto& ecs = CurrentRegistry();
+
+
+	if (ecs.has<PointLightComponent>(entity)) {
+		PointLightComponent& light = ecs.get<PointLightComponent>(entity);
+		light.Attenuation = 0.01f;
+	}
+	else if (ecs.has<ShadowLight>(entity)) {
+		ShadowLight& light = ecs.get<ShadowLight>(entity);
+		light.Attenuation = 0.01f;
+	}
+}

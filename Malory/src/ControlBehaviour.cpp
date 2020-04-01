@@ -5,6 +5,7 @@
 #include "florp/game/SceneManager.h"
 #include "florp/app/Timing.h"
 
+
 #define GLM_ENABLE_EXPERIMENTAL
 #include <GLM/gtx/wrap.hpp>
 
@@ -26,8 +27,15 @@ T wrap(const T& value, const T& min, const T& max) {
 	return glm::mod(glm::mod(value - min, range) + range, range )+ min;
 }
 
-static glm::vec3 cameraPos = {1, 1, 10};
+static glm::vec3 cameraPos = { 1.0f, 1.0f, 10.0f };
 std::vector <int> keys; //Use 0 for locked doors and 1 for unlocked
+float angleForX = 0;
+float angleForY = 0;
+float angleForZ = 0;
+glm::vec3 lookAtPoint;
+const float LANTERN_FULL = 2000;
+float lanternFuel = LANTERN_FULL;
+float playerState = 1; //0 is title screen, 1 is normal, 2 is paused, 3 is dead
 
 
 void ControlBehaviour::Update(entt::entity entity) {
@@ -38,14 +46,14 @@ void ControlBehaviour::Update(entt::entity entity) {
 	if (transform.GetLocalPosition() != cameraPos) {
 		transform.SetPosition(cameraPos);
 	}
-	else {
+	else if (playerState == 1) { //Make sure the player is in the playing state before letting them move
 		glm::vec3 movement = glm::vec3(0.0f);
 		glm::vec3 rotation = glm::vec3(0.0f);
 
 		// Rotate and move our camera based on input
 		float speed = 30.0f;
 		float speed2 = 15.0f;
-		float rotSpeed = 1.0f;
+		float rotSpeed = 0.05f;
 		bool isheadBob = false;
 		//myCamera->LookAt(cameraViewTarget, cameraViewAngle);
 
@@ -85,12 +93,12 @@ void ControlBehaviour::Update(entt::entity entity) {
 			}
 		}
 		if (GetKeyState(0x27) & 0x8000) {
-			angleForY += 0.01;
-			angleForX -= 0.01;
+			angleForY += rotSpeed;
+			angleForX -= rotSpeed;
 		}
 		if (GetKeyState(0x25) & 0x8000) {
-			angleForY -= 0.01;
-			angleForX += 0.01;
+			angleForY -= rotSpeed;
+			angleForX += rotSpeed;
 		}
 
 
@@ -107,8 +115,8 @@ void ControlBehaviour::Update(entt::entity entity) {
 			finalHeadBobSide = 0;
 		}
 
-
-		transform.LookAt({ transform.GetLocalPosition().x + cos(-angleForX), transform.GetLocalPosition().y + sin(-angleForY), transform.GetLocalPosition().z + tan(angleForZ) }, glm::vec3(0, 0, 1));
+		lookAtPoint = { transform.GetLocalPosition().x + cos(-angleForX), transform.GetLocalPosition().y + sin(-angleForY), transform.GetLocalPosition().z + tan(angleForZ) };
+		transform.LookAt(lookAtPoint, glm::vec3(0, 0, 1));
 
 		if (glm::length(movement) > 0) {
 			if (!HitBoxes::GetInstance().isInHitBox(CurrentRegistry().get<florp::game::Transform>(entity).GetLocalPosition(),
@@ -197,33 +205,32 @@ void Car::Update(entt::entity entity)
 	}
 }
 
-void doorOpening::Update(entt::entity entity)
-{
-	
+void doorManDoors::Update(entt::entity entity) {
 	auto& transform = CurrentRegistry().get<florp::game::Transform>(entity);
 	glm::tquat temp = glm::mat4(1.0f);
 	temp = transform.GetLocalTransform();
+	
 
 	if (interacted == 2) {
 		;
 	}
 	else if (GetKeyState(0x45) & 0x8000 && interacted == 0) {
-		if (HitBoxes::GetInstance().getFloor() == floorObjectIsOn) {
+		if (HitBoxes::GetInstance().getFloor() == floorCurrent) { //Update this if it's working
 			if (interactionIsPossible(cameraPos, transform.GetLocalPosition())) {
 				interacted = 1;
 			}
 		}
 	}
-	else if (interacted = 1) {
+	else if (interacted == 1) {
 		if (transform.GetLocalTransform()[0].y >= 0.99) { //Is interaction is done
-			interacted = 2; 
+			interacted = 2;
 		}
 		else {
-			temp = glm::rotate(temp, PI, glm::vec3(0, 0, 0.3));
-			transform.SetRotation(temp);
+			transform.Rotate(glm::vec3(0, 0, 0.3));
 		}
 	}
 }
+
 
 void lockedDoor::Update(entt::entity entity)
 {
@@ -243,7 +250,7 @@ void lockedDoor::Update(entt::entity entity)
 			}
 		}
 	}
-	else if (interacted = 1) {
+	else if (interacted == 1) {
 		if (transform.GetLocalTransform()[0].y >= 0.99) { //Is interaction is done
 			interacted = 2;
 		}
@@ -336,74 +343,253 @@ void stairs2::Update(entt::entity entity)
 			}
 		}
 	}
-	else if (interacted = 1) { //Do the interaction of going up the stairs
-		HitBoxes::GetInstance().saveFloor(1);
-		cameraPos = glm::vec3(cameraPos.x, cameraPos.y, cameraPos.z + 50);
-		interacted = 2;
+	else if (interacted == 1) { //Do the interaction of going up the stairs
+	HitBoxes::GetInstance().saveFloor(1);
+	cameraPos = glm::vec3(cameraPos.x, cameraPos.y, cameraPos.z + 50);
+	interacted = 2;
 	}
-	else if (interacted = 3) { //Do the interaction of going down the stairs
-		HitBoxes::GetInstance().saveFloor(0);
-		cameraPos = glm::vec3(cameraPos.x, cameraPos.y, cameraPos.z - 50);
-		interacted = 0;
+	else if (interacted == 3) { //Do the interaction of going down the stairs
+	HitBoxes::GetInstance().saveFloor(0);
+	cameraPos = glm::vec3(cameraPos.x, cameraPos.y, cameraPos.z - 50);
+	interacted = 0;
 	}
 }
 
-/*
-else if (amountOfObjects[i] == 19 && interactBuffer == true) { //20 is for stairs going down
-						if (interactionIsPossible(cameraPos, glm::vec3(genTransform[i][3].x + 7, genTransform[i][3].y, genTransform[i][3].z))) {
-							objectsToUpdate.push_back(i);
-							amountOfObjects[i]++; //It's 20 because here it's getting incremented by one
-							interactBuffer = false;
-						}
-					}
-					else if (amountOfObjects[i] == 20 && interactBuffer == true) { //19 is for stairs going up
-						if (interactionIsPossible(cameraPos, glm::vec3(genTransform[i][3].x - 7, genTransform[i][3].y, genTransform[i][3].z))) {
-							objectsToUpdate.push_back(i);
-							amountOfObjects[i]--; //It's 19 because here it's getting incremented by one
-							interactBuffer = false;
-						}
-					} //192.0f, -0.9f, 0.0f
-					else if (amountOfObjects[i] == 21 && interactBuffer == true) { //22 is for stairs going down
-						if (interactionIsPossible(cameraPos, glm::vec3(genTransform[i][3].x, genTransform[i][3].y + 20, genTransform[i][3].z))) {
-							objectsToUpdate.push_back(i);
-							amountOfObjects[i]++; //It's 22 because here it's getting incremented by one
-							interactBuffer = false;
-						}
-					}
-					else if (amountOfObjects[i] == 22 && interactBuffer == true) { //21 is for stairs going up
-						if (interactionIsPossible(cameraPos, glm::vec3(genTransform[i][3].x, genTransform[i][3].y + 20, genTransform[i][3].z))) {
-							objectsToUpdate.push_back(i);
-							amountOfObjects[i]--; //It's 21 because here it's getting incremented by one
-							interactBuffer = false;
-						}
-					}
+void lantern::Update(entt::entity entity)
+{
+	auto& transform = CurrentRegistry().get<florp::game::Transform>(entity);
 
-*/
+	transform.SetPosition(glm::vec3(cameraPos.x + cos(-angleForX) + 10 * cos(angleForX - 0.5),
+		cameraPos.y + sin(-angleForY) + 10 * sin(-angleForY - 0.5),
+		cameraPos.z + (angleForZ > -1 ? (angleForZ < 1 ? tan(angleForZ) : 1) : -1)));
+	transform.LookAt({ lookAtPoint.x, -lookAtPoint.y, -lookAtPoint.z }, glm::vec3(0.0f, 0.0f, 1.0f));
+
+	auto& ecs = CurrentRegistry();
+	if (ecs.has<ShadowLight>(entity)) {
+		if (lanternFuel > 0) {
+			lanternFuel--;
+		}
+		int aNumber = 100;
+		ShadowLight& light = ecs.get<ShadowLight>(entity);
+
+		int percentage = 100 - ((LANTERN_FULL - lanternFuel) / LANTERN_FULL) * 100;
+		if (percentage > 60)
+			;
+		else if (percentage <= 60 && percentage != 0) {
+			light.Attenuation = 0.01 * ((100 - percentage) * (100 - percentage) * 0.1);
+		}
+		else {
+			light.Attenuation = 1000000;
+		}
+	}
+}
 
 
-/*
-case 20:
-		objFloor[objectsToUpdate[ID]] = 0;
-		myCamera->SetPosition({ 3.21, -7.373, myCamera->GetPosition().z - 50}); //Do the stuff here idiot.
-		currentFloor--;
-		objectsToUpdate.clear();
-		break;
-	case 19:
-		objFloor[objectsToUpdate[ID]] = 1;
-		myCamera->SetPosition( { 33.0, -17.0, myCamera->GetPosition().z + 50 }); //Do the stuff here idiot. 33 -17
-		currentFloor++;
-		objectsToUpdate.clear();
-		break;
-	case 22:
-		objFloor[objectsToUpdate[ID]] = 0;
-		myCamera->SetPosition({ myCamera->GetPosition().x, myCamera->GetPosition().y, myCamera->GetPosition().z - 50 }); //Do the stuff here idiot.
-		currentFloor--;
-		objectsToUpdate.clear();
-		break;
-	case 21:
-		objFloor[objectsToUpdate[ID]] = 1;
-		myCamera->SetPosition({ myCamera->GetPosition().x, myCamera->GetPosition().y, myCamera->GetPosition().z + 50 }); //Do the stuff here idiot. 33 -17
-		currentFloor++;
-		objectsToUpdate.clear();
-		break;
-*/
+void death::Update(entt::entity entity)
+{
+	auto& transform = CurrentRegistry().get<florp::game::Transform>(entity);
+	if (lanternFuel == 0 && !((transform.GetLocalPosition().x > -11.7 && transform.GetLocalPosition().x < 52.5 &&
+		transform.GetLocalPosition().y > -8.15 && transform.GetLocalPosition().y < 35.2 && HitBoxes::GetInstance().getFloor() == 0))) {
+		playerState = 3;
+	}
+}
+
+void aStarAlgorithm::Update(entt::entity entity)
+{
+	//How do we want to do this?
+	//First we get the estimated amount of intervals (since each interval will move the object by 5 it's equal to the floor of the x and y components from the hypotenus/5 (distance)
+	//We do the math for all the squares (each possible movement will have to be +5 movement and see how far it's from the goal (estimated))
+	//Take the path that contains the smallest value
+	//If more then one path is equal, then take the first one until it's value get's increased above the other ones, then try the next
+	//Once found make it move to it's location
+
+	static int stateOfAlgorithm = 0; //Waiting for initiation
+	auto& transform = CurrentRegistry().get<florp::game::Transform>(entity);
+
+
+	if (GetKeyState(0x52) & 0x8000 && stateOfAlgorithm == 0 && ((cameraPos.x > -11.7 && cameraPos.x < 52.5 &&
+		cameraPos.y > -8.15 && cameraPos.y < 35.2 && HitBoxes::GetInstance().getFloor() == 0))) {
+		stateOfAlgorithm = 1; //Calculation phase
+		//Find distance is goal - current.x+y+z ^ 2 sqrt
+		estimatedStepsX = abs(cameraPos.x - transform.GetLocalPosition().x) / 5;
+		estimatedStepsY = abs(cameraPos.y - transform.GetLocalPosition().y) / 5;
+
+	}
+	else if (stateOfAlgorithm == 1) {
+		//			0			
+		//
+		//
+		//3			p			1
+		//
+		//
+		//			2			
+
+		glm::vec3 positionTest = transform.GetLocalPosition();
+		glm::vec3 endposition;
+		if (cameraPos.x < transform.GetLocalPosition().x) {
+			if (cameraPos.y < transform.GetLocalPosition().y) {
+				endposition = glm::vec3(positionTest.x - 5 * estimatedStepsX, positionTest.y - 5 * estimatedStepsY, positionTest.z);
+			}
+			else {
+				endposition = glm::vec3(positionTest.x - 5 * estimatedStepsX, positionTest.y + 5 * estimatedStepsY, positionTest.z);
+			}
+		}
+		else {
+			if (cameraPos.y < transform.GetLocalPosition().y) {
+				endposition = glm::vec3(positionTest.x + 5 * estimatedStepsX, positionTest.y - 5 * estimatedStepsY, positionTest.z);
+			}
+			else {
+				endposition = glm::vec3(positionTest.x + 5 * estimatedStepsX, positionTest.y + 5 * estimatedStepsY, positionTest.z);
+			}
+		}
+
+		std::vector <glm::vec3> positionsReached;
+		std::vector <int> toNotUse;
+
+		while (positionTest != endposition) {
+			int square1Value = 999;
+			int square2Value = 999;
+			int square3Value = 999;
+			int square4Value = 999;
+			onStep++;
+			bool wasPositionedReached = false;
+			//check the 4 and see which is closer
+			//add lowest to a table
+			if (!(HitBoxes::GetInstance().isInHitBox(cameraPos, glm::vec3(positionTest.x, positionTest.y + 5, positionTest.z)))) {
+				wasPositionedReached = false;
+				for (int i = 0; i < positionsReached.size(); i++) {
+					if (glm::vec3(positionTest.x, positionTest.y + 5, positionTest.z) == positionsReached[i]) {
+						wasPositionedReached = true;
+						i = positionsReached.size(); //Can exit the loop since we got our answer
+					}
+				}
+
+				if (wasPositionedReached == false) {
+					square1Value = onStep + abs(cameraPos.x - positionTest.x) / 5 + abs(cameraPos.y - (positionTest.y + 5)) / 5;
+				}
+			}
+			if (!(HitBoxes::GetInstance().isInHitBox(cameraPos, glm::vec3(positionTest.x + 5, positionTest.y, positionTest.z)))) {
+				wasPositionedReached = false;
+				for (int i = 0; i < positionsReached.size(); i++) {
+					if (glm::vec3(positionTest.x + 5, positionTest.y, positionTest.z) == positionsReached[i]) {
+						wasPositionedReached = true;
+						i = positionsReached.size(); //Can exit the loop since we got our answer
+					}
+				}
+
+				if (wasPositionedReached == false) {
+					square2Value = onStep + abs(cameraPos.x - (positionTest.x + 5)) / 5 + abs(cameraPos.y - positionTest.y) / 5;
+				}
+			}
+			if (!(HitBoxes::GetInstance().isInHitBox(cameraPos, glm::vec3(positionTest.x, positionTest.y - 5, positionTest.z)))) {
+				wasPositionedReached = false;
+				for (int i = 0; i < positionsReached.size(); i++) {
+					if (glm::vec3(positionTest.x, positionTest.y - 5, positionTest.z) == positionsReached[i]) {
+						wasPositionedReached = true;
+						i = positionsReached.size(); //Can exit the loop since we got our answer
+					}
+				}
+
+				if (wasPositionedReached == false) {
+					square3Value = onStep + abs(cameraPos.x - positionTest.x) / 5 + abs(cameraPos.y - (positionTest.y - 5)) / 5;
+				}
+			}
+			if (!(HitBoxes::GetInstance().isInHitBox(cameraPos, glm::vec3(positionTest.x - 5, positionTest.y, positionTest.z)))) {
+				wasPositionedReached = false;
+				for (int i = 0; i < positionsReached.size(); i++) {
+					if (glm::vec3(positionTest.x - 5, positionTest.y, positionTest.z) == positionsReached[i]) {
+						wasPositionedReached = true;
+						i = positionsReached.size(); //Can exit the loop since we got our answer
+					}
+				}
+
+				if (wasPositionedReached == false) {
+					square4Value = onStep + abs(cameraPos.x - (positionTest.x - 5)) / 5 + abs(cameraPos.y - positionTest.y) / 5;
+				}
+			}
+
+			if (square1Value == 999 && square2Value == 999 && square3Value == 999 && square4Value == 999) {
+				
+				if (directions[onStep - 1] == 0) {
+					positionTest = glm::vec3(positionTest.x, positionTest.y - 5, positionTest.z);
+				}
+				else if (directions[onStep - 1] == 1) {
+					positionTest = glm::vec3(positionTest.x - 5, positionTest.y, positionTest.z);
+				}
+				else if (directions[onStep - 1] == 2) {
+					positionTest = glm::vec3(positionTest.x, positionTest.y + 5, positionTest.z);
+				}
+				else if (directions[onStep - 1] == 3) {
+					positionTest = glm::vec3(positionTest.x + 5, positionTest.y, positionTest.z);
+				}
+				onStep--;
+				std::vector <glm::vec3> temp;
+				std::vector <int> temp2;
+				for (int i = 0; i < positionsReached.size() - 1; i++) {
+					temp.push_back(positionsReached[i]);
+					temp2.push_back(directions[i]);
+				}
+				positionsReached.clear();
+				positionsReached = temp;
+				directions.clear();
+				directions = temp2;
+			}
+			else {
+				directions.push_back(square1Value < square2Value ? square1Value < square3Value ? square1Value < square4Value ? 0 : 3 : square3Value < square4Value ?
+					2 : 3 : square2Value < square3Value ? square2Value < square4Value ? 1 : 3 : square3Value < square4Value ?
+					2 : 3);
+				if (directions[onStep - 1] == 0) {
+					positionTest = glm::vec3(positionTest.x, positionTest.y + 5, positionTest.z);
+				}
+				else if(directions[onStep - 1] == 1) {
+					positionTest = glm::vec3(positionTest.x + 5, positionTest.y, positionTest.z);
+				}
+				else if (directions[onStep - 1] == 2) {
+					positionTest = glm::vec3(positionTest.x, positionTest.y - 5, positionTest.z);
+				}
+				else if (directions[onStep - 1] == 3) {
+					positionTest = glm::vec3(positionTest.x - 5, positionTest.y, positionTest.z);
+				}
+				positionsReached.push_back(positionTest);
+			}
+			
+
+		}
+
+		stateOfAlgorithm = 2;
+
+	}
+	else if (stateOfAlgorithm == 2) {
+		if (!(delay == 0)) {
+			delay--;
+		}
+		else {
+			if (directions[index] == 0) {
+				transform.SetPosition(glm::vec3(transform.GetLocalPosition().x, transform.GetLocalPosition().y + 5, transform.GetLocalPosition().z));
+			}
+			else if (directions[index] == 1) {
+				transform.SetPosition(glm::vec3(transform.GetLocalPosition().x + 5, transform.GetLocalPosition().y, transform.GetLocalPosition().z));
+			}
+			else if (directions[index] == 2) {
+				transform.SetPosition(glm::vec3(transform.GetLocalPosition().x, transform.GetLocalPosition().y - 5, transform.GetLocalPosition().z));
+			}
+			else if (directions[index] == 3) {
+				transform.SetPosition(glm::vec3(transform.GetLocalPosition().x - 5, transform.GetLocalPosition().y, transform.GetLocalPosition().z));
+			}
+			delay = 20;
+			index++;
+			if (index >= directions.size()) {
+				stateOfAlgorithm = 3;
+			}
+
+		}
+	}
+	else if (stateOfAlgorithm == 3) {
+		if (GetKeyState(0x52) & 0x8000) {
+			stateOfAlgorithm = 0;
+			index = 0;
+			directions.clear();
+			onStep = 0;
+		}
+	}
+}

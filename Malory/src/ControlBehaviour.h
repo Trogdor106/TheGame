@@ -2,6 +2,20 @@
 #include "florp/game/IBehaviour.h"
 #include <GLM/glm.hpp>
 #include "HitBoxes.h"
+#include "ShadowLight.h"
+#include "PointLightComponent.h"
+
+class lantern : public florp::game::IBehaviour {
+public:
+	lantern() {};
+	virtual ~lantern() = default;
+	virtual void Update(entt::entity entity);
+
+
+private:
+	const float PI = 3.1415926535897932384626433832795028841971693993;
+
+};
 
 class ControlBehaviour : public florp::game::IBehaviour {
 public:
@@ -13,9 +27,6 @@ public:
 private:
 	glm::vec3 mySpeed;
 	glm::vec2 myYawPitch;
-	float angleForX = 0;
-	float angleForY = 0;
-	float angleForZ = 0;
 };
 
 class InputBehaviour : public florp::game::IBehaviour {
@@ -55,19 +66,20 @@ private:
 	float mySpeed = 1.0;
 };
 
-class doorOpening : public florp::game::IBehaviour {
+class doorManDoors : public florp::game::IBehaviour {
 public:
-	doorOpening(int floor) : IBehaviour(), interacted(0), floorObjectIsOn(floor) {  };
-	virtual ~doorOpening() = default;
-	virtual void Update(entt::entity entity);
+	doorManDoors(const glm::vec3& position, float floor) : IBehaviour(), myPosition(position), myYawPitch(glm::vec2(0.0f)), interacted(0), floorCurrent(floor) {};
+	virtual ~doorManDoors() = default;
 
-	
+	virtual void Update(entt::entity entity) override;
+
 private:
+	int floorCurrent; //Despite the name this actually represents the floor the obeject is on
 	int interacted;
-	int floorObjectIsOn;
-	const float PI = 3.1415926535897932384626433832795028841971693993;
-
+	glm::vec3 myPosition;
+	glm::vec2 myYawPitch;
 };
+
 
 class lockedDoor : public florp::game::IBehaviour {
 public:
@@ -124,5 +136,46 @@ private:
 	int interacted;
 	int floorObjectIsOn;
 	const float PI = 3.1415926535897932384626433832795028841971693993;
+
+};
+
+class death : public florp::game::IBehaviour {
+public:
+	death() : IBehaviour() {};
+	virtual ~death() = default;
+
+	virtual void Update(entt::entity entity) override;
+
+private:
+	int floorCurrent; //Despite the name this actually represents the floor the obeject is on
+	int interacted;
+	glm::vec3 myPosition;
+	glm::vec2 myYawPitch;
+};
+
+class aStarAlgorithm : public florp::game::IBehaviour {
+public:
+	aStarAlgorithm() : IBehaviour(), floorCurrent(0), interacted(0), distance(0), estimatedStepsX(0), estimatedStepsY(0), onStep(0) {};
+	virtual ~aStarAlgorithm() = default;
+
+	virtual void Update(entt::entity entity) override;
+
+private:
+	int floorCurrent; //Despite the name this actually represents the floor the obeject is on
+	int interacted;
+	glm::vec3 myPosition;
+	float distance;
+	int estimatedStepsX, estimatedStepsY, onStep;
+	int delay = 20;
+	int index = 0;
+
+	std::vector <int> directions; //Can go from 0 to 3
+									//			0			
+									//
+									//
+									//3			p			1
+									//
+									//
+									//			2			
 
 };

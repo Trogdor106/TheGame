@@ -24,7 +24,7 @@ void LightingLayer::Initialize() {
 	ProfileTimer timer = ProfileTimer("LightingInitialize");
 
 	// We'll set our ambient light to be some very small amount (this will be for the entire scene)
-	myAmbientLight = glm::vec3(0.01f);
+	myAmbientLight = glm::vec3(0.0f);
 	
 	// The normal shader will handle depth map generation for shadow casting lights (note that we'll just use the default, fallback fragment shader)
 	myShader = std::make_shared<Shader>();
@@ -53,7 +53,7 @@ void LightingLayer::Initialize() {
 	myFinalComposite->LoadPart(ShaderStageType::VertexShader, "shaders/post/post.vs.glsl");
 	myFinalComposite->LoadPart(ShaderStageType::FragmentShader, "shaders/post/lighting_composite.fs.glsl");
 	myFinalComposite->Link();
-	myFinalComposite->SetUniform("a_Exposure", 1.0f);
+	myFinalComposite->SetUniform("a_Exposure", 20.0f);
 
 
 	// Our accumulation buffer will be a floating-point buffer, so we can do some HDR lighting effects
