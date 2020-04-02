@@ -1,0 +1,14 @@
+{31a8ece8-ad68-4927-bbe1-32e645ccf534} bank:/Master
+{a9b5cc3c-dc13-0565-3da8-b818b43ff3ac} bank:/Master.strings
+{40226af4-f793-4ac5-9c25-2ac1e1c8b125} bus:/
+{c038c8e0-ddca-4ff9-bc31-4dd85e2eb68d} bus:/Reverb
+{11e00538-c329-4809-a68b-caaab0ab048a} event:/But_how
+{ab58464a-d912-42de-ae4d-1bb86cf13550} event:/Dave
+{64a758e4-d2ad-4c9b-a9de-70a4235cd3f5} event:/Happened_to_me
+{1779d6d0-d178-4fcc-bbaa-72ac8f7999d3} event:/LockedDoor
+{4a58f21a-2306-437d-bbbc-f9b527848072} event:/Monkey
+{1351f6f4-690f-4455-a27f-3767a07461d5} event:/Walking
+{58ec940d-2d55-4956-9d26-89f06a23e2ad} event:/creakingDoor1Short
+{064f7fcd-49f7-451b-9c5a-a1c9418fbca0} event:/creakingDoor3Short
+{646d1c2f-a035-4f7d-8751-6fa55de2a66c} event:/how_on_earth
+{6fc3a3a3-0b07-4923-91e0-68b15310aa84} event:/what_is_place
