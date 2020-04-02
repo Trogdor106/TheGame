@@ -104,6 +104,18 @@ void PostLayer::Initialize() {
 		myToggleInputs[florp::app::Key::G] = { colorCorrectionGrey };
 	}
 
+	//Always keep this one true so the screen never dissapears
+	if (true) {
+		// Our additive pass will add the color from the scene, and add the blurred highlight to it
+		auto back = __CreatePass("shaders/post/Scnene.fs.glsl");
+		back->Inputs.push_back({ nullptr, RenderTargetAttachment::Color0 }); // 1 will hold this frame's depth
+		// Add the pass to the post processing stack
+		myPasses.push_back(back);
+
+		// We will toggle motion blur on and off with one key
+		//myToggleInputs[florp::app::Key::G] = { back };
+	}
+
 	// Depth of field effect
 	if (false) {
 

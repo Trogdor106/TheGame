@@ -67,4 +67,8 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\HitBoxes.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="res\shaders\heightmap.vs.glsl" />
+    <None Include="res\shaders\post\Scnene.fs.glsl" />
+  </ItemGroup>
 </Project>

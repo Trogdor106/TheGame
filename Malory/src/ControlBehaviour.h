@@ -114,6 +114,48 @@ private:
 
 };
 
+class keymebaby : public florp::game::IBehaviour {
+public:
+	keymebaby(int floor, int id) : IBehaviour(), wasPushed(false), interacted(0), keyID(id), floorObjectIsOn(floor) {};
+	virtual ~keymebaby() = default;
+	virtual void Update(entt::entity entity) override;
+private:
+	bool wasPushed;
+	int keyID;
+	int interacted;
+	int floorObjectIsOn;
+};
+
+class lockThoseDoorsBaby : public florp::game::IBehaviour {
+public:
+	lockThoseDoorsBaby(int floor, int idLocked, int id) : IBehaviour(), wasPushed(false), interacted(0), doorID(idLocked), floorObjectIsOn(floor), dooridinthetotallist(id) {};
+	virtual ~lockThoseDoorsBaby() = default;
+	virtual void Update(entt::entity entity) override;
+private:
+	bool wasPushed;
+	int interacted;
+	int doorID;
+	int dooridinthetotallist;
+	int floorObjectIsOn;
+};
+
+class lockedDoorManDoors : public florp::game::IBehaviour {
+public:
+	lockedDoorManDoors(const glm::vec3& position, float floor, int id, int idLocked) : IBehaviour(), myPosition(position), myYawPitch(glm::vec2(0.0f)), interacted(0),
+						floorCurrent(floor), idOfDoor(idLocked), doorID(id) {};
+	virtual ~lockedDoorManDoors() = default;
+
+	virtual void Update(entt::entity entity) override;
+
+private:
+	int idOfDoor;
+	int doorID;
+	int floorCurrent; //Despite the name this actually represents the floor the obeject is on
+	int interacted;
+	glm::vec3 myPosition;
+	glm::vec2 myYawPitch;
+};
+
 class stairs1 : public florp::game::IBehaviour {
 public:
 	stairs1(int floor) : IBehaviour(), interacted(0), floorObjectIsOn(floor) {  };
@@ -214,3 +256,11 @@ public:
 
 };
 
+class note : public florp::game::IBehaviour {
+public:
+	note() : IBehaviour() {};
+	virtual ~note() = default;
+	virtual void Update(entt::entity entity) override;
+private:
+	int interacted = 0;
+};

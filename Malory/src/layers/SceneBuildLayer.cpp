@@ -129,6 +129,12 @@ void SceneBuilder::Initialize()
 	emissiveShader->LoadPart(ShaderStageType::FragmentShader, "shaders/forward-emissive.fs.glsl");
 	emissiveShader->Link();
 
+
+	displacementmap = std::make_shared<Shader>();
+	displacementmap->LoadPart(ShaderStageType::VertexShader, "shaders/heightmap.vs.glsl");
+	displacementmap->LoadPart(ShaderStageType::FragmentShader, "shaders/forward-emissive.fs.glsl");
+	displacementmap->Link();
+
 	// Creating our 'console'
 	//{
 	//	// Material for the frame
@@ -186,6 +192,13 @@ void SceneBuilder::Initialize()
 
 	//Below are texture examples that should be removed if I forget, for now it's here as reference (delete once used somewhere else)
 	// Load and set up our simple test material
+
+	Material::Sptr heightMat = std::make_shared<Material>(displacementmap);
+	heightMat->Set("s_Albedo", Texture2D::LoadFromFile("marble.png", false, true, true));
+	heightMat->Set("s_Emissive", Texture2D::LoadFromFile("monkey_emissive.png", false, true, true));
+	heightMat->Set("a_EmissiveStrength", 4.0f);
+	
+
 	Material::Sptr monkeyMat = std::make_shared<Material>(emissiveShader);
 	monkeyMat->Set("s_Albedo", Texture2D::LoadFromFile("marble.png", false, true, true));
 	monkeyMat->Set("s_Emissive", Texture2D::LoadFromFile("monkey_emissive.png", false, true, true));
@@ -205,15 +218,16 @@ void SceneBuilder::Initialize()
 	testmotion->Set("s_Albedo", Texture2D::LoadFromFile("marbleBlue.png", false, true, true));
 
 
+
+
+
 	//Create objects, put them in the scene and attach a behavior down below
 
 	int lockedDoorID = 0;
 	int lockedKeyID = 0;
 
 	for (int i = 0; i < materialToUse.size(); i++) {
-		if (i == 34) {
-			int dfsaj = 0;
-		}
+		
 		entt::entity entity = scene->CreateEntity();
 		RenderableComponent& renderable = scene->Registry().assign<RenderableComponent>(entity);
 		renderable.Mesh = MeshBuilder::Bake(meshHolder[meshToUse[i]]);
@@ -261,17 +275,17 @@ void SceneBuilder::Initialize()
 		HitBoxes::GetInstance().saveHitBoxes(tempHit, floorToUse[i]);
 		HitBoxes::GetInstance().updateHitBox(i, genTransform[i]);
 		
-		if (meshToUse[i] == 7 || meshToUse[i] == 10) { //Normal door (change the number if it's not 3 that you want)
-			scene->AddBehaviour<doorManDoors>(entity, t.GetWorldPosition(), floorToUse[i], i);;// scene->AddBehaviour<doorOpening>(entity, glm::vec3(genTransform[i][3][0], genTransform[i][3][1], genTransform[i][3][2]), floorToUse[i]);
-		}
-		else if (meshToUse[i] == 6) { //Locked door (change the number if it's not 6 that you want(hint: it's not))
-			scene->AddBehaviour<lockedDoor>(entity, floorToUse[i], lockedDoorID);
-			lockedDoorID++;
-		}
-		else if (meshToUse[i] == 5) { //Locked door (change the number if it's not 3 that you want)
-			scene->AddBehaviour<key>(entity, floorToUse[i], lockedKeyID);
-			lockedKeyID++;
-		}
+		if (meshToUse[i] == 4 || meshToUse[i] == 7 || meshToUse[i] == 10) { //Normal door (change the number if it's not 3 that you want)
+            scene->AddBehaviour<doorManDoors>(entity, t.GetWorldPosition(), floorToUse[i], i);;// scene->AddBehaviour<doorOpening>(entity, glm::vec3(genTransform[i][3][0], genTransform[i][3][1], genTransform[i][3][2]), floorToUse[i]);
+        }
+        else if (meshToUse[i] == 8 || meshToUse[i] == 5) { //Locked door (change the number if it's not 6 that you want(hint: it's not))
+            scene->AddBehaviour<lockedDoorManDoors>(entity, t.GetWorldPosition(), floorToUse[i], lockedDoorID, i);
+            lockedDoorID++;
+        }
+        else if (meshToUse[i] == 18 || meshToUse[i] == 19) { //Locked door (change the number if it's not 3 that you want)
+            scene->AddBehaviour<keymebaby>(entity, floorToUse[i], lockedKeyID);
+            lockedKeyID++;
+        }
 		else if (meshToUse[i] == 20) { //stairs near spawn
 			scene->AddBehaviour<stairs1>(entity, floorToUse[i]);
 		}
@@ -280,9 +294,10 @@ void SceneBuilder::Initialize()
 		}
 		else if (meshToUse[i] == 38) {
 			scene->AddBehaviour<aStarAlgorithm>(entity);
-
 		}
-
+		else if (meshToUse[i] == 39) {
+			scene->AddBehaviour<note>(entity);
+		}
 	}
 	int goodbye = 0;
 
@@ -499,19 +514,21 @@ void SceneBuilder::textureLoader()
 
 
 	std::vector <char*> texturename = { "",
-				//0							//1						//2					//3								//4
-		"textures/floor 1 4096.png", "textures/Door.png", "textures/DoorOpen.png", "textures/f_Drawer.png", "textures/f_DresserNoDrawer.png", 
-				//5							//6								//7							 //8					//9
-		"textures/NewCaskNew.png", "textures/KitchenTableNew.png", "textures/CupboardsNew.png", "textures/DoorNew.png", "textures/DoorOpenNew.png",
-				//10							//11					//12				//13							//14
-		"textures/WideWindowNew.png", "textures/PianoNew.png", "textures/Sink.png", "textures/BigVaseNew.png", "textures/BookShelfFullNew.png", 
-				//15							//16							//17						//18					//19
-		"textures/KitchenStairs.png", "textures/SmallWindowNew.png", "textures/FrontDoorNew.png", "textures/Toilet.png", "textures/FireplaceNew.png",
-				//20					//21					//22					//23							//24
-		"textures/Ceiling.png", "textures/Key1.png", "textures/PortraitNew.png", "textures/Portrait2New.png", "textures/ChandelierNew.png",
-				//25							//26					//27
-		"textures/EndTableNew.png", "textures/TableObjectsNew.png",  "textures/Key1.png"
-	};
+		//0                            //1                        //2                    //3                                //4
+		"textures/floor 1 4096New.png", "textures/Door.png", "textures/DoorOpen.png", "textures/f_Drawer.png", "textures/f_DresserNoDrawer.png",
+		//5                            //6                            //7                     //8                    //9
+		"textures/NewCask.png", "textures/KitchenTable.png", "textures/Cupboards.png", "textures/Door.png", "textures/DoorOpen.png",
+		//10                        //11                //12                    //13                    //14
+		"textures/WideWindow.png", "textures/Piano.png", "textures/Sink.png", "textures/BigVase.png", "textures/BookShelfFull.png",
+		//15                            //16                        //17                    //18                    //19
+		"textures/KitchenStairs.png", "textures/SmallWindow.png", "textures/FrontDoor.png", "textures/Toilet.png", "textures/Fireplace.png",
+		//20                    //21                    //22                    //23                    //24
+		"textures/Ceiling.png", "textures/Key1.png", "textures/Portrait.png", "textures/Portrait2.png", "textures/Chandelier.png",
+		//25                        //26                    //27						//28						//29
+		"textures/EndTable.png", "textures/TableObjects.png",  "textures/Key1.png", "textures/PauseScreen.png", "textures/Dead.png",
+			//30					//31
+		"textures/Title.png", "textures/Win.png"
+			};
 
 	
 	florp::game::Material::Sptr temp = std::make_shared<florp::game::Material>(shader);
@@ -521,15 +538,35 @@ void SceneBuilder::textureLoader()
 	//Textures need to be fixed for down here
 
 	materialToUse = {  //Put the id of the texture you will want to use with the object that will show up in the list
-		0, 2, 1, 2, 1, 2, 4, 3, 3, 3, 5, 16, 13, 13, 14, 14, 2, 2, 2, 2, 17, 15, 15, 11, 18, 12, 6, 2, 5, 19, 6, 7, 27, 27, 27, 27, 10, 10, 10, 16,
-		16, 22, 23, 20, 24, 25, 3, 26, 25, 25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+		0,                                        //0
+		2 , 1 , 2 , 1 , 2 , 4 , 3 , 3 , 3 , 5 , //10
+		16, 11, 11, 14, 14, 2 , 2 , 2 , 2 , 17,    //20
+		15, 15, 11, 18, 12, 6 , 2 , 5 , 19, 6 ,    //30
+		7 , 13, 13, 27, 27, 10, 10, 10, 16, 16,    //40
+		22, 23, 20, 24, 25, 3 , 26, 25, 25, 0 ,    //50
+		1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 ,    //60
+		1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 ,    //70
+		1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 ,    //80
+		1 , 1, 28, 30, 29, 31
 	};
 
 	//Can uncomment this once all the textures have been resized
 	for (int i = 1; i < texturename.size(); i++) {
-		temp = std::make_shared<florp::game::Material>(shader);
-		temp->Set("s_Albedo", florp::graphics::Texture2D::LoadFromFile(texturename[i], false, true, true));
-		materialHolder.push_back(temp);
+		
+		if (!(i >= 29 && i <= 32)) {
+			temp = std::make_shared<florp::game::Material>(shader);
+			temp->Set("s_Albedo", florp::graphics::Texture2D::LoadFromFile(texturename[i], false, true, true));
+			materialHolder.push_back(temp);
+		}
+		else {
+			temp = std::make_shared<florp::game::Material>(displacementmap);
+			temp->Set("s_Albedo", florp::graphics::Texture2D::LoadFromFile(texturename[i], false, true, true));
+			temp->Set("s_Emissive", florp::graphics::Texture2D::LoadFromFile("textures/fire.png", false, true, true));
+			temp->Set("a_EmissiveStrength", 10.03f);
+
+
+			materialHolder.push_back(temp);
+		}
 	}
 
 	int hello = 0;
@@ -549,47 +586,50 @@ void SceneBuilder::meshLoader()
 
 
 	std::vector <char*> filename = { "",
-			//1						 //2					//3					   //4						  //5					 //6               
-		"Objects/1stFloorUVD_1.obj",	"Objects/2ndFloor.obj",	 "Objects/Bed.obj",	 "Objects/BigVaseUV.obj",	 "Objects/SmallVase.obj", "Objects/Book.obj",
+					//1						 //2					//3					   //4						  //5					 //6             
+			"Objects/1stFloorUVD_1.obj",	"Objects/2ndFloor.obj",	 "Objects/Bed.obj",	 "Objects/note.obj",	 "Objects/DoorReverse.obj", "Objects/DoorReverseLocked.obj",
 			//7
-		"Objects/BookShelf.obj",
-			//8						    //9								 //10								 //11
-		"Objects/Door.obj", "Objects/f_Door(Reverse_open_1_3).obj", "Objects/f_Door(Reverse_open_2_3).obj", "Objects/DoorOpen.obj",
+			"Objects/BookShelf.obj",
+			//8						//9							 //10							 //11
+			"Objects/Door.obj", "Objects/DoorLocked.obj", "Objects/f_Door(Reverse_open_2_3).obj", "Objects/DoorOpen.obj",
 			//12								//13							  //14								//15				  //16                
-		"Objects/f_Door(open_1_3).obj", "Objects/f_Door(open_2_3).obj", "Objects/f_Door(open_Max).obj", "Objects/f_Drawer.obj", "Objects/Dresser.obj",
+			"Objects/f_Door(open_1_3).obj", "Objects/f_Door(open_2_3).obj", "Objects/f_Door(open_Max).obj", "Objects/f_Drawer.obj", "Objects/Dresser.obj",
 			//17							//18						   //19					 //20				 //21
-		"Objects/Dresser.obj", "Objects/f_DresserWithMorror.obj",  "Objects/Key1.obj",   "Objects/Key2.obj",   "Objects/Key3.obj",
+			"Objects/Dresser.obj", "Objects/f_DresserWithMorror.obj",  "Objects/Key1.obj",   "Objects/Key2.obj",   "Objects/Key3.obj",
 			//22					    //23					 //24					 //25							//26          
-		"Objects/f_Key4.obj", "Objects/Portrait.obj", "Objects/SmallFrame.obj", "Objects/SmallWindow.obj", "Objects/Stairs.obj",
-			//27					//28
-		"Objects/f_LargeWindow.obj", "Objects/WideWindow.obj" ,
-			//29					  //30							//31									 //32					//33
-		"Objects/BookShelfFull.obj", "Objects/f_rotatedDoor.obj", "Objects/f_shortFlatWall.obj", "Objects/f_rotatedShortWall.obj", "Objects/FrontDoor.obj",
+			"Objects/f_Key4.obj", "Objects/Portrait.obj", "Objects/SmallFrame.obj", "Objects/SmallWindow.obj", "Objects/Stairs.obj",
+			//27						//28
+			"Objects/f_LargeWindow.obj", "Objects/WideWindow.obj" ,
+			//29					  //30							//31								 //32						//33
+			"Objects/BookShelfFull.obj", "Objects/f_rotatedDoor.obj", "Objects/f_shortFlatWall.obj", "Objects/f_rotatedShortWall.obj", "Objects/FrontDoor.obj",
 			//34							//35					//36				//37				 //38							//39			
-		"Objects/SafeRoomStairs.obj", "Objects/KitchenStairs.obj", "Objects/Piano.obj", "Objects/Toilet.obj" ,"Objects/PaintBucket.obj" , "Objects/NewCask.obj",
+			"Objects/SafeRoomStairs.obj", "Objects/KitchenStairs.obj", "Objects/Piano.obj", "Objects/Toilet.obj" ,"Objects/PaintBucket.obj" , "Objects/NewCask.obj",
 			//40
-		"Objects/note.obj",
+			"Objects/BigVaseUV.obj",
 			//41					  //42				  //43							//44					 //45					//46					
-		"Objects/sink UV.obj", "Objects/Mirror.obj", "Objects/Fireplace.obj", "Objects/KitchenTable.obj", "Objects/Cupboards.obj", "Objects/HallwayWindow.obj",
-					//47							//48					//49					//50					//51
-		"Objects/FireplaceSmallWindow.obj",	"Objects/Ceiling.obj", "Objects/Chandelier.obj", "Objects/EndTable.obj", "Objects/TableObjects.obj",
-					//52						//53						//54						//55						//56
-		"Objects/FrontEndTable.obj", "Objects/FrontDrawer.obj", "Walls/TopRightSafeWall.obj", "Walls/TopLeftSafeWall.obj", "Walls/BottomLeftSafeWall.obj",
-					//57								//58								//59					//60
-		"Walls/BottomRightSafeWall.obj", "Walls/RightBottomSafeWall.obj", "Walls/RightTopSafeWall.obj", "Walls/LeftSafeWall.obj",
-					//61										//62							//63							//64
-		"Walls/BottomLeftMainHallWall.obj", "Walls/BottomRightMainHallWall.obj", "Walls/TopLeftMainHallWall.obj", "Walls/BottomBasementWall.obj",
-				//65						//66								//67								//68
-		"Walls/TopMainHallWall.obj", "Walls/RightMainHallWall.obj", "Walls/LeftRightStairwayWall.obj", "Walls/RightRightStairwayWall.obj",
-				//69						//70						//71						//72						//73
-		"Walls/RightStudyWall.obj", "Walls/LeftStudyWall.obj", "Walls/BottomStudyWall.obj", "Walls/TopStudyWall.obj", "Walls/LeftTopMainHallWall.obj",
-					//74								//75								//76							//77
-		"Walls/LeftBottomKitchenWall.obj", "Walls/LeftTopKitchenWall.obj", "Walls/RightBottomKitchenWall.obj", "Walls/RightTopKitchenWall.obj",
-					//78							//79						//80							//81						//82
-		"Walls/TopLeftKitchenWall.obj", "Walls/TopRightKitchenWall.obj", "Walls/LeftPantryWall.obj", "Walls/TopBathroomWall.obj", "Walls/BottomBathroomWall.obj",
-					//83							//84							//85								//86
-		"Walls/LeftTopBathroomWall.obj", "Walls/LeftBottomBathroomWall.obj", "Walls/BottomLeftStairwayWall.obj", "Walls/BottomRightStairwayWall.obj"
+			"Objects/sink UV.obj", "Objects/Mirror.obj", "Objects/Fireplace.obj", "Objects/KitchenTable.obj", "Objects/Cupboards.obj", "Objects/HallwayWindow.obj",
+			//47							//48					//49					//50					//51
+			"Objects/FireplaceSmallWindow.obj",	"Objects/Ceiling.obj", "Objects/Chandelier.obj", "Objects/EndTable.obj", "Objects/TableObjects.obj",
+			//52						//53						//54						//55						//56
+			"Objects/FrontEndTable.obj", "Objects/FrontDrawer.obj", "Walls/TopRightSafeWall.obj", "Walls/TopLeftSafeWall.obj", "Walls/BottomLeftSafeWall.obj",
+			//57								//58								//59					//60
+			"Walls/BottomRightSafeWall.obj", "Walls/RightBottomSafeWall.obj", "Walls/RightTopSafeWall.obj", "Walls/LeftSafeWall.obj",
+			//61										//62							//63							//64
+			"Walls/BottomLeftMainHallWall.obj", "Walls/BottomRightMainHallWall.obj", "Walls/TopLeftMainHallWall.obj", "Walls/BottomBasementWall.obj",
+			//65						//66								//67								//68
+			"Walls/TopMainHallWall.obj", "Walls/RightMainHallWall.obj", "Walls/LeftRightStairwayWall.obj", "Walls/RightRightStairwayWall.obj",
+			//69						//70						//71						//72						//73
+			"Walls/RightStudyWall.obj", "Walls/LeftStudyWall.obj", "Walls/BottomStudyWall.obj", "Walls/TopStudyWall.obj", "Walls/LeftTopMainHallWall.obj",
+			//74								//75								//76							//77
+			"Walls/LeftBottomKitchenWall.obj", "Walls/LeftTopKitchenWall.obj", "Walls/RightBottomKitchenWall.obj", "Walls/RightTopKitchenWall.obj",
+			//78							//79						//80							//81						//82
+			"Walls/TopLeftKitchenWall.obj", "Walls/TopRightKitchenWall.obj", "Walls/LeftPantryWall.obj", "Walls/TopBathroomWall.obj", "Walls/BottomBathroomWall.obj",
+			//83							//84							//85								//86
+			"Walls/LeftTopBathroomWall.obj", "Walls/LeftBottomBathroomWall.obj", "Walls/BottomLeftStairwayWall.obj", "Walls/BottomRightStairwayWall.obj",
+			//87
+			"Objects/plane.obj"
 	};
+
 
 	glm::mat4 temp = glm::mat4(1.0f);
 
@@ -632,10 +672,10 @@ void SceneBuilder::meshLoader()
 			genTransform.push_back(glm::translate(temp, glm::vec3(-9.0f, -17.5f, 5.5f))); //Working
 			break;
 		case 12:// object 12 is a big vase in the safe room
-			genTransform.push_back(glm::translate(temp, glm::vec3(-5.85f, 1.75f, 0.0f))); //Working
+			genTransform.push_back(glm::translate(temp, glm::vec3(-4.85f, 1.75f, 1000.0f))); //Not used
 			break;
 		case 13:// object 13 is a big vase in the safe room
-			genTransform.push_back(glm::translate(temp, glm::vec3(-4.00f, -3.25f, 0.0f))); //Working
+			genTransform.push_back(glm::translate(temp, glm::vec3(-4.00f, -3.25f, 1000.0f))); //Not used
 			break;
 		case 14:// object 14 is the bookshelf with way, way too many faces
 			genTransform.push_back(glm::translate(temp, glm::vec3(24.0f, -7.1f, -0.2f))); //Working
@@ -644,18 +684,18 @@ void SceneBuilder::meshLoader()
 			genTransform.push_back(glm::translate(temp, glm::vec3(122.0f, -37.4f, -3.0f))); //Working
 			break;
 		case 16:// object 16 is the study door
-			genTransform.push_back(glm::translate(temp, glm::vec3(169.35f, 1.35f, -3.0f))); //Working
+			genTransform.push_back(glm::translate(temp, glm::vec3(169.35f, -7.35f, -3.0f))); //Working
 			break;
 		case 17:// object 17 is the right kitchen door
-			genTransform.push_back(glm::translate(temp, glm::vec3(169.35f, 31.85f, -3.0f))); //Working
+			genTransform.push_back(glm::translate(temp, glm::vec3(169.35f, 23.15f, -3.0f))); //Working
 			break;
 
 		case 18:// object 18 is the left kitchen door
-			genTransform.push_back(glm::translate(temp, glm::vec3(106.6f, 21.35f, -2.0f))); //Working
+			genTransform.push_back(glm::translate(temp, glm::vec3(106.6f, 12.65f, -2.0f))); //Working 106.6f, 21.35f, -2.0f
 			break;
 
 		case 19:// object 19 is the pantry door
-			genTransform.push_back(glm::translate(temp, glm::vec3(106.6f, 51.85f, -1.7f))); //Working
+			genTransform.push_back(glm::translate(temp, glm::vec3(106.6f, 43.15f, -1.7f))); //Working
 			break;
 
 		case 20:// object 20 is the front door
@@ -675,7 +715,7 @@ void SceneBuilder::meshLoader()
 			break;
 
 		case 24:// object 24 is the 1st floor toilet
-			genTransform.push_back(glm::translate(temp, glm::vec3(96.55f, 11.9f, -1.5f))); //Working
+			genTransform.push_back(glm::translate(temp, glm::vec3(85.55f, 11.9f, -1.5f))); //Working
 			break;
 
 		case 25:// object 25 is the bathroom sink
@@ -699,7 +739,7 @@ void SceneBuilder::meshLoader()
 			break;
 
 		case 30:// object 30 is the kitchen table
-			genTransform.push_back(glm::translate(temp, glm::vec3(135.0f, 45.0f, -1.5f)));
+			genTransform.push_back(glm::translate(temp, glm::vec3(135.0f, 45.0f, -1.5f))); //Working
 			break;
 
 		case 31:// object 31 is the kitchen cupboards
@@ -759,11 +799,11 @@ void SceneBuilder::meshLoader()
 			break;
 
 		case 45:// object 45 is an end table
-			genTransform.push_back(glm::translate(temp, glm::vec3(195.5f, 91.0f, -1.9f))); //Working
+			genTransform.push_back(glm::translate(temp, glm::vec3(194.85f, 94.0f, -1.9f))); //Working
 			break;
 
 		case 46:// object 46 is the end table drawer
-			genTransform.push_back(glm::translate(temp, glm::vec3(195.5f, 91.0f, -1.9f))); //Working
+			genTransform.push_back(glm::translate(temp, glm::vec3(194.85f, 94.0f, -1.9f))); //Working
 			break;
 
 		case 47:// object 47 is the stuff on the doorway end table
@@ -867,11 +907,11 @@ void SceneBuilder::meshLoader()
 			break;
 
 		case 72: //Object 72 The kitchen right top wall
-			genTransform.push_back(glm::translate(temp, glm::vec3(44.2f, 49.9f, 0.0f)));
+			genTransform.push_back(glm::translate(temp, glm::vec3(44.2f, 51.9f, 0.0f)));
 			break;
 
 		case 73: //Object 73 The kitchen right bottom wall
-			genTransform.push_back(glm::translate(temp, glm::vec3(44.2f, 49.9f, 0.0f)));
+			genTransform.push_back(glm::translate(temp, glm::vec3(44.2f, 51.9f, 0.0f)));
 			break;
 
 		case 74: //Object 74 The kitchen top left wall
@@ -909,34 +949,49 @@ void SceneBuilder::meshLoader()
 		case 82: //Object 82 is the bottom right stairway wall
 			genTransform.push_back(glm::translate(temp, glm::vec3(44.2f, 49.9f, 0.0f)));
 			break;
-
+		case 83: //Object 83 is the Pause Screen
+			genTransform.push_back(glm::translate(temp, glm::vec3(0.0f, 9990.0f, 0.0f)));
+			break;
+		case 84: //Object 84 is the Title Screen
+			genTransform.push_back(glm::translate(temp, glm::vec3(0.0f, 19990.0f, 0.0f)));
+			break;
+		case 85: //Object 85 is the Death Screen
+			genTransform.push_back(glm::translate(temp, glm::vec3(0.0f, 29990.0f, 0.0f)));
+			break;
+		case 86: //Object 86 is the Win Screen
+			genTransform.push_back(glm::translate(temp, glm::vec3(0.0f, 39990.0f, 0.0f)));
+			break;
 		}
 	}
 
 	MeshData data = ObjLoader::LoadObj("monkey.obj", glm::vec4(1.0f));
 
 	for (int i = 1; i < filename.size(); i++) {
+		
 		data = ObjLoader::LoadObj(filename[i], glm::vec4(1.0f));
 		meshHolder.push_back(data);
 	}
 
 	meshToUse = { //Put the id of the mesh you will want to use with the object that will show up in the list
-		0 , 10, 7 , 10, 7 , 10, 15, 14, 14, 14, 27, 46, 3 , 3 , 28, 28, 10, 10, 10, 10, 32, 33, 34, 35, 36, 40, 41, 10, 38, 42, 43, 44, 1 , 2 , 18, 19, 45, 45, 27, 24, 46, 22, 22, 47, 48, 49, 14, 50, 51, 52, 53, 54,
-		55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85
+	//        1st                                    10th                                    20th                                    30th                                   40th
+		0 , 10, 7 , 10, 8 , 4 , 15, 14, 14, 14, 27, 46, 39, 39, 28, 28, 4 , 4 , 4 , 5 , 32, 33, 34, 35, 36, 40, 41, 10, 38, 42, 43, 44, 1 , 3, 18, 19, 45, 45, 27, 24, 46, 22, 22, 47, 48, 49, 14, 50, 51, 52,
+		//    50th                                    60th                                    70th                                    80th        From 0 to 82, so 83 objects
+			53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 86, 86, 86
 
 	}; //Put the id of the mesh you will want to use with the object that will show up in the list
-	floorToUse = {
-		-1,                                //0
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, -1, -1, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, -1, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0
-		/**/ }; //Put the floor that the mesh is on
+
+	floorToUse = { // floor that the mesh is on
+	  -1,                                //0
+	  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	  0, -1, -1, 0, 0, 0, 0, 0, 0, 0,
+	  0, 0, -1, 0, 0, 0, 0, 0, 0, 0,
+	  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	  0, 0, -1, -1, -1, -1
+	};
 
 
 	int hello = 0;

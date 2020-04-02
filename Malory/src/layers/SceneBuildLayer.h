@@ -27,6 +27,7 @@ private:
 	const float PI = 3.1415926535897932384626433832795028841971693993;
 	florp::graphics::Shader::Sptr emissiveShader;
 	florp::graphics::Shader::Sptr shader;
+	florp::graphics::Shader::Sptr displacementmap;
 	std::vector <florp::game::Material::Sptr> materialHolder;
 	std::vector <float> materialToUse;
 	std::vector <florp::graphics::MeshData> meshHolder;

@@ -38,6 +38,10 @@ float lanternFuel = LANTERN_FULL;
 float playerState = 1; //0 is title screen, 1 is normal, 2 is paused, 3 is dead
 std::vector <int> timers;
 std::vector <std::string> names;
+glm::vec3 toReturnto;
+glm::vec3 toReturnView;
+int deathTimer;
+
 
 void playSound(std::string sound, float duration, glm::vec3 position = { 0,0,0 }) {
 	AudioEngine& audioEngine = AudioEngine::GetInstance();
@@ -66,8 +70,32 @@ void ControlBehaviour::Update(entt::entity entity) {
 	using namespace florp::app;
 	auto& transform = CurrentRegistry().get<florp::game::Transform>(entity);
 	Window::Sptr window = Application::Get()->GetWindow();
+	static bool bufferEscp = false;
 
-	if (transform.GetLocalPosition() != cameraPos) {
+	if (GetKeyState(0x1B) & 0x8000) {
+		if (!bufferEscp) {
+			if (playerState == 1) {
+				bufferEscp = true;
+				playerState = 2;
+				toReturnto = cameraPos;
+				toReturnView = lookAtPoint;
+			}
+		}
+	}
+	else {
+		bufferEscp = false;
+	}
+	if (playerState == 0) {
+		transform.SetPosition(glm::vec3(0, 20000, 0));
+		transform.LookAt(glm::vec3(0, 0, 0), glm::vec3(0, 0, 1));
+		static int timerForTitle = 50;
+		timerForTitle--;
+		if (timerForTitle == 0) {
+			playerState = 1;
+			transform.SetPosition(cameraPos);
+		}
+	}
+	else if (transform.GetLocalPosition() != cameraPos && playerState == 1) {
 		transform.SetPosition(cameraPos);
 	}
 	else if (playerState == 1) { //Make sure the player is in the playing state before letting them move
@@ -80,6 +108,8 @@ void ControlBehaviour::Update(entt::entity entity) {
 		float rotSpeed = 0.05f;
 		bool isheadBob = false;
 		//myCamera->LookAt(cameraViewTarget, cameraViewAngle);
+
+		
 
 		if (GetKeyState(0x53) & 0x8000) { //S key
 			movement.z = -speed2 * Timing::DeltaTime;
@@ -162,6 +192,33 @@ void ControlBehaviour::Update(entt::entity entity) {
 					transform.GetLocalPosition().z + finalHeadBob });
 				cameraPos = transform.GetLocalPosition();
 			}
+		}
+	}
+	else if (playerState == 2) {
+		transform.SetPosition(glm::vec3(0, 10000, 0));
+		transform.LookAt(glm::vec3(0, 0, 0), glm::vec3(0,0,1));
+		if (GetKeyState(0x1B) & 0x8000) {
+			if (!bufferEscp) {
+				if (bufferEscp == false) {
+					playerState = 1;
+					transform.SetPosition(toReturnto);
+					transform.LookAt(toReturnView, glm::vec3(0, 0, 1));
+				}
+				bufferEscp = true;
+			}
+		}
+		else {
+			bufferEscp = false;
+		}
+	}
+	else if (playerState == 3) {
+		transform.SetPosition(glm::vec3(0, 30000, 0));
+		transform.LookAt(glm::vec3(0, 0, 0), glm::vec3(0, 0, 1));
+		deathTimer--;
+		if (deathTimer == 0) {
+			transform.SetPosition({ 1.0f, 1.0f, 10.0f });
+			playerState = 1;
+			cameraPos = { 1.0f, 1.0f, 10.0f };
 		}
 	}
 	updateSounds();
@@ -300,9 +357,6 @@ void key::Update(entt::entity entity)
 {
 
 	auto& transform = CurrentRegistry().get<florp::game::Transform>(entity);
-	glm::tquat temp = glm::mat4(1.0f);
-	temp = transform.GetLocalTransform();
-
 	if (interacted == 2) {
 		;
 	}
@@ -319,6 +373,9 @@ void key::Update(entt::entity entity)
 		keys[keyID] = 1;
 	}
 }
+
+
+
 
 void stairs1::Update(entt::entity entity)
 {
@@ -388,28 +445,29 @@ void stairs2::Update(entt::entity entity)
 void lantern::Update(entt::entity entity)
 {
 	auto& transform = CurrentRegistry().get<florp::game::Transform>(entity);
+	if (playerState == 1) {
+		transform.SetPosition(glm::vec3(cameraPos.x + cos(-angleForX) + 10 * cos(angleForX - 0.5),
+			cameraPos.y + sin(-angleForY) + 10 * sin(-angleForY - 0.5),
+			cameraPos.z + (angleForZ > -1 ? (angleForZ < 1 ? tan(angleForZ) : 1) : -1)));
+		transform.LookAt({ lookAtPoint.x, -lookAtPoint.y, -lookAtPoint.z }, glm::vec3(0.0f, 0.0f, 1.0f));
 
-	transform.SetPosition(glm::vec3(cameraPos.x + cos(-angleForX) + 10 * cos(angleForX - 0.5),
-		cameraPos.y + sin(-angleForY) + 10 * sin(-angleForY - 0.5),
-		cameraPos.z + (angleForZ > -1 ? (angleForZ < 1 ? tan(angleForZ) : 1) : -1)));
-	transform.LookAt({ lookAtPoint.x, -lookAtPoint.y, -lookAtPoint.z }, glm::vec3(0.0f, 0.0f, 1.0f));
+		auto& ecs = CurrentRegistry();
+		if (ecs.has<ShadowLight>(entity)) {
+			if (lanternFuel > 0) {
+				lanternFuel--;
+			}
+			int aNumber = 100;
+			ShadowLight& light = ecs.get<ShadowLight>(entity);
 
-	auto& ecs = CurrentRegistry();
-	if (ecs.has<ShadowLight>(entity)) {
-		if (lanternFuel > 0) {
-			lanternFuel--;
-		}
-		int aNumber = 100;
-		ShadowLight& light = ecs.get<ShadowLight>(entity);
-
-		int percentage = 100 - ((LANTERN_FULL - lanternFuel) / LANTERN_FULL) * 100;
-		if (percentage > 60)
-			;
-		else if (percentage <= 60 && percentage != 0) {
-			light.Attenuation = 0.01 * ((100 - percentage) * (100 - percentage) * 0.1);
-		}
-		else {
-			light.Attenuation = 1000000;
+			int percentage = 100 - ((LANTERN_FULL - lanternFuel) / LANTERN_FULL) * 100;
+			if (percentage > 60)
+				;
+			else if (percentage <= 60 && percentage != 0) {
+				light.Attenuation = 0.01 * ((100 - percentage) * (100 - percentage) * 0.1);
+			}
+			else {
+				light.Attenuation = 1000000;
+			}
 		}
 	}
 }
@@ -418,9 +476,10 @@ void lantern::Update(entt::entity entity)
 void death::Update(entt::entity entity)
 {
 	auto& transform = CurrentRegistry().get<florp::game::Transform>(entity);
-	if (lanternFuel == 0 && !((transform.GetLocalPosition().x > -11.7 && transform.GetLocalPosition().x < 52.5 &&
+	if (lanternFuel == 0 && playerState == 1 && !((transform.GetLocalPosition().x > -11.7 && transform.GetLocalPosition().x < 52.5 &&
 		transform.GetLocalPosition().y > -8.15 && transform.GetLocalPosition().y < 35.2 && HitBoxes::GetInstance().getFloor() == 0))) {
 		playerState = 3;
+		deathTimer = 500;
 	}
 }
 
@@ -664,4 +723,93 @@ void BackgroundMusic::OnLoad(entt::entity entity)
 void BackgroundMusic::Update(entt::entity entity)
 {
 	AudioEngine::GetInstance().SetEventPosition("Music", cameraPos);
+}
+
+void note::Update(entt::entity entity)
+{
+	auto& transform = CurrentRegistry().get<florp::game::Transform>(entity);
+	transform.SetPosition(lookAtPoint * 1.1f);
+	transform.LookAt(cameraPos, glm::vec3(0, 0, 1));
+}
+
+void keymebaby::Update(entt::entity entity)
+{
+	if (wasPushed == false) {
+		keys.push_back(0);
+		wasPushed = true;
+	}
+	auto& transform = CurrentRegistry().get<florp::game::Transform>(entity);
+	if (interacted == 2) {
+		;
+	}
+	else if (GetKeyState(0x45) & 0x8000 && interacted == 0) {
+		if (HitBoxes::GetInstance().getFloor() == floorObjectIsOn) {
+			if (interactionIsPossible(cameraPos, transform.GetLocalPosition())) {
+				interacted = 1;
+			}
+		}
+	}
+	else if (interacted == 1) {
+		transform.SetPosition(glm::vec3(100000000, 1000000, 1000000));
+		interacted = 2;
+		keys[keyID] = 1;
+	}
+}
+
+void lockThoseDoorsBaby::Update(entt::entity entity)
+{
+	auto& transform = CurrentRegistry().get<florp::game::Transform>(entity);
+	glm::tquat temp = glm::mat4(1.0f);
+	temp = transform.GetLocalTransform();
+
+
+	if (interacted == 2) {
+		;
+	}
+	else if (GetKeyState(0x45) & 0x8000 && interacted == 0 && keys[doorID] == 1) {
+		if (HitBoxes::GetInstance().getFloor() == floorObjectIsOn) { //Update this if it's working
+			if (interactionIsPossible(cameraPos, transform.GetLocalPosition())) {
+				interacted = 1;
+			}
+		}
+	}
+	else if (interacted == 1) {
+		if (transform.GetLocalTransform()[0].y >= 0.99) { //Is interaction is done
+			interacted = 2;
+			HitBoxes::GetInstance().updateHitBox(dooridinthetotallist, transform.GetLocalTransform());
+		}
+		else {
+			transform.Rotate(glm::vec3(0, 0, 0.3));
+		}
+	}
+}
+
+void lockedDoorManDoors::Update(entt::entity entity)
+{
+	auto& transform = CurrentRegistry().get<florp::game::Transform>(entity);
+	glm::tquat temp = glm::mat4(1.0f);
+	temp = transform.GetLocalTransform();
+
+
+	if (interacted == 2) {
+		;
+	}
+	else if (GetKeyState(0x45) & 0x8000 && interacted == 0) {
+		if (HitBoxes::GetInstance().getFloor() == floorCurrent) { //Update this if it's working
+			if (interactionIsPossible(cameraPos, transform.GetLocalPosition())) {
+				if (keys[doorID] == 1) {
+					interacted = 1;
+				}
+			}
+		}
+	}
+	else if (interacted == 1) {
+		if (transform.GetLocalTransform()[0].y >= 0.99) { //Is interaction is done
+			interacted = 2;
+			HitBoxes::GetInstance().updateHitBox(idOfDoor, transform.GetLocalTransform());
+		}
+		else {
+			transform.Rotate(glm::vec3(0, 0, 0.3));
+		}
+	}
 }

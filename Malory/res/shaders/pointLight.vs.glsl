@@ -17,5 +17,4 @@ int main(){
 	vec3 norm = normalize(inNormal);
 	outNormal = (norm / 2.0) + vec3(0.5);
 
-
 }
