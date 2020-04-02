@@ -1,16 +1,20 @@
-// Code edited from: https://codyclaborn.me/tutorials/making-a-basic-fmod-audio-engine-in-c/
-
 #include "AudioEngine.h"
+
+//////// FMOD Implementation ////////
+
+Implementation* implementation = nullptr;
 
 Implementation::Implementation()
 {
 	mpStudioSystem = NULL;
 	AudioEngine::ErrorCheck(FMOD::Studio::System::create(&mpStudioSystem));
-	AudioEngine::ErrorCheck(mpStudioSystem->initialize(32, FMOD_STUDIO_INIT_LIVEUPDATE, FMOD_INIT_PROFILE_ENABLE, NULL));
+	AudioEngine::ErrorCheck(mpStudioSystem->initialize(32, FMOD_STUDIO_INIT_NORMAL, FMOD_INIT_3D_RIGHTHANDED, NULL));
 
 	mpSystem = NULL;
 	AudioEngine::ErrorCheck(mpStudioSystem->getCoreSystem(&mpSystem));
-} 
+
+	mnNextChannelId = 0;
+}
 
 Implementation::~Implementation()
 {
@@ -39,11 +43,52 @@ void Implementation::Update()
 	AudioEngine::ErrorCheck(mpStudioSystem->update());
 }
 
-Implementation* implementation = nullptr;
+//////// Logistics ////////
 
 void AudioEngine::Init()
 {
 	implementation = new Implementation;
+	LoadGUIDs();
+}
+
+void AudioEngine::LoadGUIDs()
+{
+	// Open the file
+	std::ifstream guidFile;
+	guidFile.open("GUIDs.txt");
+
+	// Loop for each line
+	if (guidFile.is_open())
+	{
+		std::string currentLine;
+		std::string guid;
+		std::string key;
+
+		while (!guidFile.eof())
+		{
+			// Get Line
+			getline(guidFile, currentLine); // Format: "{bb98735b-7f42-4b9a-a178-7fe3140e7ea5} event:/Glide"
+
+			// Parse GUID
+			guid = currentLine.substr(0, currentLine.find(" "));
+
+			// Parse Key
+			key = currentLine.substr(currentLine.find(" ") + 1, currentLine.length() - guid.length() - 1);
+
+			// Add to bank
+			implementation->mGUIDs[key] = guid;
+		}
+		guidFile.close();
+	}
+	else
+	{
+		std::cout << "Audio Engine: GUID.txt not found" << std::endl;
+	}
+}
+
+void AudioEngine::Shutdown()
+{
+	delete implementation;
 }
 
 void AudioEngine::Update()
@@ -51,100 +96,29 @@ void AudioEngine::Update()
 	implementation->Update();
 }
 
-void AudioEngine::LoadSound(const std::string& strSoundName, bool b3d, bool bLooping, bool bStream)
+int AudioEngine::ErrorCheck(FMOD_RESULT result)
 {
-	auto tFoundIt = implementation->mSounds.find(strSoundName);
-	if (tFoundIt != implementation->mSounds.end())
-		return;
-
-	FMOD_MODE eMode = FMOD_DEFAULT;
-	eMode |= b3d ? FMOD_3D : FMOD_2D;
-	eMode |= bLooping ? FMOD_LOOP_NORMAL : FMOD_LOOP_OFF;
-	eMode |= bStream ? FMOD_CREATESTREAM : FMOD_CREATECOMPRESSEDSAMPLE;
-
-	FMOD::Sound* pSound = nullptr;
-
-	AudioEngine::ErrorCheck(implementation->mpSystem->createSound(strSoundName.c_str(), eMode, nullptr, &pSound));
-	if (pSound)
+	if (result != FMOD_OK)
 	{
-		implementation->mSounds[strSoundName] = pSound;
-	}
-}
-
-void AudioEngine::UnloadSound(const std::string& strSoundName)
-{
-	auto tFoundIt = implementation->mSounds.find(strSoundName);
-	if (tFoundIt == implementation->mSounds.end())
-		return;
-
-	AudioEngine::ErrorCheck(tFoundIt->second->release());
-	implementation->mSounds.erase(tFoundIt);
-}
-
-int AudioEngine::PlaySound(const std::string& strSoundName, const glm::vec3& vPosition, float fVolumedB)
-{
-	int nChannelId = implementation->mnNextChannelId++;
-	auto tFoundIt = implementation->mSounds.find(strSoundName);
-	if (tFoundIt == implementation->mSounds.end())
-	{
-		// If the sound cannot be found try to load it
-		LoadSound(strSoundName);
-		tFoundIt = implementation->mSounds.find(strSoundName);
-		if (tFoundIt == implementation->mSounds.end())
-		{
-			return nChannelId;
-		}
+		std::cout << "FMOD ERROR: " << FMOD_ErrorString(result) << std::endl;
+		return 1;
 	}
 
-	FMOD::Channel* pChannel = nullptr;
-	AudioEngine::ErrorCheck(implementation->mpSystem->playSound(tFoundIt->second, nullptr, true, &pChannel));
-	if (pChannel)
-	{
-		FMOD_MODE currMode;
-		tFoundIt->second->getMode(&currMode);
-		if (currMode & FMOD_3D)
-		{
-			FMOD_VECTOR position = VectorToFmod(vPosition);
-			AudioEngine::ErrorCheck(pChannel->set3DAttributes(&position, nullptr));
-		}
-
-		AudioEngine::ErrorCheck(pChannel->setVolume(dbToVolume(fVolumedB)));
-		AudioEngine::ErrorCheck(pChannel->setPaused(false));
-		implementation->mChannels[nChannelId] = pChannel;
-
-	}
-
-	return nChannelId;
-
+	// All good
+	return 0;
 }
 
-void AudioEngine::SetChannel3dPosition(int nChannelId, const glm::vec3& vPosition)
+
+//////// Banks ////////
+
+void AudioEngine::LoadBank(const std::string& strBankName)
 {
-	auto tFoundIt = implementation->mChannels.find(nChannelId);
-	if (tFoundIt == implementation->mChannels.end())
-		return;
-
-	FMOD_VECTOR position = VectorToFmod(vPosition);
-	AudioEngine::ErrorCheck(tFoundIt->second->set3DAttributes(&position, NULL));
-}
-
-void AudioEngine::SetChannelVolume(int nChannelId, float fVolumedB)
-{
-	auto tFoundIt = implementation->mChannels.find(nChannelId);
-	if (tFoundIt == implementation->mChannels.end())
-		return;
-
-	AudioEngine::ErrorCheck(tFoundIt->second->setVolume(dbToVolume(fVolumedB)));
-}
-
-void AudioEngine::LoadBank(const std::string& strBankName, FMOD_STUDIO_LOAD_BANK_FLAGS flags)
-{	
 	auto tFoundIt = implementation->mBanks.find(strBankName);
 	if (tFoundIt != implementation->mBanks.end())
 		return;
 
 	FMOD::Studio::Bank* pBank;
-	AudioEngine::ErrorCheck(implementation->mpStudioSystem->loadBankFile((strBankName + ".bank").c_str(), flags, &pBank));
+	AudioEngine::ErrorCheck(implementation->mpStudioSystem->loadBankFile(("Desktop/" + strBankName + ".bank").c_str(), FMOD_STUDIO_LOAD_BANK_NORMAL, &pBank));
 
 	if (pBank)
 	{
@@ -152,19 +126,38 @@ void AudioEngine::LoadBank(const std::string& strBankName, FMOD_STUDIO_LOAD_BANK
 	}
 }
 
-void AudioEngine::LoadEvent(const std::string& strEventName, const std::string& strEventNumber)
+void AudioEngine::UnloadAllBanks()
 {
-	auto tFoundit = implementation->mEvents.find(strEventName);
-	if (tFoundit != implementation->mEvents.end())
+	AudioEngine::ErrorCheck(implementation->mpStudioSystem->unloadAll());
+}
+
+
+//////// Events ////////
+
+void AudioEngine::LoadEvent(const std::string& strEventName)
+{
+	// Return if the event is already loaded
+	auto tFoundEvent = implementation->mEvents.find(strEventName);
+	if (tFoundEvent != implementation->mEvents.end())
 		return;
 
+	// Return if the GUID does not exist
+	auto tFoundGUID = implementation->mGUIDs.find("event:/" + strEventName);
+	if (tFoundGUID == implementation->mGUIDs.end())
+		return;
+
+	// Get GUID
+	std::string newEventGUID = implementation->mGUIDs["event:/" + strEventName];
+
+	// Load event using the GUID
 	FMOD::Studio::EventDescription* pEventDescription = NULL;
-	AudioEngine::ErrorCheck(implementation->mpStudioSystem->getEvent(strEventNumber.c_str(), &pEventDescription));
+	AudioEngine::ErrorCheck(implementation->mpStudioSystem->getEvent(newEventGUID.c_str(), &pEventDescription));
 	if (pEventDescription)
 	{
+		// Create event instance
 		FMOD::Studio::EventInstance* pEventInstance = NULL;
 		AudioEngine::ErrorCheck(pEventDescription->createInstance(&pEventInstance));
-		if (pEventInstance) 
+		if (pEventInstance)
 		{
 			implementation->mEvents[strEventName] = pEventInstance;
 		}
@@ -181,18 +174,39 @@ void AudioEngine::PlayEvent(const std::string& strEventName)
 	tFoundIt->second->start();
 }
 
-void AudioEngine::StopEvent(const std::string& strEventName, bool bImmediate)
+void AudioEngine::StopEvent(const std::string& strEventName, bool bFadeOut)
 {
 	auto tFoundIt = implementation->mEvents.find(strEventName);
 	if (tFoundIt == implementation->mEvents.end())
 		return;
 
 	FMOD_STUDIO_STOP_MODE eMode;
-	eMode = bImmediate ? FMOD_STUDIO_STOP_IMMEDIATE : FMOD_STUDIO_STOP_ALLOWFADEOUT;
+	eMode = bFadeOut ? FMOD_STUDIO_STOP_ALLOWFADEOUT : FMOD_STUDIO_STOP_IMMEDIATE;
 	AudioEngine::ErrorCheck(tFoundIt->second->stop(eMode));
 }
 
-bool AudioEngine::isEventPlaying(const std::string& strEventName)
+void AudioEngine::SetEventPosition(const std::string& strEventName, const glm::vec3 vPosition)
+{
+	// Get instance from map
+	auto tFoundIt = implementation->mEvents.find(strEventName);
+	if (tFoundIt == implementation->mEvents.end())
+		return;
+
+	// Temp Object
+	FMOD_3D_ATTRIBUTES newAttributes;
+
+	// Get attribute from event
+	AudioEngine::ErrorCheck(tFoundIt->second->get3DAttributes(&newAttributes));
+
+	// Set the new position
+	newAttributes.position = VectorToFmod(vPosition);
+
+	// Set new attribute on event
+	AudioEngine::ErrorCheck(tFoundIt->second->set3DAttributes(&newAttributes));
+	
+}
+
+bool AudioEngine::isEventPlaying(const std::string& strEventName) const
 {
 	auto tFoundIt = implementation->mEvents.find(strEventName);
 	if (tFoundIt == implementation->mEvents.end())
@@ -206,6 +220,8 @@ bool AudioEngine::isEventPlaying(const std::string& strEventName)
 
 	return false;
 }
+
+//////// FMOD Parameters ////////
 
 void AudioEngine::GetEventParameter(const std::string& strEventName, const std::string& strParameterName, float* parameter)
 {
@@ -221,49 +237,50 @@ void AudioEngine::SetEventParameter(const std::string& strEventName, const std::
 	auto tFoundIt = implementation->mEvents.find(strEventName);
 	if (tFoundIt == implementation->mEvents.end())
 		return;
-	
+
 	AudioEngine::ErrorCheck(tFoundIt->second->setParameterByName(strParameterName.c_str(), fValue));
 }
 
-void AudioEngine::SetEventPosition(const std::string& strEventName, const glm::vec3 vPosition)
+void AudioEngine::SetGlobalParameter(const std::string& strParameterName, float fValue)
 {
-	// Get instance for map
-	auto tFoundIt = implementation->mEvents.find(strEventName);
-	if (tFoundIt == implementation->mEvents.end())
-		return;
+	AudioEngine::ErrorCheck(implementation->mpStudioSystem->setParameterByName(strParameterName.c_str(), fValue));
 
-	// Temp Object
-	FMOD_3D_ATTRIBUTES newAttributes;
-
-	// Get attribute from event
-	AudioEngine::ErrorCheck(tFoundIt->second->get3DAttributes(&newAttributes));
-
-	// Set the new position
-	newAttributes.position = VectorToFmod(vPosition);
-	
-	// Set new attribute on event
-	AudioEngine::ErrorCheck(tFoundIt->second->set3DAttributes(&newAttributes));
 }
 
-void AudioEngine::SetEventVelocity(const std::string& strEventName, const glm::vec3 vVelocity)
-{
-	// Get instance for map
-	auto tFoundIt = implementation->mEvents.find(strEventName);
-	if (tFoundIt == implementation->mEvents.end())
-		return;
 
+//////// Listeners ////////
+
+void AudioEngine::SetListenerPosition(const glm::vec3& vPosition)
+{
 	// Temp Object
-	FMOD_3D_ATTRIBUTES newAttributes;
+	FMOD_3D_ATTRIBUTES tempAttributes;
 
 	// Get attribute from event
-	AudioEngine::ErrorCheck(tFoundIt->second->get3DAttributes(&newAttributes));
+	AudioEngine::ErrorCheck(implementation->mpStudioSystem->getListenerAttributes(0, &tempAttributes));
 
 	// Set the new position
-	newAttributes.velocity = VectorToFmod(vVelocity);
+	tempAttributes.position = VectorToFmod(vPosition);
+	AudioEngine::ErrorCheck(implementation->mpStudioSystem->setListenerAttributes(0, &tempAttributes));
 
-	// Set new attribute on event
-	AudioEngine::ErrorCheck(tFoundIt->second->set3DAttributes(&newAttributes));
 }
+
+void AudioEngine::SetListenerOrientation(const glm::vec3& vUp, const glm::vec3& vForward)
+{
+	// Temp Object
+	FMOD_3D_ATTRIBUTES tempAttributes;
+
+	// Get attribute from event
+	AudioEngine::ErrorCheck(implementation->mpStudioSystem->getListenerAttributes(0, &tempAttributes));
+
+	// Set the new position
+	tempAttributes.forward = VectorToFmod(vForward);
+	tempAttributes.up = VectorToFmod(vUp);
+	AudioEngine::ErrorCheck(implementation->mpStudioSystem->setListenerAttributes(0, &tempAttributes));
+
+}
+
+
+//////// Helpers /////////
 
 FMOD_VECTOR AudioEngine::VectorToFmod(const glm::vec3& vPosition)
 {
@@ -283,26 +300,3 @@ float AudioEngine::VolumeTodb(float volume)
 {
 	return 20.0f * log10f(volume);
 }
-
-void AudioEngine::SetGlobalParameter(const std::string& strParameterName, float fValue)
-{
-	AudioEngine::ErrorCheck(implementation->mpStudioSystem->setParameterByName(strParameterName.c_str(), fValue));
-}
-
-int AudioEngine::ErrorCheck(FMOD_RESULT result)
-{
-	if (result != FMOD_OK)
-	{
-		std::cout << "FMOD ERROR: " << FMOD_ErrorString(result) << std::endl;
-		return 1;
-	}
-
-	// All good
-	return 0;
-}
-
-void AudioEngine::Shutdown()
-{
-	delete implementation;
-}
-

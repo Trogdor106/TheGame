@@ -4,6 +4,8 @@
 #include "HitBoxes.h"
 #include "ShadowLight.h"
 #include "PointLightComponent.h"
+#include "AudioEngine.h"
+
 
 class lantern : public florp::game::IBehaviour {
 public:
@@ -68,12 +70,13 @@ private:
 
 class doorManDoors : public florp::game::IBehaviour {
 public:
-	doorManDoors(const glm::vec3& position, float floor) : IBehaviour(), myPosition(position), myYawPitch(glm::vec2(0.0f)), interacted(0), floorCurrent(floor) {};
+	doorManDoors(const glm::vec3& position, float floor, int id) : IBehaviour(), myPosition(position), myYawPitch(glm::vec2(0.0f)), interacted(0), floorCurrent(floor), idOfDoor(id) {};
 	virtual ~doorManDoors() = default;
 
 	virtual void Update(entt::entity entity) override;
 
 private:
+	int idOfDoor;
 	int floorCurrent; //Despite the name this actually represents the floor the obeject is on
 	int interacted;
 	glm::vec3 myPosition;
@@ -179,3 +182,35 @@ private:
 									//			2			
 
 };
+
+//class ListenerBehaviour : public florp::game::IBehaviour {
+//public:
+//	ListenerBehaviour() : IBehaviour() {};
+//	virtual ~ListenerBehaviour() = default;
+//
+//	virtual void OnLoad(entt::entity entity) override {
+//		auto& transform = CurrentRegistry().get<florp::game::Transform>(entity);
+//
+//	}
+//
+//	virtual void Update(entt::entity entity) override;
+//
+//};
+
+class Listener : public florp::game::IBehaviour {
+public:
+	Listener() : IBehaviour() {};
+	virtual ~Listener() = default;
+	virtual void Update(entt::entity) override;
+	virtual void OnLoad(entt::entity) override;
+};
+
+class BackgroundMusic : public florp::game::IBehaviour {
+public:
+	BackgroundMusic() : IBehaviour() {};
+	virtual ~BackgroundMusic() = default;
+	virtual void OnLoad(entt::entity entity) override;
+	virtual void Update(entt::entity entity) override;
+
+};
+

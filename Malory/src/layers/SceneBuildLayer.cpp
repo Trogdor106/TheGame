@@ -262,7 +262,7 @@ void SceneBuilder::Initialize()
 		HitBoxes::GetInstance().updateHitBox(i, genTransform[i]);
 		
 		if (meshToUse[i] == 7 || meshToUse[i] == 10) { //Normal door (change the number if it's not 3 that you want)
-			scene->AddBehaviour<doorManDoors>(entity, t.GetWorldPosition(), floorToUse[i]);;// scene->AddBehaviour<doorOpening>(entity, glm::vec3(genTransform[i][3][0], genTransform[i][3][1], genTransform[i][3][2]), floorToUse[i]);
+			scene->AddBehaviour<doorManDoors>(entity, t.GetWorldPosition(), floorToUse[i], i);;// scene->AddBehaviour<doorOpening>(entity, glm::vec3(genTransform[i][3][0], genTransform[i][3][1], genTransform[i][3][2]), floorToUse[i]);
 		}
 		else if (meshToUse[i] == 6) { //Locked door (change the number if it's not 6 that you want(hint: it's not))
 			scene->AddBehaviour<lockedDoor>(entity, floorToUse[i], lockedDoorID);
@@ -408,6 +408,8 @@ void SceneBuilder::Initialize()
 		// We'll add our control behaviour so that we can fly the camera around
 		scene->AddBehaviour<ControlBehaviour>(camera, glm::vec3(1.0f));
 		scene->AddBehaviour<death>(camera);
+		scene->AddBehaviour<Listener>(camera);
+		scene->AddBehaviour<BackgroundMusic>(camera);
 		//scene->AddBehaviour<Car>(camera, glm::vec3(0.5f));
 
 		// We'll attach a cube to the camera so that it casts shadows

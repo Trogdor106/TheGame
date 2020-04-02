@@ -1,7 +1,4 @@
-// Code edited from: https://codyclaborn.me/tutorials/making-a-basic-fmod-audio-engine-in-c/
-
-#ifndef _AUDIO_ENGINE_H_
-#define _AUDIO_ENGINE_H_
+#pragma once
 
 // FMOD
 #include "fmod_studio.hpp"
@@ -14,16 +11,15 @@
 #include <vector>
 #include <math.h>
 #include <iostream>
+#include <fstream>
 
 #include <glm/glm.hpp>
 
-//using namespace std;
-
 struct Implementation
 {
-	/* 
-	- Initializes and shuts down FMOD 
-	- Holds instances of of both the Studio and low-level system objects
+	/*
+	- Initializes and shuts down FMOD
+	- Holds instances of of both the Studio and core system objects
 	- Also holds a map of all the sounds and events we've played
 	*/
 
@@ -32,53 +28,81 @@ struct Implementation
 
 	void Update();
 
+	// System
 	FMOD::Studio::System* mpStudioSystem;
 	FMOD::System* mpSystem;
 
-	int mnNextChannelId;
+	// GUIDs
+	typedef std::map<std::string, std::string> GUIDMap;
 
-	typedef std::map<std::string, FMOD::Sound*> SoundMap;
-	typedef std::map<int, FMOD::Channel*> ChannelMap;
-	typedef std::map<std::string, FMOD::Studio::EventInstance*> EventMap;
+	// Banks
 	typedef std::map<std::string, FMOD::Studio::Bank*> BankMap;
 
+	// Events
+	typedef std::map<std::string, FMOD::Studio::EventInstance*> EventMap;
+
+
+	// Channels
+	int mnNextChannelId;
+	typedef std::map<int, FMOD::Channel*> ChannelMap;
+
+	// Sounds
+	typedef std::map<std::string, FMOD::Sound*> SoundMap;
+
+
+	GUIDMap mGUIDs;
 	BankMap mBanks;
 	EventMap mEvents;
-	SoundMap mSounds;
 	ChannelMap mChannels;
+	SoundMap mSounds;
 
 };
 
-class AudioEngine 
+class AudioEngine
 {
 public:
-	static void Init();
-	static void Update();
-	static void Shutdown();
+
+	//// TODO: Singleton Stuff Here
+	static AudioEngine& GetInstance() {
+		static AudioEngine* singleton = new AudioEngine();
+		return *singleton;
+	}
+
+
+	// Logistics
+	void Init();
+	void LoadGUIDs(); // Called by init
+	void Update();
+	void Shutdown();
 	static int ErrorCheck(FMOD_RESULT result);
 
-	static void LoadBank(const std::string& strBankName, FMOD_STUDIO_LOAD_BANK_FLAGS flags);
-	static void LoadEvent(const std::string& strEventName, const std::string& strEventNumber);
-	static void LoadSound(const std::string& strSoundName, bool b3d = true, bool bLooping = false, bool bStream = false);
-	static void UnloadSound(const std::string& strSoundName);
-	//void Set3dListenerAndOrientation(const Vector3& vPos = Vector3{ 0, 0, 0 }, float  fVolumedB = 0.0f);
-	static int PlaySound(const std::string& strSoundName, const glm::vec3& vPos = glm::vec3{ 0, 0, 0 }, float fVolumedB = 0.0f);
-	static void PlayEvent(const std::string& strEventName);
-	//void StopChannel(int nChannelId);
-	static void StopEvent(const std::string& strEventName, bool bImmediate = false);
-	static void GetEventParameter(const std::string& strEventName, const std::string& strEventParameter, float* parameter);
-	static void SetEventParameter(const std::string& strEventName, const std::string& strParameterName, float fValue);
-	static void SetEventPosition(const std::string& strEventName, const glm::vec3 vPosition);
-	static void SetEventVelocity(const std::string& strEventName, const glm::vec3 vVelocity);
-	//void StopAllChannels();
-	static void SetChannel3dPosition(int nChannelId, const glm::vec3& vPosition);
-	static void SetChannelVolume(int nChannelId, float fVolumedb); 
-	//bool isPlaying(int nChannelId) const;
-	static bool isEventPlaying(const std::string& strEventName);
-	static float dbToVolume(float db);
-	static float VolumeTodb(float volume);
-	static FMOD_VECTOR VectorToFmod(const glm::vec3& vPosition);
-	static void SetGlobalParameter(const std::string& strParameterName, float fValue);
-};
+	// Banks
+	void LoadBank(const std::string& strBankName);
+	void UnloadAllBanks();
 
-#endif
+	// Events
+	void LoadEvent(const std::string& strEventName);
+	void PlayEvent(const std::string& strEventName);
+	void StopEvent(const std::string& strEventName, bool bImmediate = false);
+
+	void SetEventPosition(const std::string& strEventName, const glm::vec3 vPosition);
+	bool isEventPlaying(const std::string& strEventName) const;
+
+	// Parameters
+	void GetEventParameter(const std::string& strEventName, const std::string& strEventParameter, float* parameter);
+	void SetEventParameter(const std::string& strEventName, const std::string& strParameterName, float fValue);
+	void SetGlobalParameter(const std::string& strParameterName, float fValue);
+
+	// Listeners
+	void SetListenerPosition(const glm::vec3& vPosition);
+	void SetListenerOrientation(const glm::vec3& vUP, const glm::vec3& vForward);
+
+	// Helpers
+	float dbToVolume(float db);
+	float VolumeTodb(float volume);
+	FMOD_VECTOR VectorToFmod(const glm::vec3& vPosition);
+
+private:
+	//// TODO: Constructor here
+	AudioEngine() {};
+};

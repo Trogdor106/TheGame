@@ -3,19 +3,28 @@
 
 void AudioLayer::Initialize()
 {
-	AudioEngine::Init();
-	AudioEngine::LoadBank("banks/Master", FMOD_STUDIO_LOAD_BANK_NORMAL);
-	AudioEngine::LoadEvent("Music", "{f51c7b6b-6861-4f9f-a6df-c2195fd68c8a}");
-	AudioEngine::PlayEvent("Music");
-	AudioEngine::SetEventParameter("Music", "Volume", 0.5f);
+	// TODO: Init the sound engine and load the master bank
+	AudioEngine& audioEngine = AudioEngine::GetInstance();
+
+	audioEngine.Init();
+	audioEngine.LoadBank("Master");
+
+	audioEngine.LoadEvent("Crash");
+
 }
 
 void AudioLayer::Shutdown()
 {
-	AudioEngine::Shutdown();
+	//TODO: Shutdown AudioEngine
+	AudioEngine::GetInstance().Shutdown();
 }
 
 void AudioLayer::Update()
 {
-	AudioEngine::Update();
+	//TODO: Update AudioEngine
+	
+	
+	AudioEngine::GetInstance().Update();
+
+
 }

@@ -4,7 +4,7 @@
 #include "florp/game/Transform.h"
 #include "florp/game/SceneManager.h"
 #include "florp/app/Timing.h"
-
+#include "layers/AudioLayer.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <GLM/gtx/wrap.hpp>
@@ -36,6 +36,30 @@ glm::vec3 lookAtPoint;
 const float LANTERN_FULL = 2000;
 float lanternFuel = LANTERN_FULL;
 float playerState = 1; //0 is title screen, 1 is normal, 2 is paused, 3 is dead
+std::vector <int> timers;
+std::vector <std::string> names;
+
+void playSound(std::string sound, float duration, glm::vec3 position = { 0,0,0 }) {
+	AudioEngine& audioEngine = AudioEngine::GetInstance();
+	audioEngine.LoadEvent(sound);
+	audioEngine.PlayEvent(sound);
+	audioEngine.SetEventPosition(sound, position);
+	names.push_back(sound);
+	timers.push_back(duration);
+}
+void updateSounds() {
+	AudioEngine& audioEngine = AudioEngine::GetInstance();
+
+	for (int i = 0; i < names.size(); i++) {
+		if (timers[i] == 0) {
+			audioEngine.StopEvent(names[i], true);
+		}
+		else {
+			timers[i]--;
+		}
+	}
+}
+
 
 
 void ControlBehaviour::Update(entt::entity entity) {
@@ -114,6 +138,10 @@ void ControlBehaviour::Update(entt::entity entity) {
 			finalHeadBob = 0;
 			finalHeadBobSide = 0;
 		}
+		
+		//if (finalHeadBob == 0) { //Do your conditions to make a sound
+		//	playSound("Monkey", 30);
+		//}
 
 		lookAtPoint = { transform.GetLocalPosition().x + cos(-angleForX), transform.GetLocalPosition().y + sin(-angleForY), transform.GetLocalPosition().z + tan(angleForZ) };
 		transform.LookAt(lookAtPoint, glm::vec3(0, 0, 1));
@@ -136,6 +164,7 @@ void ControlBehaviour::Update(entt::entity entity) {
 			}
 		}
 	}
+	updateSounds();
 }
 
 void InputBehaviour::Update(entt::entity entity)
@@ -224,6 +253,7 @@ void doorManDoors::Update(entt::entity entity) {
 	else if (interacted == 1) {
 		if (transform.GetLocalTransform()[0].y >= 0.99) { //Is interaction is done
 			interacted = 2;
+			HitBoxes::GetInstance().updateHitBox(idOfDoor, transform.GetLocalTransform());
 		}
 		else {
 			transform.Rotate(glm::vec3(0, 0, 0.3));
@@ -283,7 +313,7 @@ void key::Update(entt::entity entity)
 			}
 		}
 	}
-	else if (interacted = 1) {
+	else if (interacted == 1) {
 		transform.SetPosition(glm::vec3(100000000, 1000000, 1000000));
 		interacted = 0;
 		keys[keyID] = 1;
@@ -310,12 +340,12 @@ void stairs1::Update(entt::entity entity)
 			}
 		}
 	}
-	else if (interacted = 1) { //Do the interaction of going up the stairs
+	else if (interacted == 1) { //Do the interaction of going up the stairs
 		HitBoxes::GetInstance().saveFloor(1);
 		cameraPos = glm::vec3(33.0, -17.0, cameraPos.z + 50);
 		interacted = 2;
 	}
-	else if (interacted = 3) { //Do the interaction of going down the stairs
+	else if (interacted == 3) { //Do the interaction of going down the stairs
 		HitBoxes::GetInstance().saveFloor(0);
 		cameraPos = glm::vec3(3.21, -7.373, cameraPos.z - 50);
 		interacted = 0;
@@ -442,122 +472,126 @@ void aStarAlgorithm::Update(entt::entity entity)
 				endposition = glm::vec3(positionTest.x + 5 * estimatedStepsX, positionTest.y + 5 * estimatedStepsY, positionTest.z);
 			}
 		}
-
-		std::vector <glm::vec3> positionsReached;
-		std::vector <int> toNotUse;
-
-		while (positionTest != endposition) {
-			int square1Value = 999;
-			int square2Value = 999;
-			int square3Value = 999;
-			int square4Value = 999;
-			onStep++;
-			bool wasPositionedReached = false;
-			//check the 4 and see which is closer
-			//add lowest to a table
-			if (!(HitBoxes::GetInstance().isInHitBox(cameraPos, glm::vec3(positionTest.x, positionTest.y + 5, positionTest.z)))) {
-				wasPositionedReached = false;
-				for (int i = 0; i < positionsReached.size(); i++) {
-					if (glm::vec3(positionTest.x, positionTest.y + 5, positionTest.z) == positionsReached[i]) {
-						wasPositionedReached = true;
-						i = positionsReached.size(); //Can exit the loop since we got our answer
-					}
-				}
-
-				if (wasPositionedReached == false) {
-					square1Value = onStep + abs(cameraPos.x - positionTest.x) / 5 + abs(cameraPos.y - (positionTest.y + 5)) / 5;
-				}
-			}
-			if (!(HitBoxes::GetInstance().isInHitBox(cameraPos, glm::vec3(positionTest.x + 5, positionTest.y, positionTest.z)))) {
-				wasPositionedReached = false;
-				for (int i = 0; i < positionsReached.size(); i++) {
-					if (glm::vec3(positionTest.x + 5, positionTest.y, positionTest.z) == positionsReached[i]) {
-						wasPositionedReached = true;
-						i = positionsReached.size(); //Can exit the loop since we got our answer
-					}
-				}
-
-				if (wasPositionedReached == false) {
-					square2Value = onStep + abs(cameraPos.x - (positionTest.x + 5)) / 5 + abs(cameraPos.y - positionTest.y) / 5;
-				}
-			}
-			if (!(HitBoxes::GetInstance().isInHitBox(cameraPos, glm::vec3(positionTest.x, positionTest.y - 5, positionTest.z)))) {
-				wasPositionedReached = false;
-				for (int i = 0; i < positionsReached.size(); i++) {
-					if (glm::vec3(positionTest.x, positionTest.y - 5, positionTest.z) == positionsReached[i]) {
-						wasPositionedReached = true;
-						i = positionsReached.size(); //Can exit the loop since we got our answer
-					}
-				}
-
-				if (wasPositionedReached == false) {
-					square3Value = onStep + abs(cameraPos.x - positionTest.x) / 5 + abs(cameraPos.y - (positionTest.y - 5)) / 5;
-				}
-			}
-			if (!(HitBoxes::GetInstance().isInHitBox(cameraPos, glm::vec3(positionTest.x - 5, positionTest.y, positionTest.z)))) {
-				wasPositionedReached = false;
-				for (int i = 0; i < positionsReached.size(); i++) {
-					if (glm::vec3(positionTest.x - 5, positionTest.y, positionTest.z) == positionsReached[i]) {
-						wasPositionedReached = true;
-						i = positionsReached.size(); //Can exit the loop since we got our answer
-					}
-				}
-
-				if (wasPositionedReached == false) {
-					square4Value = onStep + abs(cameraPos.x - (positionTest.x - 5)) / 5 + abs(cameraPos.y - positionTest.y) / 5;
-				}
-			}
-
-			if (square1Value == 999 && square2Value == 999 && square3Value == 999 && square4Value == 999) {
-				
-				if (directions[onStep - 1] == 0) {
-					positionTest = glm::vec3(positionTest.x, positionTest.y - 5, positionTest.z);
-				}
-				else if (directions[onStep - 1] == 1) {
-					positionTest = glm::vec3(positionTest.x - 5, positionTest.y, positionTest.z);
-				}
-				else if (directions[onStep - 1] == 2) {
-					positionTest = glm::vec3(positionTest.x, positionTest.y + 5, positionTest.z);
-				}
-				else if (directions[onStep - 1] == 3) {
-					positionTest = glm::vec3(positionTest.x + 5, positionTest.y, positionTest.z);
-				}
-				onStep--;
-				std::vector <glm::vec3> temp;
-				std::vector <int> temp2;
-				for (int i = 0; i < positionsReached.size() - 1; i++) {
-					temp.push_back(positionsReached[i]);
-					temp2.push_back(directions[i]);
-				}
-				positionsReached.clear();
-				positionsReached = temp;
-				directions.clear();
-				directions = temp2;
-			}
-			else {
-				directions.push_back(square1Value < square2Value ? square1Value < square3Value ? square1Value < square4Value ? 0 : 3 : square3Value < square4Value ?
-					2 : 3 : square2Value < square3Value ? square2Value < square4Value ? 1 : 3 : square3Value < square4Value ?
-					2 : 3);
-				if (directions[onStep - 1] == 0) {
-					positionTest = glm::vec3(positionTest.x, positionTest.y + 5, positionTest.z);
-				}
-				else if(directions[onStep - 1] == 1) {
-					positionTest = glm::vec3(positionTest.x + 5, positionTest.y, positionTest.z);
-				}
-				else if (directions[onStep - 1] == 2) {
-					positionTest = glm::vec3(positionTest.x, positionTest.y - 5, positionTest.z);
-				}
-				else if (directions[onStep - 1] == 3) {
-					positionTest = glm::vec3(positionTest.x - 5, positionTest.y, positionTest.z);
-				}
-				positionsReached.push_back(positionTest);
-			}
-			
-
+		
+		if (positionTest == endposition || HitBoxes::GetInstance().isInHitBox(endposition, endposition)) {
+			stateOfAlgorithm = 0;
 		}
+		else {
+			std::vector <glm::vec3> positionsReached;
+			std::vector <int> toNotUse;
 
-		stateOfAlgorithm = 2;
+			while (positionTest != endposition) {
+				int square1Value = 999;
+				int square2Value = 999;
+				int square3Value = 999;
+				int square4Value = 999;
+				onStep++;
+				bool wasPositionedReached = false;
+				//check the 4 and see which is closer
+				//add lowest to a table
+				if (!(HitBoxes::GetInstance().isInHitBox(cameraPos, glm::vec3(positionTest.x, positionTest.y + 5, positionTest.z)))) {
+					wasPositionedReached = false;
+					for (int i = 0; i < positionsReached.size(); i++) {
+						if (glm::vec3(positionTest.x, positionTest.y + 5, positionTest.z) == positionsReached[i]) {
+							wasPositionedReached = true;
+							i = positionsReached.size(); //Can exit the loop since we got our answer
+						}
+					}
 
+					if (wasPositionedReached == false) {
+						square1Value = onStep + abs(cameraPos.x - positionTest.x) / 5 + abs(cameraPos.y - (positionTest.y + 5)) / 5;
+					}
+				}
+				if (!(HitBoxes::GetInstance().isInHitBox(cameraPos, glm::vec3(positionTest.x + 5, positionTest.y, positionTest.z)))) {
+					wasPositionedReached = false;
+					for (int i = 0; i < positionsReached.size(); i++) {
+						if (glm::vec3(positionTest.x + 5, positionTest.y, positionTest.z) == positionsReached[i]) {
+							wasPositionedReached = true;
+							i = positionsReached.size(); //Can exit the loop since we got our answer
+						}
+					}
+
+					if (wasPositionedReached == false) {
+						square2Value = onStep + abs(cameraPos.x - (positionTest.x + 5)) / 5 + abs(cameraPos.y - positionTest.y) / 5;
+					}
+				}
+				if (!(HitBoxes::GetInstance().isInHitBox(cameraPos, glm::vec3(positionTest.x, positionTest.y - 5, positionTest.z)))) {
+					wasPositionedReached = false;
+					for (int i = 0; i < positionsReached.size(); i++) {
+						if (glm::vec3(positionTest.x, positionTest.y - 5, positionTest.z) == positionsReached[i]) {
+							wasPositionedReached = true;
+							i = positionsReached.size(); //Can exit the loop since we got our answer
+						}
+					}
+
+					if (wasPositionedReached == false) {
+						square3Value = onStep + abs(cameraPos.x - positionTest.x) / 5 + abs(cameraPos.y - (positionTest.y - 5)) / 5;
+					}
+				}
+				if (!(HitBoxes::GetInstance().isInHitBox(cameraPos, glm::vec3(positionTest.x - 5, positionTest.y, positionTest.z)))) {
+					wasPositionedReached = false;
+					for (int i = 0; i < positionsReached.size(); i++) {
+						if (glm::vec3(positionTest.x - 5, positionTest.y, positionTest.z) == positionsReached[i]) {
+							wasPositionedReached = true;
+							i = positionsReached.size(); //Can exit the loop since we got our answer
+						}
+					}
+
+					if (wasPositionedReached == false) {
+						square4Value = onStep + abs(cameraPos.x - (positionTest.x - 5)) / 5 + abs(cameraPos.y - positionTest.y) / 5;
+					}
+				}
+
+				if (square1Value == 999 && square2Value == 999 && square3Value == 999 && square4Value == 999) {
+
+					if (directions[onStep - 1] == 0) {
+						positionTest = glm::vec3(positionTest.x, positionTest.y - 5, positionTest.z);
+					}
+					else if (directions[onStep - 1] == 1) {
+						positionTest = glm::vec3(positionTest.x - 5, positionTest.y, positionTest.z);
+					}
+					else if (directions[onStep - 1] == 2) {
+						positionTest = glm::vec3(positionTest.x, positionTest.y + 5, positionTest.z);
+					}
+					else if (directions[onStep - 1] == 3) {
+						positionTest = glm::vec3(positionTest.x + 5, positionTest.y, positionTest.z);
+					}
+					onStep--;
+					std::vector <glm::vec3> temp;
+					std::vector <int> temp2;
+					for (int i = 0; i < positionsReached.size() - 1; i++) {
+						temp.push_back(positionsReached[i]);
+						temp2.push_back(directions[i]);
+					}
+					positionsReached.clear();
+					positionsReached = temp;
+					directions.clear();
+					directions = temp2;
+				}
+				else {
+					directions.push_back(square1Value < square2Value ? square1Value < square3Value ? square1Value < square4Value ? 0 : 3 : square3Value < square4Value ?
+						2 : 3 : square2Value < square3Value ? square2Value < square4Value ? 1 : 3 : square3Value < square4Value ?
+						2 : 3);
+					if (directions[onStep - 1] == 0) {
+						positionTest = glm::vec3(positionTest.x, positionTest.y + 5, positionTest.z);
+					}
+					else if (directions[onStep - 1] == 1) {
+						positionTest = glm::vec3(positionTest.x + 5, positionTest.y, positionTest.z);
+					}
+					else if (directions[onStep - 1] == 2) {
+						positionTest = glm::vec3(positionTest.x, positionTest.y - 5, positionTest.z);
+					}
+					else if (directions[onStep - 1] == 3) {
+						positionTest = glm::vec3(positionTest.x - 5, positionTest.y, positionTest.z);
+					}
+					positionsReached.push_back(positionTest);
+				}
+
+
+			}
+
+			stateOfAlgorithm = 2;
+		}
 	}
 	else if (stateOfAlgorithm == 2) {
 		if (!(delay == 0)) {
@@ -592,4 +626,42 @@ void aStarAlgorithm::Update(entt::entity entity)
 			onStep = 0;
 		}
 	}
+}
+
+
+
+
+void Listener::Update(entt::entity entity)
+{
+	using namespace florp::app;
+	auto& transform = CurrentRegistry().get<florp::game::Transform>(entity);
+
+	AudioEngine& audioEngine = AudioEngine::GetInstance();
+
+
+	// Set listener position
+	audioEngine.SetListenerPosition(transform.GetLocalPosition());
+
+
+	// Set listener orientation
+
+	audioEngine.SetListenerOrientation(transform.GetUp(), transform.GetForward());
+
+}
+
+void Listener::OnLoad(entt::entity entity)
+{
+	auto& transform = CurrentRegistry().get<florp::game::Transform>(entity);
+}
+
+void BackgroundMusic::OnLoad(entt::entity entity)
+{
+	AudioEngine& audioEngine = AudioEngine::GetInstance();
+	audioEngine.LoadEvent("Music");
+	audioEngine.PlayEvent("Music");
+}
+
+void BackgroundMusic::Update(entt::entity entity)
+{
+	AudioEngine::GetInstance().SetEventPosition("Music", cameraPos);
 }
