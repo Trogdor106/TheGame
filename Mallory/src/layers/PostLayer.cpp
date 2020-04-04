@@ -51,7 +51,7 @@ void PostLayer::Initialize() {
 		auto highlight = __CreatePass("shaders/post/bloom_highlight.fs.glsl");
 		highlight->Name = "Bloom Highlight";
 		highlight->Shader->SetUniform("a_BloomThreshold", 1.0f);
-		highlight->ConfParameters.push_back(__CreateFloatParam("a_BloomThreshold", 1.0f, 0.0f, 2.0f));
+		highlight->ConfParameters.push_back(__CreateFloatParam("a_BloomThreshold", 0.05f, 0.0f, 2.0f));
 		// Add the pass to the post processing stack
 		myPasses.push_back(highlight);
 
@@ -95,24 +95,25 @@ void PostLayer::Initialize() {
 
 	if (true) {
 		// Our additive pass will add the color from the scene, and add the blurred highlight to it
+		auto sepia = __CreatePass("shaders/post/Sepia.fs.glsl");
+		sepia->Inputs.push_back({ nullptr, RenderTargetAttachment::Color0 }); // 1 will hold this frame's depth
+		// Add the pass to the post processing stack
+		myPasses.push_back(sepia);
+
+		// We will toggle motion blur on and off with one key
+		myToggleInputs[florp::app::Key::Three] = { sepia };
+	}
+
+	if (true) {
+		// Our additive pass will add the color from the scene, and add the blurred highlight to it
 		auto colorCorrectionGrey = __CreatePass("shaders/post/ColorCorrectionGrey.fs.glsl");
 		colorCorrectionGrey->Inputs.push_back({ nullptr, RenderTargetAttachment::Color0 }); // 1 will hold this frame's depth
 		// Add the pass to the post processing stack
 		myPasses.push_back(colorCorrectionGrey);
 
 		// We will toggle motion blur on and off with one key
-		myToggleInputs[florp::app::Key::G] = { colorCorrectionGrey };
+		myToggleInputs[florp::app::Key::Two] = { colorCorrectionGrey };
 
-		if (true) {
-			// Our additive pass will add the color from the scene, and add the blurred highlight to it
-			auto sepia = __CreatePass("shaders/post/Sepia.fs.glsl");
-			sepia->Inputs.push_back({ nullptr, RenderTargetAttachment::Color0 }); // 1 will hold this frame's depth
-			// Add the pass to the post processing stack
-			myPasses.push_back(sepia);
-
-			// We will toggle motion blur on and off with one key
-			myToggleInputs[florp::app::Key::Three] = { colorCorrectionGrey };
-		}
 	}
 
 	//Always keep this one true so the screen never dissapears

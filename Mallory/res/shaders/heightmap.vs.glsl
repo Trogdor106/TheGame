@@ -23,9 +23,9 @@ void main() {
 	outWorldPos =  (a_Model * vec4(inPosition, 1)).xyz;
 	vec3 displace = inPosition;
 	
-		displace.y = sin(a_Time) * displace.y;
-		displace.y = max(displace.y, -4.0f);
-		displace.y = min(4.0f, displace.y);
+	displace.y = sin(a_Time) * displace.y;
+	displace.y = max(displace.y, -4.0f);
+	displace.y = min(4.0f, displace.y);
 	
 
 	gl_Position = a_ModelViewProjection * vec4(displace, 1);

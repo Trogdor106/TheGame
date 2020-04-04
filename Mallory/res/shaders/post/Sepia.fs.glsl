@@ -12,11 +12,7 @@ void main() {
 	
 	vec3 grey = color.rgb;
 
-	float average = (grey.r + grey.b + grey.g)/3.0f;
 	
-	grey.r = average;
-	grey.b = average;
-	grey.g = average;
 
 	//outputRed = (inputRed * .393) + (inputGreen *.769) + (inputBlue * .189)
 	//outputGreen = (inputRed * .349) + (inputGreen *.686) + (inputBlue * .168)

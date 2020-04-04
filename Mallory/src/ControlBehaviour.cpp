@@ -35,7 +35,7 @@ float angleForZ = 0;
 glm::vec3 lookAtPoint;
 const float LANTERN_FULL = 2700;
 float lanternFuel = LANTERN_FULL;
-float playerState = 1; //0 is title screen, 1 is normal, 2 is paused, 3 is dead, 4 is success
+float playerState = 0; //0 is title screen, 1 is normal, 2 is paused, 3 is dead, 4 is success
 std::vector <int> timers;
 std::vector <std::string> names;
 glm::vec3 toReturnto;
@@ -98,7 +98,7 @@ void ControlBehaviour::Update(entt::entity entity) {
 	if (playerState == 0) {
 		transform.SetPosition(glm::vec3(0, 20000, 0));
 		transform.LookAt(glm::vec3(0, 0, 0), glm::vec3(0, 0, 1));
-		static int timerForTitle = 50;
+		static int timerForTitle = 300;
 		timerForTitle--;
 		if (timerForTitle == 0) {
 			playerState = 1;
@@ -173,13 +173,13 @@ void ControlBehaviour::Update(entt::entity entity) {
 
 
 		if (GetKeyState(0x28) & 0x8000) {
-			angleForZ -= 0.09;
+			angleForZ -= 0.07;
 			if (angleForZ < -1.4) {
 				angleForZ = -1.4;
 			}
 		}
 		if (GetKeyState(0x26) & 0x8000) {
-			angleForZ += 0.09;
+			angleForZ += 0.07;
 			if (angleForZ > 1.4) {
 				angleForZ = 1.4;
 			}
@@ -537,7 +537,7 @@ void death::Update(entt::entity entity)
 	if (lanternFuel == 0 && playerState == 1 && !((transform.GetLocalPosition().x > -11.7 && transform.GetLocalPosition().x < 52.5 &&
 		transform.GetLocalPosition().y > -8.15 && transform.GetLocalPosition().y < 35.2 && HitBoxes::GetInstance().getFloor() == 0))) {
 		playerState = 3;
-		deathTimer = 500;
+		deathTimer = 200;
 	}
 }
 
@@ -550,32 +550,25 @@ void aStarAlgorithm::Update(entt::entity entity)
 	//If more then one path is equal, then take the first one until it's value get's increased above the other ones, then try the next
 	//Once found make it move to it's location
 
-	static int stateOfAlgorithm = 0; //Waiting for initiation
-	auto& transform = CurrentRegistry().get<florp::game::Transform>(entity);
-
+	static int stateOfAlgorithm = 0; //0 is Waiting for initiation, when 1 calculate the best route, when 2 go to said location
+	auto& transform = CurrentRegistry().get<florp::game::Transform>(entity);//Florp coding, get's the pointer to the lights information and saves it
 
 	if (GetKeyState(0x52) & 0x8000 && stateOfAlgorithm == 0 && ((cameraPos.x > -11.7 && cameraPos.x < 52.5 &&
-		cameraPos.y > -8.15 && cameraPos.y < 35.2 && HitBoxes::GetInstance().getFloor() == 0))) {
-		stateOfAlgorithm = 1; //Calculation phase
-		//Find distance is goal - current.x+y+z ^ 2 sqrt
-		estimatedStepsX = abs(cameraPos.x - transform.GetLocalPosition().x) / 5;
-		estimatedStepsY = abs(cameraPos.y - transform.GetLocalPosition().y) / 5;
+		cameraPos.y > -8.15 && cameraPos.y < 35.2 && HitBoxes::GetInstance().getFloor() == 0))) { //If statement that will start start the calculation phase if it's true
+		stateOfAlgorithm = 1; //Sets for the calculation phase
+		estimatedStepsX = abs(cameraPos.x - transform.GetLocalPosition().x) / 5; //Get the estimated amount of steps on X required to get to the player imitates 5x5 squares for movement
+		estimatedStepsY = abs(cameraPos.y - transform.GetLocalPosition().y) / 5; //Get the estimated amount of steps on Y required to get to the player imitates 5x5 squares for movement
 
 	}
-	else if (stateOfAlgorithm == 1) {
-		//			0			
-		//
-		//
-		//3			p			1
-		//
-		//
-		//			2			
-
-		glm::vec3 positionTest = transform.GetLocalPosition();
-		glm::vec3 endposition;
-		if (cameraPos.x < transform.GetLocalPosition().x) {
-			if (cameraPos.y < transform.GetLocalPosition().y) {
-				endposition = glm::vec3(positionTest.x - 5 * estimatedStepsX, positionTest.y - 5 * estimatedStepsY, positionTest.z);
+	else if (stateOfAlgorithm == 1) { //Calculation phase, calculate the steps needed to take to get to the player's position when the if statement above was true
+	
+		glm::vec3 positionTest = transform.GetLocalPosition(); //Saves the current position of the light
+		glm::vec3 endposition; //Create a container to hold the end position of the light (it's goal to get to)
+		if (cameraPos.x < transform.GetLocalPosition().x) { //Looks if the player is above or bellow the light in the x axis
+			if (cameraPos.y < transform.GetLocalPosition().y) { //Looks if the player is above or bellow the light in the y axis
+				endposition = glm::vec3(positionTest.x - 5 * estimatedStepsX, positionTest.y - 5 * estimatedStepsY, positionTest.z); //we calculate the goal of the light like this
+																																	//to allow the goal's position to be a nice round
+																																	//number
 			}
 			else {
 				endposition = glm::vec3(positionTest.x - 5 * estimatedStepsX, positionTest.y + 5 * estimatedStepsY, positionTest.z);
@@ -590,35 +583,43 @@ void aStarAlgorithm::Update(entt::entity entity)
 			}
 		}
 		
-		if (positionTest == endposition || HitBoxes::GetInstance().isInHitBox(endposition, endposition)) {
+		if (positionTest == endposition || HitBoxes::GetInstance().isInHitBox(endposition, endposition)) { //If the endposition is already obtained (the player didn't move before
+																											//												re-activating a*) 
+																											//or the position will end up inside another object, don't calculate
 			stateOfAlgorithm = 0;
 		}
 		else {
-			std::vector <glm::vec3> positionsReached;
-			std::vector <int> toNotUse;
+			std::vector <glm::vec3> positionsReached; //Saves all the position the algorithm has went to at least once
+			std::vector <int> toNotUse; //Unused code
 
-			while (positionTest != endposition) {
-				int square1Value = 999;
+			while (positionTest != endposition) { //While the end position was not reached
+				int square1Value = 999; //Saves the 4 possibles outcomes as a large number
 				int square2Value = 999;
 				int square3Value = 999;
 				int square4Value = 999;
-				onStep++;
-				bool wasPositionedReached = false;
-				//check the 4 and see which is closer
-				//add lowest to a table
-				if (!(HitBoxes::GetInstance().isInHitBox(cameraPos, glm::vec3(positionTest.x, positionTest.y + 5, positionTest.z)))) {
-					wasPositionedReached = false;
-					for (int i = 0; i < positionsReached.size(); i++) {
-						if (glm::vec3(positionTest.x, positionTest.y + 5, positionTest.z) == positionsReached[i]) {
+				onStep++; //Update the step we are looking at
+				bool wasPositionedReached = false; //
+				
+				if (!(HitBoxes::GetInstance().isInHitBox(cameraPos, glm::vec3(positionTest.x, positionTest.y + 5, positionTest.z)))) { 
+					//^ First of 4
+					//They check the positions up right down left of the light
+					//also checks if the movement will be illigal by the light going into a hitbox
+					
+					wasPositionedReached = false; //
+					for (int i = 0; i < positionsReached.size(); i++) { //Checks if the position it's wanting to check was already reached at some point
+						if (glm::vec3(positionTest.x, positionTest.y + 5, positionTest.z) == positionsReached[i]) { //If the position is already in the list, the light
+																													//was already there so don't check again
 							wasPositionedReached = true;
 							i = positionsReached.size(); //Can exit the loop since we got our answer
 						}
 					}
 
 					if (wasPositionedReached == false) {
-						square1Value = onStep + abs(cameraPos.x - positionTest.x) / 5 + abs(cameraPos.y - (positionTest.y + 5)) / 5;
+						square1Value = onStep + abs(cameraPos.x - positionTest.x) / 5 + abs(cameraPos.y - (positionTest.y + 5)) / 5; //Saves the estimated movement value of the light
+																																	//Would take to get to the goal position
 					}
 				}
+				//Now do the same with the other 3 possible sides v
 				if (!(HitBoxes::GetInstance().isInHitBox(cameraPos, glm::vec3(positionTest.x + 5, positionTest.y, positionTest.z)))) {
 					wasPositionedReached = false;
 					for (int i = 0; i < positionsReached.size(); i++) {
@@ -659,10 +660,11 @@ void aStarAlgorithm::Update(entt::entity entity)
 					}
 				}
 
+				//If the values are their default state that means the light had no legal moves where it is
 				if (square1Value == 999 && square2Value == 999 && square3Value == 999 && square4Value == 999) {
 
-					if (directions[onStep - 1] == 0) {
-						positionTest = glm::vec3(positionTest.x, positionTest.y - 5, positionTest.z);
+					if (directions[onStep - 1] == 0) { //checks what the last step was to bring the light one position back
+						positionTest = glm::vec3(positionTest.x, positionTest.y - 5, positionTest.z); //Bring the light back to where it was last step
 					}
 					else if (directions[onStep - 1] == 1) {
 						positionTest = glm::vec3(positionTest.x - 5, positionTest.y, positionTest.z);
@@ -673,24 +675,28 @@ void aStarAlgorithm::Update(entt::entity entity)
 					else if (directions[onStep - 1] == 3) {
 						positionTest = glm::vec3(positionTest.x + 5, positionTest.y, positionTest.z);
 					}
-					onStep--;
+					onStep--; //Decrease the step by 1 because the step we just did was invalidated
 					std::vector <glm::vec3> temp;
 					std::vector <int> temp2;
 					for (int i = 0; i < positionsReached.size() - 1; i++) {
-						temp.push_back(positionsReached[i]);
-						temp2.push_back(directions[i]);
-					}
+						temp.push_back(positionsReached[i]); //Add the position to positions reached to remember it was a position that cannot be used
+						temp2.push_back(directions[i]);//We do this to re-write the directions without the most recent direction as that one led to a position where the light 
+															//																										 can't move
+					} 
 					positionsReached.clear();
-					positionsReached = temp;
-					directions.clear();
-					directions = temp2;
+					positionsReached = temp; //saves it into position reached
+					directions.clear(); //Clear the current directions
+					directions = temp2; //Saves the updated directions into directions
 				}
-				else {
+				else { //If there is a movement to take
+					//This huge ugly thing just checks for the smalles value and saves 0 - up - squareValue1, 1 - right - squareValue2, 2 - down - squareValue3, 3 - left - squareValue4
+					//corresponding to the smallest value and saves it into the list of directions the light has to take
 					directions.push_back(square1Value < square2Value ? square1Value < square3Value ? square1Value < square4Value ? 0 : 3 : square3Value < square4Value ?
 						2 : 3 : square2Value < square3Value ? square2Value < square4Value ? 1 : 3 : square3Value < square4Value ?
 						2 : 3);
-					if (directions[onStep - 1] == 0) {
-						positionTest = glm::vec3(positionTest.x, positionTest.y + 5, positionTest.z);
+
+					if (directions[onStep - 1] == 0) { //Checks what movement the light just did (reason why it's -1 is the onStep is always 1 index ahead)
+						positionTest = glm::vec3(positionTest.x, positionTest.y + 5, positionTest.z); //apply the transformation to the position used for testing
 					}
 					else if (directions[onStep - 1] == 1) {
 						positionTest = glm::vec3(positionTest.x + 5, positionTest.y, positionTest.z);
@@ -707,16 +713,16 @@ void aStarAlgorithm::Update(entt::entity entity)
 
 			}
 
-			stateOfAlgorithm = 2;
+			stateOfAlgorithm = 2; //Set the algorithm to the movement phase as the directions to get to the position is done
 		}
 	}
-	else if (stateOfAlgorithm == 2) {
-		if (!(delay == 0)) {
+	else if (stateOfAlgorithm == 2) { //If the algorithm is in the movement phase
+		if (!(delay == 0)) { //Delay so you actually see the light move and not just instantly go from start to finish
 			delay--;
 		}
 		else {
-			if (directions[index] == 0) {
-				transform.SetPosition(glm::vec3(transform.GetLocalPosition().x, transform.GetLocalPosition().y + 5, transform.GetLocalPosition().z));
+			if (directions[index] == 0) { //Checks what direction the light should take
+				transform.SetPosition(glm::vec3(transform.GetLocalPosition().x, transform.GetLocalPosition().y + 5, transform.GetLocalPosition().z)); //Moves the light
 			}
 			else if (directions[index] == 1) {
 				transform.SetPosition(glm::vec3(transform.GetLocalPosition().x + 5, transform.GetLocalPosition().y, transform.GetLocalPosition().z));
@@ -729,18 +735,19 @@ void aStarAlgorithm::Update(entt::entity entity)
 			}
 			delay = 20;
 			index++;
-			if (index >= directions.size()) {
-				stateOfAlgorithm = 3;
+			if (index >= directions.size()) {//The light arrived at the end 
+				stateOfAlgorithm = 3; //Set it to reset
 			}
 
 		}
 	}
 	else if (stateOfAlgorithm == 3) {
-		if (GetKeyState(0x52) & 0x8000) {
-			stateOfAlgorithm = 0;
-			index = 0;
-			directions.clear();
-			onStep = 0;
+		if (GetKeyState(0x52) & 0x8000) { //Resets when the player presser r
+			stateOfAlgorithm = 0; //Put back to the waiting phase
+			index = 0; //reset index
+			directions.clear(); //Reset directions
+			onStep = 0; //reset onStep
+			//Everything else are local variables so no need to reset them manually
 		}
 	}
 }
